@@ -91,7 +91,7 @@ renderer.blockquote = function ({ tokens }) {
 
 // Task list items
 renderer.listitem = function ({ tokens, task, checked }) {
-  const content = this.parser.parseInline(tokens);
+  const content = this.parser.parse(tokens);
   if (task) {
     const checkbox = checked
       ? '<span class="md-checkbox md-checked">&#9745;</span>'
