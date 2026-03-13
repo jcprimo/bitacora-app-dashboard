@@ -3,7 +3,7 @@
 // Composes hooks for state, components for UI chrome, and views for
 // each tab (Board, Create, AI Usage, Detail).
 //
-// Views:  board | create | usage | detail
+// Views:  board | create | qa | docs | usage | detail
 // State:  all app state lives in custom hooks; this file only wires
 //         them together and renders the active view.
 
@@ -22,6 +22,8 @@ import { useCreateTicket } from "./hooks/useCreateTicket";
 import { useIssueDetail } from "./hooks/useIssueDetail";
 import { useAnthropicUsage } from "./hooks/useAnthropicUsage";
 import { useOpenAIUsage } from "./hooks/useOpenAIUsage";
+import { useQATracker } from "./hooks/useQATracker";
+import { useMarkdownReader } from "./hooks/useMarkdownReader";
 
 // ─── UI Components ──────────────────────────────────────────────
 import Toast from "./components/Toast";
@@ -33,6 +35,8 @@ import BoardView from "./views/BoardView";
 import CreateView from "./views/CreateView";
 import UsageView from "./views/UsageView";
 import DetailView from "./views/DetailView";
+import QATrackerView from "./views/QATrackerView";
+import MarkdownView from "./views/MarkdownView";
 
 // ═══════════════════════════════════════════════════════════════════
 export default function App() {
@@ -54,6 +58,8 @@ export default function App() {
   const detail = useIssueDetail(token, showToast, loadIssues, setView);
   const anthropic = useAnthropicUsage(showToast);
   const openai = useOpenAIUsage();
+  const qa = useQATracker(token, showToast, loadIssues, detail.openDetail);
+  const md = useMarkdownReader(showToast);
 
   // Anthropic + OpenAI total for the sidebar spend widget
   const combinedSpend = anthropic.totalSpendUsd + openai.openaiTotalSpend;
@@ -97,6 +103,20 @@ export default function App() {
           style={{ borderBottom: view === "create" ? "2px solid var(--accent-indigo)" : "2px solid transparent" }}
         >
           ＋ Create
+        </button>
+        <button
+          className={`step-btn ${view === "qa" ? "active" : ""}`}
+          onClick={() => setView("qa")}
+          style={{ borderBottom: view === "qa" ? "2px solid var(--qa-accent)" : "2px solid transparent" }}
+        >
+          🧪 QA Tracker
+        </button>
+        <button
+          className={`step-btn ${view === "docs" ? "active" : ""}`}
+          onClick={() => setView("docs")}
+          style={{ borderBottom: view === "docs" ? "2px solid var(--md-accent)" : "2px solid transparent" }}
+        >
+          📖 Docs{md.files.length > 0 ? ` (${md.files.length})` : ""}
         </button>
         <button
           className={`step-btn ${view === "usage" ? "active" : ""}`}
@@ -164,6 +184,54 @@ export default function App() {
           openaiTotalSpend={openai.openaiTotalSpend}
           setView={setView}
           loadIssues={loadIssues}
+        />
+      )}
+
+      {view === "qa" && (
+        <QATrackerView
+          testCases={qa.testCases}
+          csvHeaders={qa.csvHeaders}
+          fileName={qa.fileName}
+          importError={qa.importError}
+          columnVisibility={qa.columnVisibility}
+          visibleColumns={qa.visibleColumns}
+          toggleColumn={qa.toggleColumn}
+          searchQuery={qa.searchQuery}
+          setSearchQuery={qa.setSearchQuery}
+          categoryFilter={qa.categoryFilter}
+          setCategoryFilter={qa.setCategoryFilter}
+          priorityFilter={qa.priorityFilter}
+          setPriorityFilter={qa.setPriorityFilter}
+          statusFilter={qa.statusFilter}
+          setStatusFilter={qa.setStatusFilter}
+          categories={qa.categories}
+          priorities={qa.priorities}
+          statuses={qa.statuses}
+          filteredCases={qa.filteredCases}
+          pagedCases={qa.pagedCases}
+          currentPage={qa.currentPage}
+          totalPages={qa.totalPages}
+          goToPage={qa.goToPage}
+          ticketState={qa.ticketState}
+          actionLoading={qa.actionLoading}
+          createBugTicket={qa.createBugTicket}
+          startDevelopment={qa.startDevelopment}
+          copyContextBundle={qa.copyContextBundle}
+          copyLaunchCommand={qa.copyLaunchCommand}
+          viewTicket={qa.viewTicket}
+          importCSV={qa.importCSV}
+        />
+      )}
+
+      {view === "docs" && (
+        <MarkdownView
+          files={md.files}
+          activeFile={md.activeFile}
+          activeFileId={md.activeFileId}
+          setActiveFileId={md.setActiveFileId}
+          importFile={md.importFile}
+          importFiles={md.importFiles}
+          removeFile={md.removeFile}
         />
       )}
 
