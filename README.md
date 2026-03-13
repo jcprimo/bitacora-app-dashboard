@@ -35,8 +35,8 @@ Manage YouTrack tickets through an agent-based workflow with AI-assisted or temp
 
 ```bash
 # 1. Clone
-git clone https://github.com/jcprimo/reporta-youtrack.git
-cd reporta-youtrack
+git clone https://github.com/jcprimo/bitacora-youtrack.git
+cd bitacora-youtrack
 
 # 2. Configure
 cp .env.example .env
