@@ -80,23 +80,60 @@ The Docker image uses a multi-stage build (Node 22 → nginx Alpine) and proxies
 ## Project Structure
 
 ```
-├── src/
-│   ├── App.jsx              # Main app — Board, Create, AI Usage, and Detail views
-│   ├── App.css              # Component styles (light + dark mode)
-│   ├── index.css            # CSS variables, theme definitions, animations
-│   ├── youtrack.js          # YouTrack REST API service layer
-│   ├── openai.js            # OpenAI Costs & Usage API service layer
-│   ├── youtrack.test.js     # Unit tests (node:test)
-│   ├── youtrack.e2e.test.js # E2E tests (against real YouTrack)
-│   └── main.jsx             # Entry point
-├── public/
-│   └── favicon.svg
-├── Dockerfile               # Multi-stage build (Node → nginx)
-├── nginx.conf               # Production reverse proxy config
-├── vite.config.js           # Dev server + API proxy config
-├── .env.example             # Template for environment variables
-└── package.json
+src/
+├── App.jsx                        # App shell — hooks, nav, view router (~210 lines)
+├── App.css                        # Component styles (light + dark mode)
+├── index.css                      # CSS variables, theme definitions, animations
+├── main.jsx                       # React entry point
+│
+├── constants/
+│   ├── agents.js                  # 8-agent team definitions (id, icon, color, priority)
+│   ├── prompts.js                 # System prompts, placeholders, Markdown templates
+│   └── pricing.js                 # Token estimation & cost calculation helpers
+│
+├── hooks/
+│   ├── useToast.js                # Toast notification state (auto-dismiss 3.5s)
+│   ├── useTheme.js                # Light/dark mode with localStorage persistence
+│   ├── useSettings.js             # Runtime credential management (modal state)
+│   ├── useBoard.js                # Issue list fetching & filtering
+│   ├── useCreateTicket.js         # 3-step creation: AI Generate / Template / Manual
+│   ├── useIssueDetail.js          # Issue editing, inline field updates, delete
+│   ├── useAnthropicUsage.js       # Client-side Anthropic spend tracker (localStorage)
+│   └── useOpenAIUsage.js          # OpenAI Costs API integration (Admin key required)
+│
+├── views/
+│   ├── BoardView.jsx              # Issue list with filter bar & inline stage updates
+│   ├── CreateView.jsx             # Agent sidebar + 3-step wizard (Input → Review → Done)
+│   ├── UsageView.jsx              # AI spend dashboard (Anthropic + OpenAI tabs)
+│   └── DetailView.jsx             # Single issue editor with delete confirmation
+│
+├── components/
+│   ├── Toast.jsx                  # Fixed-position notification banner
+│   ├── Header.jsx                 # App title, compliance badges, connection status
+│   └── SettingsModal.jsx          # Overlay for editing credentials at runtime
+│
+├── youtrack.js                    # YouTrack REST API service (CRUD, custom fields)
+├── openai.js                      # OpenAI Costs & Usage API service
+├── youtrack.test.js               # Unit tests (node:test)
+└── youtrack.e2e.test.js           # E2E tests (against real YouTrack)
+
+public/
+└── favicon.svg
+
+Dockerfile                         # Multi-stage build (Node 22 → nginx Alpine)
+nginx.conf                         # Production reverse proxy (/yt-api, /openai-api)
+vite.config.js                     # Dev server + API proxy config
+.env.example                       # Template for environment variables
+package.json
 ```
+
+### Architecture Notes
+
+- **App.jsx** is a thin shell (~210 lines) — all business logic lives in custom hooks, all UI lives in views/components.
+- **State ownership**: each hook owns its slice of state. App.jsx composes them and passes data down via props. No context providers or global state libraries.
+- **API proxying**: in development, Vite proxies `/yt-api` → YouTrack and `/openai-api` → OpenAI. In production, nginx handles the same routes. The Anthropic API is called directly from the browser (no proxy) using the `anthropic-dangerous-direct-browser-access` header.
+- **localStorage keys**: `bitacora-yt-token`, `bitacora-anthropic-key`, `bitacora-openai-key`, `bitacora-ai-usage`, `bitacora-openai-usage`, `bitacora-theme`.
+- **Theming**: CSS-only via `:root` (dark default) and `[data-theme="light"]` selectors in `index.css`. No JS theme library.
 
 ## Testing
 
