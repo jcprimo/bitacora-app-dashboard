@@ -21,11 +21,12 @@ marked.setOptions({
 const renderer = new marked.Renderer();
 
 // Headings get id anchors for in-page navigation
-renderer.heading = function ({ text, depth }) {
-  // text may be a string or contain nested tokens — flatten to string
-  const plain = typeof text === "string" ? text : String(text);
+renderer.heading = function ({ tokens, depth }) {
+  const rendered = this.parser.parseInline(tokens);
+  // Strip HTML tags for the slug
+  const plain = rendered.replace(/<[^>]+>/g, "");
   const slug = plain.toLowerCase().replace(/[^\w]+/g, "-").replace(/(^-|-$)/g, "");
-  return `<h${depth} id="${slug}" class="md-heading md-h${depth}">${plain}</h${depth}>`;
+  return `<h${depth} id="${slug}" class="md-heading md-h${depth}">${rendered}</h${depth}>`;
 };
 
 // Links open in new tab if external
@@ -83,19 +84,21 @@ renderer.image = function ({ href, title, text }) {
 };
 
 // Blockquotes
-renderer.blockquote = function ({ text }) {
-  return `<blockquote class="md-blockquote">${text}</blockquote>`;
+renderer.blockquote = function ({ tokens }) {
+  const body = this.parser.parse(tokens);
+  return `<blockquote class="md-blockquote">${body}</blockquote>`;
 };
 
 // Task list items
-renderer.listitem = function ({ text, task, checked }) {
+renderer.listitem = function ({ tokens, task, checked }) {
+  const content = this.parser.parseInline(tokens);
   if (task) {
     const checkbox = checked
       ? '<span class="md-checkbox md-checked">&#9745;</span>'
       : '<span class="md-checkbox">&#9744;</span>';
-    return `<li class="md-task-item">${checkbox}${text}</li>`;
+    return `<li class="md-task-item">${checkbox}${content}</li>`;
   }
-  return `<li>${text}</li>`;
+  return `<li>${content}</li>`;
 };
 
 marked.use({ renderer });

@@ -49,10 +49,11 @@ export default function MarkdownView({
     onDragLeave: handleDragLeave,
   };
 
-  // Memoize rendered HTML to avoid re-parsing on every render
+  // Memoize rendered HTML — key on content + id, not object reference
+  const activeContent = activeFile?.content ?? "";
   const renderedHtml = useMemo(
-    () => activeFile ? renderMarkdown(activeFile.content) : "",
-    [activeFile]
+    () => activeContent ? renderMarkdown(activeContent) : "",
+    [activeContent]
   );
 
   // Hidden file input (shared)

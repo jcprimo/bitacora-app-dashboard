@@ -35,10 +35,7 @@ function saveFiles(files) {
 
 export function useMarkdownReader(showToast) {
   const [files, setFiles] = useState(loadFiles);
-  const [activeFileId, setActiveFileId] = useState(() => {
-    const loaded = loadFiles();
-    return loaded.length > 0 ? loaded[0].id : null;
-  });
+  const [activeFileId, setActiveFileId] = useState(() => files[0]?.id ?? null);
 
   // Currently selected file
   const activeFile = useMemo(
@@ -78,14 +75,45 @@ export function useMarkdownReader(showToast) {
     });
   }, [showToast]);
 
-  // Import multiple files at once
+  // Import multiple files at once — batched to avoid sequential state updates
   const importFiles = useCallback(async (fileList) => {
-    for (const file of fileList) {
-      if (file.name.endsWith(".md")) {
-        await importFile(file);
-      }
-    }
-  }, [importFile]);
+    const mdFiles = Array.from(fileList).filter((f) => f.name.endsWith(".md"));
+    if (mdFiles.length === 0) return;
+
+    // Read all file contents in parallel
+    const entries = await Promise.all(
+      mdFiles.map(async (file) => ({
+        name: file.name,
+        path: file.webkitRelativePath || file.name,
+        content: await file.text(),
+      }))
+    );
+
+    const now = Date.now();
+    setFiles((prev) => {
+      let next = [...prev];
+      let lastId = null;
+      entries.forEach((entry, i) => {
+        const existing = next.find((f) => f.name === entry.name);
+        if (existing) {
+          next = next.map((f) =>
+            f.id === existing.id
+              ? { ...f, content: entry.content, path: entry.path, updatedAt: now + i }
+              : f
+          );
+          lastId = existing.id;
+        } else {
+          const id = `md-${now + i}`;
+          next.push({ id, ...entry, addedAt: now + i, updatedAt: now + i });
+          lastId = id;
+        }
+      });
+      saveFiles(next);
+      if (lastId) setTimeout(() => setActiveFileId(lastId), 0);
+      return next;
+    });
+    showToast(`Imported ${entries.length} file${entries.length > 1 ? "s" : ""}`);
+  }, [showToast]);
 
   // Remove a file from the collection
   const removeFile = useCallback((fileId) => {
