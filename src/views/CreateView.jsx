@@ -22,7 +22,7 @@ export default function CreateView({
   aiError, actionLoading,
   hasAIKey, resetCreate,
   generateWithAI, generateFromTemplate, submitTicket,
-  showToast, recordUsage,
+  showToast, recordUsage, token,
   aiUsage, totalSpendUsd, budgetPct, overBudget, combinedSpend, openaiTotalSpend,
   setView, loadIssues,
 }) {
