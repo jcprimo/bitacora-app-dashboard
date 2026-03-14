@@ -5,6 +5,12 @@ node_modules
 dist
 dist-ssr
 
+# Database (SQLite — lives on Docker volume in prod)
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/sessions.db
+
 # Environment (secrets)
 .env
 .env.local
