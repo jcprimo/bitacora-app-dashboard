@@ -6,19 +6,50 @@
 // directly from the issue list (without opening the detail view).
 
 import { useState, useCallback } from "react";
-import { updateIssue, updateCustomField, deleteIssue, fetchIssues } from "../youtrack";
+import { updateIssue, updateCustomField, deleteIssue, fetchIssues, fetchComments, addComment } from "../youtrack";
 
 export function useIssueDetail(token, showToast, loadIssues, setView) {
   const [activeIssue, setActiveIssue] = useState(null);
   const [editFields, setEditFields] = useState({});
   const [actionLoading, setActionLoading] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+
+  const loadComments = useCallback(async (issueId) => {
+    if (!token) return;
+    setCommentsLoading(true);
+    try {
+      const data = await fetchComments(token, issueId);
+      setComments(data);
+    } catch {
+      setComments([]);
+    } finally {
+      setCommentsLoading(false);
+    }
+  }, [token]);
+
+  const postComment = useCallback(async (text) => {
+    if (!activeIssue || !token || !text.trim()) return;
+    setActionLoading("comment");
+    try {
+      const created = await addComment(token, activeIssue.idReadable, text);
+      setComments((prev) => [...prev, created]);
+      showToast("Comment added");
+    } catch (e) {
+      showToast(e.message, "error");
+    } finally {
+      setActionLoading(null);
+    }
+  }, [activeIssue, token, showToast]);
 
   const openDetail = (issue) => {
     setActiveIssue(issue);
     setEditFields({ summary: issue.summary, description: issue.description || "" });
     setConfirmDelete(false);
+    setComments([]);
     setView("detail");
+    loadComments(issue.idReadable);
   };
 
   const saveEdit = useCallback(async () => {
@@ -82,5 +113,6 @@ export function useIssueDetail(token, showToast, loadIssues, setView) {
     editFields, setEditFields,
     actionLoading, confirmDelete, setConfirmDelete,
     openDetail, saveEdit, changeField, handleDelete,
+    comments, commentsLoading, postComment,
   };
 }

@@ -1,11 +1,14 @@
 /* ─── Dark mode (default) ──────────────────────────────────────── */
 :root {
-  --bg-primary: #06060b;
-  --bg-card: #0c0c16;
-  --bg-input: #12121f;
-  --bg-elevated: #16162a;
-  --border-subtle: #1c1c35;
-  --border-medium: #2a2a4a;
+  --bg-primary: transparent;
+  --bg-solid: #06060b;
+  --bg-card: rgba(10, 10, 22, 0.72);
+  --bg-input: rgba(18, 18, 31, 0.82);
+  --bg-elevated: rgba(22, 22, 42, 0.75);
+  --border-subtle: rgba(28, 28, 53, 0.6);
+  --border-medium: rgba(42, 42, 74, 0.65);
+  --glass-blur: blur(16px);
+  --glass-blur-sm: blur(10px);
   --text-primary: #f0f0f8;
   --text-secondary: #a0a0c0;
   --text-muted: #5a5a80;
@@ -21,35 +24,74 @@
   --radius-xl: 18px;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.4);
-  --step-bar-bg: rgba(6, 6, 11, 0.5);
+  --shadow-card: 0 2px 16px rgba(0,0,0,0.35);
+  --step-bar-bg: rgba(6, 6, 11, 0.6);
   --toggle-bg: var(--bg-elevated);
   --toggle-border: var(--border-medium);
   --toggle-color: var(--text-secondary);
+
+  /* QA Tracker — green/black accent palette */
+  --qa-accent: #34d399;
+  --qa-accent-strong: #10b981;
+  --qa-accent-bg: rgba(52, 211, 153, 0.08);
+  --qa-accent-border: rgba(52, 211, 153, 0.3);
+  --qa-bg-hover: rgba(52, 211, 153, 0.03);
+  --qa-bg-subtle: rgba(52, 211, 153, 0.04);
+  --qa-drop-border: rgba(52, 211, 153, 0.5);
+
+  /* Markdown Reader — warm neutral accent */
+  --md-accent: #a78bfa;
+  --md-accent-bg: rgba(167, 139, 250, 0.08);
+  --md-accent-border: rgba(167, 139, 250, 0.3);
+  --md-sidebar-bg: rgba(8, 8, 16, 0.75);
+  --md-code-bg: rgba(22, 22, 42, 0.8);
+  --md-blockquote-border: rgba(42, 42, 74, 0.6);
+  --md-table-stripe: rgba(255,255,255,0.02);
 }
 
-/* ─── Light mode ───────────────────────────────────────────────── */
+/* ─── Light mode — deep lavender-slate, no harsh whites ─────────── */
 [data-theme="light"] {
-  --bg-primary: #f5f5fa;
-  --bg-card: #ffffff;
-  --bg-input: #f0f0f6;
-  --bg-elevated: #e8e8f0;
-  --border-subtle: #d8d8e4;
-  --border-medium: #c0c0d4;
-  --text-primary: #1a1a2e;
-  --text-secondary: #4a4a6a;
-  --text-muted: #7a7a9a;
-  --text-dim: #a0a0b8;
-  --accent-indigo: #6350e0;
-  --accent-green: #16a36a;
-  --accent-red: #dc3545;
-  --accent-amber: #d97706;
-  --accent-cyan: #0891b2;
-  --shadow-card: 0 1px 4px rgba(0,0,0,0.08);
-  --step-bar-bg: rgba(240, 240, 250, 0.7);
+  --bg-primary: #c5c0d8;
+  --bg-solid: #c5c0d8;
+  --bg-card: rgba(195, 190, 215, 0.65);
+  --bg-input: rgba(180, 175, 205, 0.7);
+  --bg-elevated: rgba(170, 164, 198, 0.65);
+  --border-subtle: rgba(140, 132, 175, 0.45);
+  --border-medium: rgba(120, 112, 160, 0.45);
+  --text-primary: #1e1a30;
+  --text-secondary: #3a3558;
+  --text-muted: #605a78;
+  --text-dim: #8a84a0;
+  --accent-indigo: #5a45d6;
+  --accent-green: #0f8f5e;
+  --accent-red: #d03040;
+  --accent-amber: #c06a06;
+  --accent-cyan: #0780a0;
+  --shadow-card: 0 2px 12px rgba(30, 20, 60, 0.1);
+  --step-bar-bg: rgba(185, 180, 210, 0.6);
   --toggle-bg: var(--bg-card);
   --toggle-border: var(--border-medium);
   --toggle-color: var(--text-secondary);
+  --glass-blur: blur(14px);
+  --glass-blur-sm: blur(8px);
+
+  /* QA Tracker — green accent (light) */
+  --qa-accent: #059669;
+  --qa-accent-strong: #047857;
+  --qa-accent-bg: rgba(5, 150, 105, 0.1);
+  --qa-accent-border: rgba(5, 150, 105, 0.3);
+  --qa-bg-hover: rgba(5, 150, 105, 0.06);
+  --qa-bg-subtle: rgba(5, 150, 105, 0.07);
+  --qa-drop-border: rgba(5, 150, 105, 0.5);
+
+  /* Markdown Reader — warm neutral accent (light) */
+  --md-accent: #7c3aed;
+  --md-accent-bg: rgba(124, 58, 237, 0.08);
+  --md-accent-border: rgba(124, 58, 237, 0.3);
+  --md-sidebar-bg: rgba(175, 170, 200, 0.7);
+  --md-code-bg: rgba(185, 180, 210, 0.75);
+  --md-blockquote-border: rgba(120, 112, 160, 0.45);
+  --md-table-stripe: rgba(0,0,0,0.03);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -66,6 +108,20 @@ body {
   color: var(--text-primary);
   min-height: 100vh;
   transition: background 0.3s ease, color 0.3s ease;
+  /* Cosmic background — dark mode only */
+  background-image: url("/bg-cosmos.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* Light mode: soft gradient instead of cosmos image */
+[data-theme="light"] body,
+body[data-theme="light"] {
+  background-image: none;
+  background: linear-gradient(160deg, #c5c0d8 0%, #b8b2d0 35%, #c2bad4 65%, #cac4dc 100%);
+  background-attachment: fixed;
 }
 
 #root { min-height: 100vh; }

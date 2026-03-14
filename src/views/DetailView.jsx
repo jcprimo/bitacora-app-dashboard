@@ -3,18 +3,50 @@
 //   - Editable summary and description fields
 //   - Inline Stage and Priority dropdowns (instant YouTrack update)
 //   - Copy JSON for agent handoff
+//   - Lightweight comment thread synced with YouTrack
 //   - Delete with two-step confirmation
-// After saving, navigates back to the Board view.
 
+import { useState } from "react";
 import { getCustomFieldValue, formatDate, STAGES, PRIORITIES } from "../youtrack";
 import { copyToClipboard } from "../utils/clipboard";
+import { renderMarkdown } from "../utils/markdownParser";
+
+// ─── Comment timestamp helper ────────────────────────────────────
+function commentTime(ts) {
+  if (!ts) return "";
+  const d = new Date(ts);
+  const now = new Date();
+  const diffMs = now - d;
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return "just now";
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
 
 export default function DetailView({
   activeIssue, editFields, setEditFields,
   actionLoading, confirmDelete, setConfirmDelete,
   saveEdit, changeField, handleDelete,
   setView, showToast,
+  comments, commentsLoading, postComment,
 }) {
+  const [newComment, setNewComment] = useState("");
+
+  const handlePostComment = async () => {
+    if (!newComment.trim()) return;
+    await postComment(newComment);
+    setNewComment("");
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      handlePostComment();
+    }
+  };
+
   return (
     <div className="animate-fade">
       <button className="btn-back" onClick={() => setView("board")} style={{ marginBottom: "1rem" }}>← Back to Board</button>
@@ -99,6 +131,62 @@ export default function DetailView({
             </div>
           )}
         </div>
+      </div>
+
+      {/* ─── Comments Section ───────────────────────────────────────── */}
+      <div className="detail-comments">
+        <div className="detail-comments-header">
+          <span className="detail-comments-title">
+            Comments {!commentsLoading && comments.length > 0 && `(${comments.length})`}
+          </span>
+        </div>
+
+        {commentsLoading ? (
+          <div className="detail-comments-loading">
+            <span className="spinner" /> Loading comments...
+          </div>
+        ) : comments.length === 0 ? (
+          <div className="detail-comments-empty">
+            No comments yet
+          </div>
+        ) : (
+          <div className="detail-comments-list">
+            {comments.map((c) => (
+              <div key={c.id} className="detail-comment">
+                <div className="detail-comment-meta">
+                  <span className="detail-comment-author">
+                    {c.author?.name || c.author?.login || "Unknown"}
+                  </span>
+                  <span className="detail-comment-time">{commentTime(c.created)}</span>
+                </div>
+                <div
+                  className="detail-comment-text md-content"
+                  dangerouslySetInnerHTML={{ __html: renderMarkdown(c.text) }}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* New comment input */}
+        <div className="detail-comment-input-row">
+          <textarea
+            className="detail-comment-textarea"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Add a comment..."
+            rows={2}
+          />
+          <button
+            className="detail-comment-submit"
+            onClick={handlePostComment}
+            disabled={!newComment.trim() || actionLoading === "comment"}
+          >
+            {actionLoading === "comment" ? <span className="spinner" /> : "Send"}
+          </button>
+        </div>
+        <div className="detail-comment-hint">⌘+Enter to send</div>
       </div>
     </div>
   );

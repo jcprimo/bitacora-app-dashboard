@@ -198,6 +198,36 @@ export async function deleteIssue(token, issueId) {
   return true;
 }
 
+// ─── Comments — List ─────────────────────────────────────────────
+
+export async function fetchComments(token, issueId) {
+  const fields = "id,text,author(name,login),created,updated";
+  const res = await fetch(
+    `${config.base}/issues/${issueId}/comments?fields=${fields}&$top=100`,
+    { headers: headers(token) }
+  );
+  if (!res.ok) throw new Error(`Failed to fetch comments: ${res.status}`);
+  return res.json();
+}
+
+// ─── Comments — Add ──────────────────────────────────────────────
+
+export async function addComment(token, issueId, text) {
+  const res = await fetch(
+    `${config.base}/issues/${issueId}/comments?fields=id,text,author(name,login),created`,
+    {
+      method: "POST",
+      headers: headers(token),
+      body: JSON.stringify({ text }),
+    }
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error_description || err.error?.message || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────
 
 export function getCustomFieldValue(issue, fieldName) {
