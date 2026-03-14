@@ -282,7 +282,7 @@ export default function App() {
 
       {/* Footer */}
       <footer className="footer">
-        <span className="footer-text">Bitacora Agent Team → YouTrack</span>
+        <span className="footer-text">Bitacora App Dashboard — #OpsLife</span>
         <div className="footer-badges">
           <span className="footer-badge" style={{ color: "var(--accent-green)", borderColor: "rgba(52,211,153,0.2)", background: "rgba(52,211,153,0.04)" }}>
             Bilingual EN/ES

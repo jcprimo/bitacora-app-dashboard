@@ -11,8 +11,8 @@ export default function Header({ token, theme, toggleTheme, openSettings }) {
           📋
         </div>
         <div>
-          <div className="header-title">Bitacora → YouTrack</div>
-          <div className="header-subtitle">Bitacora iOS Agent Pipeline</div>
+          <div className="header-title">Bitacora App Dashboard</div>
+          <div className="header-subtitle">#OpsLife — Agent Pipeline</div>
         </div>
       </div>
       <div className="header-badge">
