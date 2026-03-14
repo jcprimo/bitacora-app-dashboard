@@ -3,9 +3,9 @@
 // OpenAI Admin API key at runtime. Saves to localStorage — no
 // restart required. Opened by clicking the "BIT Connected" badge.
 //
-// Uses type="text" with CSS text-security masking instead of
-// type="password" to avoid browser pattern validation errors
-// on API key formats (e.g. "sk-ant-api03-...").
+// All buttons use type="button" explicitly to prevent browser
+// form validation from triggering on credential inputs.
+// Inputs use type="text" with CSS masking to avoid pattern errors.
 
 import { useState } from "react";
 
@@ -31,6 +31,7 @@ export default function SettingsModal({ showSettings, setShowSettings, settingsF
             <div style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: "0.15rem" }}>Configure your YouTrack and AI credentials</div>
           </div>
           <button
+            type="button"
             onClick={() => setShowSettings(false)}
             style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "1.2rem", cursor: "pointer", padding: "0.25rem" }}
           >
@@ -45,7 +46,11 @@ export default function SettingsModal({ showSettings, setShowSettings, settingsF
               className={`settings-input ${!showTokens.token ? "settings-input-masked" : ""}`}
               type="text"
               autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
               spellCheck="false"
+              data-lpignore="true"
+              data-1p-ignore
               value={settingsForm.token}
               onChange={(e) => setSettingsForm((f) => ({ ...f, token: e.target.value }))}
               placeholder="perm-..."
@@ -71,7 +76,11 @@ export default function SettingsModal({ showSettings, setShowSettings, settingsF
               className={`settings-input ${!showTokens.anthropicKey ? "settings-input-masked" : ""}`}
               type="text"
               autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
               spellCheck="false"
+              data-lpignore="true"
+              data-1p-ignore
               value={settingsForm.anthropicKey}
               onChange={(e) => setSettingsForm((f) => ({ ...f, anthropicKey: e.target.value }))}
               placeholder="sk-ant-api03-..."
@@ -97,7 +106,11 @@ export default function SettingsModal({ showSettings, setShowSettings, settingsF
               className={`settings-input ${!showTokens.openaiKey ? "settings-input-masked" : ""}`}
               type="text"
               autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
               spellCheck="false"
+              data-lpignore="true"
+              data-1p-ignore
               value={settingsForm.openaiKey}
               onChange={(e) => setSettingsForm((f) => ({ ...f, openaiKey: e.target.value }))}
               placeholder="sk-..."
@@ -118,13 +131,14 @@ export default function SettingsModal({ showSettings, setShowSettings, settingsF
 
         <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.25rem" }}>
           <button
+            type="button"
             className="btn-ship"
             onClick={saveSettings}
             style={{ background: "rgba(52,211,153,0.12)", borderColor: "rgba(52,211,153,0.4)", color: "var(--accent-green)" }}
           >
             Save Settings
           </button>
-          <button className="btn-back" onClick={() => setShowSettings(false)}>
+          <button type="button" className="btn-back" onClick={() => setShowSettings(false)}>
             Cancel
           </button>
         </div>
