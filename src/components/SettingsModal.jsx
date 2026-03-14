@@ -2,9 +2,26 @@
 // Overlay modal for updating YouTrack token, Anthropic API key, and
 // OpenAI Admin API key at runtime. Saves to localStorage — no
 // restart required. Opened by clicking the "BIT Connected" badge.
+//
+// Uses type="text" with CSS text-security masking instead of
+// type="password" to avoid browser pattern validation errors
+// on API key formats (e.g. "sk-ant-api03-...").
+
+import { useState } from "react";
 
 export default function SettingsModal({ showSettings, setShowSettings, settingsForm, setSettingsForm, saveSettings }) {
+  const [showTokens, setShowTokens] = useState({
+    token: false,
+    anthropicKey: false,
+    openaiKey: false,
+  });
+
   if (!showSettings) return null;
+
+  const toggleVisibility = (field) => {
+    setShowTokens((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
+
   return (
     <div className="settings-overlay" onClick={() => setShowSettings(false)}>
       <div className="settings-modal animate-fade" onClick={(e) => e.stopPropagation()}>
@@ -23,13 +40,25 @@ export default function SettingsModal({ showSettings, setShowSettings, settingsF
 
         <div className="settings-field">
           <label className="settings-label">YouTrack Token</label>
-          <input
-            className="settings-input"
-            type="password"
-            value={settingsForm.token}
-            onChange={(e) => setSettingsForm((f) => ({ ...f, token: e.target.value }))}
-            placeholder="perm-..."
-          />
+          <div className="settings-input-wrap">
+            <input
+              className={`settings-input ${!showTokens.token ? "settings-input-masked" : ""}`}
+              type="text"
+              autoComplete="off"
+              spellCheck="false"
+              value={settingsForm.token}
+              onChange={(e) => setSettingsForm((f) => ({ ...f, token: e.target.value }))}
+              placeholder="perm-..."
+            />
+            <button
+              type="button"
+              className="settings-toggle-btn"
+              onClick={() => toggleVisibility("token")}
+              title={showTokens.token ? "Hide" : "Show"}
+            >
+              {showTokens.token ? "Hide" : "Show"}
+            </button>
+          </div>
           <div className="settings-hint">
             Generate at YouTrack → Profile → Authentication → New Token
           </div>
@@ -37,13 +66,25 @@ export default function SettingsModal({ showSettings, setShowSettings, settingsF
 
         <div className="settings-field">
           <label className="settings-label">Anthropic API Key <span style={{ color: "var(--text-dim)", fontWeight: 400 }}>(optional)</span></label>
-          <input
-            className="settings-input"
-            type="password"
-            value={settingsForm.anthropicKey}
-            onChange={(e) => setSettingsForm((f) => ({ ...f, anthropicKey: e.target.value }))}
-            placeholder="sk-ant-api03-..."
-          />
+          <div className="settings-input-wrap">
+            <input
+              className={`settings-input ${!showTokens.anthropicKey ? "settings-input-masked" : ""}`}
+              type="text"
+              autoComplete="off"
+              spellCheck="false"
+              value={settingsForm.anthropicKey}
+              onChange={(e) => setSettingsForm((f) => ({ ...f, anthropicKey: e.target.value }))}
+              placeholder="sk-ant-api03-..."
+            />
+            <button
+              type="button"
+              className="settings-toggle-btn"
+              onClick={() => toggleVisibility("anthropicKey")}
+              title={showTokens.anthropicKey ? "Hide" : "Show"}
+            >
+              {showTokens.anthropicKey ? "Hide" : "Show"}
+            </button>
+          </div>
           <div className="settings-hint">
             For AI-assisted ticket generation. Without it, use Template Generate.
           </div>
@@ -51,13 +92,25 @@ export default function SettingsModal({ showSettings, setShowSettings, settingsF
 
         <div className="settings-field">
           <label className="settings-label">OpenAI API Key <span style={{ color: "var(--text-dim)", fontWeight: 400 }}>(optional)</span></label>
-          <input
-            className="settings-input"
-            type="password"
-            value={settingsForm.openaiKey}
-            onChange={(e) => setSettingsForm((f) => ({ ...f, openaiKey: e.target.value }))}
-            placeholder="sk-..."
-          />
+          <div className="settings-input-wrap">
+            <input
+              className={`settings-input ${!showTokens.openaiKey ? "settings-input-masked" : ""}`}
+              type="text"
+              autoComplete="off"
+              spellCheck="false"
+              value={settingsForm.openaiKey}
+              onChange={(e) => setSettingsForm((f) => ({ ...f, openaiKey: e.target.value }))}
+              placeholder="sk-..."
+            />
+            <button
+              type="button"
+              className="settings-toggle-btn"
+              onClick={() => toggleVisibility("openaiKey")}
+              title={showTokens.openaiKey ? "Hide" : "Show"}
+            >
+              {showTokens.openaiKey ? "Hide" : "Show"}
+            </button>
+          </div>
           <div className="settings-hint">
             For OpenAI usage & balance tracking (Whisper, GPT-4o-mini).
           </div>
