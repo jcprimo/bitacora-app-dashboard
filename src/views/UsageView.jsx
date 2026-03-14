@@ -31,7 +31,7 @@ export default function UsageView({
   return (
     <div className="animate-fade">
       {/* Sub-tabs */}
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.25rem" }}>
+      <div className="nav-tabs">
         <button
           className={`step-btn ${usageTab === "anthropic" ? "active" : ""}`}
           onClick={() => setUsageTab("anthropic")}
@@ -131,7 +131,7 @@ export default function UsageView({
           ) : (
             <>
               {/* Date Range Filter */}
-              <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", marginBottom: "1.25rem", flexWrap: "wrap" }}>
+              <div className="date-range-row">
                 <div style={{ fontSize: "0.68rem", color: "var(--text-dim)" }}>Date range:</div>
                 <input
                   className="settings-input"
@@ -169,7 +169,7 @@ export default function UsageView({
               )}
 
               {/* Stats Grid */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0.85rem", marginBottom: "1.5rem" }}>
+              <div className="stats-grid">
                 <div className="panel" style={{ textAlign: "center", padding: "1.25rem 1rem" }}>
                   <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "#10a37f", fontFamily: "var(--font-mono)" }}>
                     ${openaiTotalSpend.toFixed(4)}
@@ -390,7 +390,7 @@ export default function UsageView({
       </div>
 
       {/* Stats Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0.85rem", marginBottom: "1.5rem" }}>
+      <div className="stats-grid">
         <div className="panel" style={{ textAlign: "center", padding: "1.25rem 1rem" }}>
           <div style={{ fontSize: "1.6rem", fontWeight: 800, color: "var(--accent-indigo)", fontFamily: "var(--font-mono)" }}>
             {aiUsage.totalRequests}
@@ -421,7 +421,7 @@ export default function UsageView({
       </div>
 
       {/* Budget + Token Breakdown */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.5rem" }}>
+      <div className="budget-grid">
         {/* Budget */}
         <div className="panel">
           <div className="panel-label" style={{ color: "var(--accent-amber)" }}>Monthly Budget</div>

@@ -218,7 +218,7 @@ export default function CreateView({
                   </div>
                 </div>
               )}
-              <div style={{ display: "flex", gap: "0.75rem", marginTop: "1rem" }}>
+              <div className="create-actions">
                 <button
                   className="btn-generate"
                   onClick={() => generateWithAI(selectedAgent, recordUsage)}

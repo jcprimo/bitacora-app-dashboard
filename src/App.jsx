@@ -89,7 +89,7 @@ export default function App() {
       />
 
       {/* Nav */}
-      <nav style={{ display: "flex", gap: "0.5rem", marginBottom: "1.25rem" }}>
+      <nav className="nav-tabs">
         <button
           className={`step-btn ${view === "board" ? "active" : ""}`}
           onClick={() => setView("board")}

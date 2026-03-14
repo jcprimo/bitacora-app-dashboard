@@ -10,7 +10,7 @@ import { priorityColor, stageColor } from "../utils/colors";
 export default function BoardView({ issues, loading, filterQuery, setFilterQuery, loadIssues, openDetail, changeField }) {
   return (
     <div className="animate-fade">
-      <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem" }}>
+      <div className="board-filter-bar">
         <input
           className="config-input"
           style={{ flex: 1, fontSize: "0.78rem", padding: "0.55rem 0.85rem", borderRadius: "var(--radius-md)" }}
