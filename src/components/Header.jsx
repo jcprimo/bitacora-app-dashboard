@@ -1,9 +1,10 @@
 // ─── components/Header.jsx — App Header Bar ─────────────────────
 // Contains: app title, FERPA/LFPDPPP compliance badges with hover
 // tooltips (including official links), connection status badge
-// (click to open Settings), and light/dark theme toggle.
+// (click to open Settings), light/dark theme toggle, and user
+// menu with logout button.
 
-export default function Header({ token, theme, toggleTheme, openSettings }) {
+export default function Header({ token, theme, toggleTheme, openSettings, user, onLogout }) {
   return (
     <header className="header">
       <div className="header-left">
@@ -63,6 +64,14 @@ export default function Header({ token, theme, toggleTheme, openSettings }) {
         <button className="theme-toggle" onClick={toggleTheme} title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
           {theme === "dark" ? "☀️" : "🌙"}
         </button>
+        {user && (
+          <div className="user-menu">
+            <span className="user-name">{user.name || user.email}</span>
+            <button className="logout-btn" onClick={onLogout} title="Sign out">
+              Sign out
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

@@ -1,7 +1,11 @@
 // ─── App.jsx — Application Shell ────────────────────────────────
-// Root component for Bitacora YouTrack Integration.
-// Composes hooks for state, components for UI chrome, and views for
-// each tab (Board, Create, AI Usage, Detail).
+// Root component for Bitacora App Dashboard.
+//
+// Auth flow:
+//   1. On mount, useAuth checks /api/auth/me for an active session
+//   2. If no users exist → shows SetupView (first-run admin creation)
+//   3. If not authenticated → shows LoginView
+//   4. If authenticated → shows the main dashboard
 //
 // Views:  board | create | qa | docs | usage | detail
 // State:  all app state lives in custom hooks; this file only wires
@@ -14,6 +18,7 @@ import "./App.css";
 import { AGENTS } from "./constants/agents";
 
 // ─── Hooks ──────────────────────────────────────────────────────
+import { useAuth } from "./hooks/useAuth";
 import { useToast } from "./hooks/useToast";
 import { useTheme } from "./hooks/useTheme";
 import { useBoard } from "./hooks/useBoard";
@@ -31,6 +36,7 @@ import Header from "./components/Header";
 import SettingsModal from "./components/SettingsModal";
 
 // ─── Views ──────────────────────────────────────────────────────
+import LoginView from "./views/LoginView";
 import BoardView from "./views/BoardView";
 import CreateView from "./views/CreateView";
 import UsageView from "./views/UsageView";
@@ -40,6 +46,44 @@ import MarkdownView from "./views/MarkdownView";
 
 // ═══════════════════════════════════════════════════════════════════
 export default function App() {
+  // ─── Authentication ────────────────────────────────────────────
+  const auth = useAuth();
+
+  // ─── Theme (available on login screen too) ─────────────────────
+  const { theme, toggleTheme } = useTheme();
+
+  // ─── Auth loading state ────────────────────────────────────────
+  if (auth.loading) {
+    return (
+      <div className="auth-loading">
+        <div className="spinner" style={{ width: 24, height: 24 }} />
+        <div className="auth-loading-text">Loading...</div>
+      </div>
+    );
+  }
+
+  // ─── Not authenticated → show login or setup ───────────────────
+  if (!auth.user) {
+    return (
+      <LoginView
+        needsSetup={auth.needsSetup}
+        login={auth.login}
+        register={auth.register}
+        error={auth.error}
+        clearError={auth.clearError}
+      />
+    );
+  }
+
+  // ─── Authenticated → render dashboard ──────────────────────────
+  return <Dashboard auth={auth} theme={theme} toggleTheme={toggleTheme} />;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Dashboard — the main app, only rendered when authenticated.
+// Separated to keep hook calls unconditional within this component.
+// ═══════════════════════════════════════════════════════════════════
+function Dashboard({ auth, theme, toggleTheme }) {
   // YouTrack auth — persisted in localStorage, falls back to env var
   const [token, setToken] = useState(localStorage.getItem("bitacora-yt-token") || import.meta.env.VITE_YT_TOKEN || "");
   // Active tab: "board" | "create" | "usage" | "detail"
@@ -47,7 +91,6 @@ export default function App() {
 
   // ─── Hook composition ──────────────────────────────────────────
   const { toast, showToast } = useToast();
-  const { theme, toggleTheme } = useTheme();
   const { issues, loading, error, filterQuery, setFilterQuery, loadIssues } = useBoard(token);
   const settings = useSettings(token, setToken, showToast, loadIssues);
 
@@ -78,6 +121,8 @@ export default function App() {
         theme={theme}
         toggleTheme={toggleTheme}
         openSettings={settings.openSettings}
+        user={auth.user}
+        onLogout={auth.logout}
       />
 
       <SettingsModal

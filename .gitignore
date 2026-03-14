@@ -5,11 +5,27 @@ node_modules
 dist
 dist-ssr
 
-# Environment (secrets)
+# Database (SQLite — lives on Docker volume in prod)
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/sessions.db
+
+# Environment (secrets) — NEVER commit these
 .env
 .env.local
+.env.production
+.env.staging
 .env.*.local
 *.local
+
+# Secrets & credentials
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+service-account*.json
 
 # Logs
 logs
