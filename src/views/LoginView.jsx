@@ -17,6 +17,8 @@ export default function LoginView({ needsSetup, login, register, error, clearErr
   const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [localError, setLocalError] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const displayError = error || localError;
 
@@ -98,29 +100,39 @@ export default function LoginView({ needsSetup, login, register, error, clearErr
 
       <div className="login-field">
         <label className="login-label">Password</label>
-        <input
-          className="login-input"
-          type="password"
-          value={password}
-          onChange={(e) => { setPassword(e.target.value); handleInputChange(); }}
-          placeholder="Minimum 8 characters"
-          autoComplete="new-password"
-          required
-          minLength={8}
-        />
+        <div className="login-input-wrap">
+          <input
+            className="login-input"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => { setPassword(e.target.value); handleInputChange(); }}
+            placeholder="Minimum 8 characters"
+            autoComplete="new-password"
+            required
+            minLength={8}
+          />
+          <button type="button" className="login-toggle-btn" onClick={() => setShowPassword((v) => !v)}>
+            {showPassword ? "Hide" : "Show"}
+          </button>
+        </div>
       </div>
 
       <div className="login-field">
         <label className="login-label">Confirm Password</label>
-        <input
-          className="login-input"
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => { setConfirmPassword(e.target.value); handleInputChange(); }}
-          placeholder="Re-enter your password"
-          autoComplete="new-password"
-          required
-        />
+        <div className="login-input-wrap">
+          <input
+            className="login-input"
+            type={showConfirm ? "text" : "password"}
+            value={confirmPassword}
+            onChange={(e) => { setConfirmPassword(e.target.value); handleInputChange(); }}
+            placeholder="Re-enter your password"
+            autoComplete="new-password"
+            required
+          />
+          <button type="button" className="login-toggle-btn" onClick={() => setShowConfirm((v) => !v)}>
+            {showConfirm ? "Hide" : "Show"}
+          </button>
+        </div>
       </div>
 
       {displayError && (
@@ -202,15 +214,20 @@ export default function LoginView({ needsSetup, login, register, error, clearErr
 
               <div className="login-field">
                 <label className="login-label">Password</label>
-                <input
-                  className="login-input"
-                  type="password"
-                  value={password}
-                  onChange={(e) => { setPassword(e.target.value); handleInputChange(); }}
-                  placeholder="Enter your password"
-                  autoComplete="current-password"
-                  required
-                />
+                <div className="login-input-wrap">
+                  <input
+                    className="login-input"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => { setPassword(e.target.value); handleInputChange(); }}
+                    placeholder="Enter your password"
+                    autoComplete="current-password"
+                    required
+                  />
+                  <button type="button" className="login-toggle-btn" onClick={() => setShowPassword((v) => !v)}>
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
               </div>
 
               {displayError && (

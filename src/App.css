@@ -146,6 +146,37 @@
   cursor: not-allowed;
 }
 
+.login-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.login-input-wrap .login-input {
+  width: 100%;
+  padding-right: 3.5rem;
+}
+
+.login-toggle-btn {
+  position: absolute;
+  right: 0.6rem;
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.6rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  padding: 0.2rem 0.45rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.login-toggle-btn:hover {
+  color: var(--text-secondary);
+  border-color: var(--border-medium);
+}
+
 .login-switch {
   margin-top: 1.25rem;
   text-align: center;
