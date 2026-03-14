@@ -9,6 +9,7 @@
 import { useState } from "react";
 import { getCustomFieldValue, formatDate, STAGES, PRIORITIES } from "../youtrack";
 import { copyToClipboard } from "../utils/clipboard";
+import { renderMarkdown } from "../utils/markdownParser";
 
 // ─── Comment timestamp helper ────────────────────────────────────
 function commentTime(ts) {
@@ -158,7 +159,10 @@ export default function DetailView({
                   </span>
                   <span className="detail-comment-time">{commentTime(c.created)}</span>
                 </div>
-                <div className="detail-comment-text">{c.text}</div>
+                <div
+                  className="detail-comment-text md-content"
+                  dangerouslySetInnerHTML={{ __html: renderMarkdown(c.text) }}
+                />
               </div>
             ))}
           </div>

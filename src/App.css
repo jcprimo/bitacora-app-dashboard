@@ -1791,8 +1791,54 @@
   font-size: 0.78rem;
   color: var(--text-secondary);
   line-height: 1.6;
-  white-space: pre-wrap;
+  overflow-wrap: break-word;
   word-break: break-word;
+}
+
+/* Override md-content padding/sizing when inside comments */
+.detail-comment-text.md-content {
+  padding: 0;
+  font-size: 0.78rem;
+  white-space: normal;
+}
+
+.detail-comment-text.md-content p {
+  margin-bottom: 0.4rem;
+}
+
+.detail-comment-text.md-content p:last-child {
+  margin-bottom: 0;
+}
+
+.detail-comment-text.md-content .md-heading {
+  font-size: 0.82rem;
+  margin: 0.5rem 0 0.25rem;
+}
+
+.detail-comment-text.md-content .md-code-block {
+  margin: 0.4rem 0;
+  font-size: 0.72rem;
+}
+
+.detail-comment-text.md-content .md-inline-code {
+  font-size: 0.72rem;
+  padding: 0.1rem 0.35rem;
+}
+
+.detail-comment-text.md-content .md-table-wrap {
+  margin: 0.4rem 0;
+  font-size: 0.72rem;
+}
+
+.detail-comment-text.md-content .md-blockquote {
+  margin: 0.4rem 0;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+}
+
+.detail-comment-text.md-content .md-image {
+  max-width: 100%;
+  border-radius: var(--radius-sm);
 }
 
 .detail-comment-input-row {
