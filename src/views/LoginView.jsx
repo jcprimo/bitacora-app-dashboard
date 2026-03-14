@@ -1,6 +1,8 @@
 // ─── views/LoginView.jsx — Authentication Screen ─────────────────
-// Renders either the Login form or the first-run Setup form, based
-// on whether any users exist in the database (needsSetup flag).
+// Three modes:
+//   1. needsSetup=true  → first-run admin creation
+//   2. mode="login"     → sign in with existing account
+//   3. mode="signup"    → self-registration for new engineers
 //
 // Uses the same glass-morphism style as the rest of the dashboard.
 // Fully responsive for iPhone 16 (393px) and desktop.
@@ -8,6 +10,7 @@
 import { useState } from "react";
 
 export default function LoginView({ needsSetup, login, register, error, clearError }) {
+  const [mode, setMode] = useState("login"); // "login" | "signup"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -29,7 +32,7 @@ export default function LoginView({ needsSetup, login, register, error, clearErr
     setSubmitting(false);
   };
 
-  const handleSetup = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     setLocalError(null);
     if (!email.trim() || !password) {
@@ -56,6 +59,88 @@ export default function LoginView({ needsSetup, login, register, error, clearErr
     }
   };
 
+  const switchMode = (newMode) => {
+    setMode(newMode);
+    setLocalError(null);
+    clearError();
+    setPassword("");
+    setConfirmPassword("");
+  };
+
+  // ─── Shared registration form (used by both setup and signup) ───
+  const registrationForm = (
+    <form onSubmit={handleRegister} className="login-form">
+      <div className="login-field">
+        <label className="login-label">Name</label>
+        <input
+          className="login-input"
+          type="text"
+          value={name}
+          onChange={(e) => { setName(e.target.value); handleInputChange(); }}
+          placeholder="Your name (optional)"
+          autoComplete="name"
+        />
+      </div>
+
+      <div className="login-field">
+        <label className="login-label">Email</label>
+        <input
+          className="login-input"
+          type="email"
+          value={email}
+          onChange={(e) => { setEmail(e.target.value); handleInputChange(); }}
+          placeholder={needsSetup ? "admin@yourcompany.com" : "you@yourcompany.com"}
+          autoComplete="email"
+          required
+          autoFocus
+        />
+      </div>
+
+      <div className="login-field">
+        <label className="login-label">Password</label>
+        <input
+          className="login-input"
+          type="password"
+          value={password}
+          onChange={(e) => { setPassword(e.target.value); handleInputChange(); }}
+          placeholder="Minimum 8 characters"
+          autoComplete="new-password"
+          required
+          minLength={8}
+        />
+      </div>
+
+      <div className="login-field">
+        <label className="login-label">Confirm Password</label>
+        <input
+          className="login-input"
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => { setConfirmPassword(e.target.value); handleInputChange(); }}
+          placeholder="Re-enter your password"
+          autoComplete="new-password"
+          required
+        />
+      </div>
+
+      {displayError && (
+        <div className="login-error">{displayError}</div>
+      )}
+
+      <button
+        type="submit"
+        className="login-submit"
+        disabled={submitting}
+      >
+        {submitting ? (
+          <><span className="spinner" /> {needsSetup ? "Creating account..." : "Creating account..."}</>
+        ) : (
+          needsSetup ? "Create Admin Account" : "Create Account"
+        )}
+      </button>
+    </form>
+  );
+
   return (
     <div className="login-screen">
       <div className="login-card animate-fade">
@@ -74,77 +159,23 @@ export default function LoginView({ needsSetup, login, register, error, clearErr
               Welcome to Bitacora. Create your admin account to get started.
               This will be the primary account for managing the dashboard.
             </p>
-
-            <form onSubmit={handleSetup} className="login-form">
-              <div className="login-field">
-                <label className="login-label">Name</label>
-                <input
-                  className="login-input"
-                  type="text"
-                  value={name}
-                  onChange={(e) => { setName(e.target.value); handleInputChange(); }}
-                  placeholder="Your name (optional)"
-                  autoComplete="name"
-                />
-              </div>
-
-              <div className="login-field">
-                <label className="login-label">Email</label>
-                <input
-                  className="login-input"
-                  type="email"
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); handleInputChange(); }}
-                  placeholder="admin@yourcompany.com"
-                  autoComplete="email"
-                  required
-                  autoFocus
-                />
-              </div>
-
-              <div className="login-field">
-                <label className="login-label">Password</label>
-                <input
-                  className="login-input"
-                  type="password"
-                  value={password}
-                  onChange={(e) => { setPassword(e.target.value); handleInputChange(); }}
-                  placeholder="Minimum 8 characters"
-                  autoComplete="new-password"
-                  required
-                  minLength={8}
-                />
-              </div>
-
-              <div className="login-field">
-                <label className="login-label">Confirm Password</label>
-                <input
-                  className="login-input"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => { setConfirmPassword(e.target.value); handleInputChange(); }}
-                  placeholder="Re-enter your password"
-                  autoComplete="new-password"
-                  required
-                />
-              </div>
-
-              {displayError && (
-                <div className="login-error">{displayError}</div>
-              )}
-
-              <button
-                type="submit"
-                className="login-submit"
-                disabled={submitting}
-              >
-                {submitting ? (
-                  <><span className="spinner" /> Creating account...</>
-                ) : (
-                  "Create Admin Account"
-                )}
+            {registrationForm}
+          </>
+        ) : mode === "signup" ? (
+          <>
+            {/* ─── Sign Up ──────────────────────────────────────── */}
+            <div className="login-heading">Create Account</div>
+            <p className="login-description">
+              Sign up to get your own dashboard access. You can configure
+              your API keys after logging in.
+            </p>
+            {registrationForm}
+            <div className="login-switch">
+              Already have an account?{" "}
+              <button className="login-switch-btn" onClick={() => switchMode("login")}>
+                Sign in
               </button>
-            </form>
+            </div>
           </>
         ) : (
           <>
@@ -198,6 +229,13 @@ export default function LoginView({ needsSetup, login, register, error, clearErr
                 )}
               </button>
             </form>
+
+            <div className="login-switch">
+              Don't have an account?{" "}
+              <button className="login-switch-btn" onClick={() => switchMode("signup")}>
+                Sign up
+              </button>
+            </div>
           </>
         )}
 

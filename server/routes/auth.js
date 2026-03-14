@@ -88,7 +88,8 @@ router.get("/me", (req, res) => {
 });
 
 // POST /api/auth/register — create user
-// First user becomes admin automatically. After that, admin-only.
+// First user becomes admin automatically. Subsequent users are members.
+// Open self-signup so engineers can create their own accounts.
 router.post("/register", registerLimiter, async (req, res) => {
   try {
     const { email, password, name } = req.body;
@@ -102,11 +103,6 @@ router.post("/register", registerLimiter, async (req, res) => {
     // Check if this is the first user (auto-admin)
     const [{ total }] = db.select({ total: count() }).from(users).all();
     const isFirstUser = total === 0;
-
-    // If not first user, require admin session
-    if (!isFirstUser && req.session?.role !== "admin") {
-      return res.status(403).json({ error: "Admin access required to register new users" });
-    }
 
     // Check for existing email
     const [existing] = db.select({ id: users.id }).from(users).where(eq(users.email, email.toLowerCase())).limit(1).all();

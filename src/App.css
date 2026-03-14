@@ -146,6 +146,30 @@
   cursor: not-allowed;
 }
 
+.login-switch {
+  margin-top: 1.25rem;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.login-switch-btn {
+  background: none;
+  border: none;
+  color: var(--accent-indigo);
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.login-switch-btn:hover {
+  color: var(--text-primary);
+}
+
 .login-footer {
   margin-top: 2rem;
   text-align: center;
