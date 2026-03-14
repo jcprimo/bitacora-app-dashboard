@@ -44,7 +44,7 @@ router.all("/yt/{*path}", async (req, res) => {
     return res.status(response.status).send(text);
   } catch (err) {
     console.error("YouTrack proxy error:", err.message);
-    return res.status(502).json({ error: "YouTrack request failed", details: err.message });
+    return res.status(502).json({ error: "YouTrack request failed" });
   }
 });
 
@@ -78,7 +78,7 @@ router.all("/openai/{*path}", async (req, res) => {
     return res.status(response.status).json(data);
   } catch (err) {
     console.error("OpenAI proxy error:", err.message);
-    return res.status(502).json({ error: "OpenAI request failed", details: err.message });
+    return res.status(502).json({ error: "OpenAI request failed" });
   }
 });
 
@@ -104,7 +104,7 @@ router.post("/anthropic/messages", async (req, res) => {
     return res.status(response.status).json(data);
   } catch (err) {
     console.error("Anthropic proxy error:", err.message);
-    return res.status(502).json({ error: "Anthropic request failed", details: err.message });
+    return res.status(502).json({ error: "Anthropic request failed" });
   }
 });
 

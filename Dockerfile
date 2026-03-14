@@ -14,6 +14,12 @@ COPY --from=build /app/server ./server
 COPY --from=build /app/package.json /app/package-lock.json ./
 RUN npm ci --omit=dev
 RUN mkdir -p /app/data
+
+# Run as non-root user to limit container compromise blast radius
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN chown -R appuser:appgroup /app
+USER appuser
+
 EXPOSE 8080
 ENV NODE_ENV=production
 CMD ["node", "server/index.js"]
