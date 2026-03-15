@@ -52,7 +52,8 @@ router.all("/yt/{*path}", async (req, res) => {
     return res.status(400).json({ error: "YouTrack token not configured. Add it in Settings." });
   }
 
-  const ytPath = req.params.path;
+  // Express 5 {*path} returns an array of path segments, not a string
+  const ytPath = Array.isArray(req.params.path) ? req.params.path.join("/") : req.params.path;
   const qs = extractQueryString(req);
   const url = `${YOUTRACK_URL}/api/${ytPath}${qs}`;
 
@@ -85,7 +86,8 @@ router.all("/openai/{*path}", async (req, res) => {
     return res.status(400).json({ error: "OpenAI API key not configured. Add it in Settings." });
   }
 
-  const openaiPath = req.params.path;
+  // Express 5 {*path} returns an array of path segments, not a string
+  const openaiPath = Array.isArray(req.params.path) ? req.params.path.join("/") : req.params.path;
   const qs = extractQueryString(req);
   const url = `https://api.openai.com/${openaiPath}${qs}`;
 
