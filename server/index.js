@@ -176,6 +176,11 @@ app.use(
   })
 );
 
+// ─── Health Check (public, no auth) ─────────────────────────────
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok", uptime: process.uptime() });
+});
+
 // ─── API Routes ──────────────────────────────────────────────────
 // Auth routes — public (login, register, setup-status)
 app.use("/api/auth", authRoutes);
