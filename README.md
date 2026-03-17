@@ -50,8 +50,8 @@ Manage YouTrack tickets through an agent-based workflow, track AI spend across A
 ### Development (Vite dev server)
 
 ```bash
-git clone https://github.com/jcprimo/bitacora-youtrack.git
-cd bitacora-youtrack
+git clone https://github.com/jcprimo/bitacora-app-dashboard.git
+cd bitacora-app-dashboard
 
 cp .env.example .env
 # Edit .env — set ENCRYPTION_KEY (run: openssl rand -hex 32)

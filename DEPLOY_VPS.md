@@ -62,7 +62,7 @@ In **Hostinger → Domains → bitacora.cloud → DNS Zone**, ensure:
 rm -rf /opt/bitacora
 
 mkdir -p /opt/bitacora && cd /opt/bitacora
-git clone https://github.com/jcprimo/bitacora-youtrack.git dashboard
+git clone https://github.com/jcprimo/bitacora-app-dashboard.git dashboard
 cd dashboard
 ```
 

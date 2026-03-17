@@ -12,8 +12,8 @@ The project was renamed from its original YouTrack-integration-focused naming to
 - **Old app dir:** `reporta-youtrack`
 - **New brand:** Bitacora App Dashboard — #OpsLife
 - **New package name:** `bitacora-app-dashboard`
-- **GitHub repo:** `jcprimo/bitacora-youtrack` (rename pending on GitHub)
+- **GitHub repo:** `jcprimo/bitacora-app-dashboard` (renamed 2026-03-17)
 
 **Why:** The project has grown beyond YouTrack integration into a full ops dashboard with AI usage tracking, QA tracker, docs viewer, and agent pipeline management.
 
-**How to apply:** Use "Bitacora App Dashboard" or "#OpsLife" when referring to this project. The GitHub repo should be renamed to match (e.g., `bitacora-app-dashboard`).
+**How to apply:** Use "Bitacora App Dashboard" or "#OpsLife" when referring to this project.
