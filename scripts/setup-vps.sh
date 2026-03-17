@@ -33,6 +33,11 @@ fi
 DOMAIN="dashboard.bitacora.app"
 SERVICE_USER="bitacora-ops"
 APP_PORT=8080
+
+# ─── Optional: emergency backup SSH public key ──────────────────
+# Paste a second public key here (from another machine) as a lockout safeguard.
+# Leave empty to skip.
+BACKUP_PUBKEY=""
 DASHBOARD_DIR="/home/${SERVICE_USER}/bitacora-app-dashboard"
 REPOS_DIR="/home/${SERVICE_USER}/repos"
 NODE_MAJOR=22
@@ -148,9 +153,10 @@ if id "${SERVICE_USER}" &>/dev/null; then
 else
   # Create user with home dir, bash shell, no password (key-only access)
   useradd -m -s /bin/bash "${SERVICE_USER}"
-  # Lock password login — SSH key only
-  passwd -l "${SERVICE_USER}" >/dev/null
-  echo "  ✓ User '${SERVICE_USER}' created (password-locked)"
+  echo "  ✓ User '${SERVICE_USER}' created"
+  echo ""
+  echo "  Set a password for '${SERVICE_USER}' (used for SSH from other machines):"
+  passwd "${SERVICE_USER}"
 fi
 
 # Grant limited sudo: only docker, systemctl for bitacora services, npm
@@ -175,6 +181,17 @@ chmod 700 "${SSHDIR}"
 chmod 600 "${SSHDIR}/authorized_keys" 2>/dev/null || true
 chown -R "${SERVICE_USER}:${SERVICE_USER}" "${SSHDIR}"
 echo "  ✓ SSH key copied from root → ${SERVICE_USER}"
+
+# Append backup key to both root and service user (if provided)
+if [ -n "${BACKUP_PUBKEY}" ]; then
+  for KEYFILE in /root/.ssh/authorized_keys "${SSHDIR}/authorized_keys"; do
+    if ! grep -qF "${BACKUP_PUBKEY}" "${KEYFILE}" 2>/dev/null; then
+      echo "${BACKUP_PUBKEY}" >> "${KEYFILE}"
+    fi
+  done
+  chown -R "${SERVICE_USER}:${SERVICE_USER}" "${SSHDIR}"
+  echo "  ✓ Backup SSH key added to root + ${SERVICE_USER}"
+fi
 
 # ─── 7. SSH hardening (root access preserved) ───────────────────
 echo ""
@@ -206,14 +223,31 @@ else
   sed -i "s/^AllowUsers.*/AllowUsers root ${SERVICE_USER}/" "${SSHD_CONFIG}"
 fi
 
+# Allow password auth ONLY for bitacora-ops (root stays key-only)
+if ! grep -q "^Match User ${SERVICE_USER}" "${SSHD_CONFIG}"; then
+  cat >> "${SSHD_CONFIG}" <<EOF
+
+# Allow password login for service user (multi-machine access)
+Match User ${SERVICE_USER}
+    PasswordAuthentication yes
+EOF
+fi
+
+# Detect SSH service name (Debian/Ubuntu use 'ssh', RHEL/Fedora use 'sshd')
+if systemctl list-unit-files ssh.service &>/dev/null && systemctl list-unit-files ssh.service | grep -q ssh.service; then
+  SSH_SERVICE="ssh"
+else
+  SSH_SERVICE="sshd"
+fi
+
 # Validate config before restarting
 if sshd -t 2>/dev/null; then
-  systemctl restart sshd
+  systemctl restart "${SSH_SERVICE}"
   echo "  ✓ SSH hardened: key-only, root preserved (prohibit-password), AllowUsers root + ${SERVICE_USER}"
 else
   echo "  ✗ SSH config invalid — restoring backup"
   cp "${SSHD_CONFIG}.backup-original" "${SSHD_CONFIG}"
-  systemctl restart sshd
+  systemctl restart "${SSH_SERVICE}"
   exit 1
 fi
 
