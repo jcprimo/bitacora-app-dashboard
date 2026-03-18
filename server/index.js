@@ -22,6 +22,7 @@ import documentsRoutes from "./routes/documents.js";
 import usageRoutes from "./routes/usage.js";
 import qaRoutes from "./routes/qa.js";
 import proxyRoutes from "./routes/proxy.js";
+import ingestRoutes from "./routes/ingest.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const isProduction = process.env.NODE_ENV === "production";
@@ -184,6 +185,9 @@ app.get("/health", (_req, res) => {
 // ─── API Routes ──────────────────────────────────────────────────
 // Auth routes — public (login, register, setup-status)
 app.use("/api/auth", authRoutes);
+
+// Ingest routes — token-auth (agents push markdown plans here)
+app.use("/api/ingest", ingestRoutes);
 
 // Protected routes — require session
 app.use("/api/credentials", requireAuth, credentialsRoutes);
