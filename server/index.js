@@ -13,7 +13,7 @@ import { existsSync } from "fs";
 
 // ─── Database init (creates tables on first run) ─────────────────
 import { sqlite } from "./db.js";
-import { requireAuth } from "./middleware/auth.js";
+import { requireAuth, requireAdmin } from "./middleware/auth.js";
 
 // ─── Routes ──────────────────────────────────────────────────────
 import authRoutes from "./routes/auth.js";
@@ -26,6 +26,12 @@ import ingestRoutes from "./routes/ingest.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const isProduction = process.env.NODE_ENV === "production";
+
+// ─── Session secret warning (all environments) ──────────────────
+const DEFAULT_SECRET = "bitacora-dev-secret-change-in-production";
+if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET === DEFAULT_SECRET) {
+  console.warn("[SECURITY] SESSION_SECRET is using the insecure default. Set a strong random value in .env.");
+}
 
 // ─── Production env validation (fail-fast) ──────────────────────
 if (isProduction) {
@@ -147,7 +153,25 @@ runMigrations();
 
 // ─── Security headers ────────────────────────────────────────────
 app.use(helmet({
-  contentSecurityPolicy: false, // SPA handles its own CSP
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"], // inline styles used by the SPA
+      imgSrc: ["'self'", "data:", "blob:"],
+      fontSrc: ["'self'", "data:"],
+      connectSrc: [
+        "'self'",
+        // Allow server-side proxy targets (via /api/* — never direct from browser)
+        // These are kept here as documentation; actual requests go through /api/*
+      ],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+      ...(isProduction ? { upgradeInsecureRequests: [] } : {}),
+    },
+  },
 }));
 
 // ─── Body parsing ────────────────────────────────────────────────
@@ -179,7 +203,7 @@ app.use(
 
 // ─── Health Check (public, no auth) ─────────────────────────────
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", uptime: process.uptime() });
+  res.json({ status: "ok" });
 });
 
 // ─── API Routes ──────────────────────────────────────────────────
@@ -190,7 +214,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/ingest", ingestRoutes);
 
 // Protected routes — require session
-app.use("/api/credentials", requireAuth, credentialsRoutes);
+// Credential management (storing/deleting API keys) is admin-only
+app.use("/api/credentials", requireAuth, requireAdmin, credentialsRoutes);
 app.use("/api/documents", requireAuth, documentsRoutes);
 app.use("/api/usage", requireAuth, usageRoutes);
 app.use("/api/qa", requireAuth, qaRoutes);

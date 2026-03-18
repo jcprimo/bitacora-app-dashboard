@@ -42,6 +42,15 @@ router.post("/", (req, res) => {
   if (!name || !content) {
     return res.status(400).json({ error: "Name and content are required" });
   }
+  if (typeof name !== "string" || name.length > 255) {
+    return res.status(400).json({ error: "Name must be 255 characters or fewer" });
+  }
+  if (path !== undefined && (typeof path !== "string" || path.length > 512)) {
+    return res.status(400).json({ error: "Path must be 512 characters or fewer" });
+  }
+  if (typeof content !== "string" || content.length > 500_000) {
+    return res.status(400).json({ error: "Content must be 500,000 characters or fewer" });
+  }
 
   const result = db.insert(documents).values({
     userId: req.session.userId,
@@ -72,9 +81,10 @@ router.put("/:id", (req, res) => {
   if (content !== undefined) updates.content = content;
   updates.updatedAt = sql`datetime('now')`;
 
+  // Include userId in WHERE to prevent IDOR — only the owner can update
   db.update(documents)
     .set(updates)
-    .where(eq(documents.id, parseInt(req.params.id)))
+    .where(and(eq(documents.id, parseInt(req.params.id)), eq(documents.userId, req.session.userId)))
     .run();
 
   return res.json({ ok: true, id: parseInt(req.params.id) });

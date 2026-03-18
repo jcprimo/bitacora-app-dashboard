@@ -14,6 +14,7 @@ const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5,                    // 5 attempts per window
   message: "Too many login attempts. Please try again in 15 minutes.",
+  keyByEmail: true,          // also lock out by email, not just IP
 });
 
 const registerLimiter = rateLimit({
@@ -29,6 +30,12 @@ router.post("/login", loginLimiter, async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password required" });
     }
+    if (typeof email !== "string" || email.length > 254) {
+      return res.status(400).json({ error: "Invalid email" });
+    }
+    if (typeof password !== "string" || password.length > 1024) {
+      return res.status(400).json({ error: "Invalid password" });
+    }
 
     const [user] = db.select().from(users).where(eq(users.email, email.toLowerCase())).limit(1).all();
     if (!user) {
@@ -39,6 +46,11 @@ router.post("/login", loginLimiter, async (req, res) => {
     if (!valid) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
+
+    // Regenerate session to prevent session fixation
+    await new Promise((resolve, reject) => {
+      req.session.regenerate((err) => (err ? reject(err) : resolve()));
+    });
 
     req.session.userId = user.id;
     req.session.role = user.role;
@@ -89,12 +101,21 @@ router.get("/me", (req, res) => {
 
 // POST /api/auth/register — create user
 // First user becomes admin automatically. Subsequent users are members.
-// Open self-signup so engineers can create their own accounts.
+// After first user exists, requires REGISTRATION_TOKEN in request body.
 router.post("/register", registerLimiter, async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, registrationToken } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password required" });
+    }
+    if (typeof email !== "string" || email.length > 254) {
+      return res.status(400).json({ error: "Invalid email" });
+    }
+    if (typeof password !== "string" || password.length > 1024) {
+      return res.status(400).json({ error: "Invalid password" });
+    }
+    if (name !== undefined && (typeof name !== "string" || name.length > 128)) {
+      return res.status(400).json({ error: "Name must be 128 characters or fewer" });
     }
     if (password.length < 8) {
       return res.status(400).json({ error: "Password must be at least 8 characters" });
@@ -103,6 +124,17 @@ router.post("/register", registerLimiter, async (req, res) => {
     // Check if this is the first user (auto-admin)
     const [{ total }] = db.select({ total: count() }).from(users).all();
     const isFirstUser = total === 0;
+
+    // Enforce invite token for all registrations after setup
+    if (!isFirstUser) {
+      const expectedToken = process.env.REGISTRATION_TOKEN;
+      if (!expectedToken) {
+        return res.status(403).json({ error: "Registration is closed" });
+      }
+      if (!registrationToken || registrationToken !== expectedToken) {
+        return res.status(403).json({ error: "Invalid or missing registration token" });
+      }
+    }
 
     // Check for existing email
     const [existing] = db.select({ id: users.id }).from(users).where(eq(users.email, email.toLowerCase())).limit(1).all();
@@ -120,7 +152,10 @@ router.post("/register", registerLimiter, async (req, res) => {
       role,
     }).returning({ id: users.id, email: users.email, name: users.name, role: users.role }).get();
 
-    // Auto-login on registration
+    // Auto-login on registration — regenerate session to prevent fixation
+    await new Promise((resolve, reject) => {
+      req.session.regenerate((err) => (err ? reject(err) : resolve()));
+    });
     req.session.userId = result.id;
     req.session.role = result.role;
 

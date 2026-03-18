@@ -23,6 +23,12 @@ router.post("/import", (req, res) => {
   if (!Array.isArray(cases) || cases.length === 0) {
     return res.status(400).json({ error: "Cases array is required" });
   }
+  if (cases.length > 10_000) {
+    return res.status(400).json({ error: "Cannot import more than 10,000 cases at once" });
+  }
+  if (fileName !== undefined && (typeof fileName !== "string" || fileName.length > 255)) {
+    return res.status(400).json({ error: "File name must be 255 characters or fewer" });
+  }
 
   const userId = req.session.userId;
 
@@ -68,7 +74,7 @@ router.put("/cases/:id", (req, res) => {
   if (ticketId !== undefined) updates.ticketId = ticketId;
   if (ticketStage !== undefined) updates.ticketStage = ticketStage;
 
-  db.update(qaTestCases).set(updates).where(eq(qaTestCases.id, parseInt(req.params.id))).run();
+  db.update(qaTestCases).set(updates).where(and(eq(qaTestCases.id, parseInt(req.params.id)), eq(qaTestCases.userId, req.session.userId))).run();
 
   return res.json({ ok: true, id: parseInt(req.params.id) });
 });
