@@ -23,30 +23,54 @@ setInterval(() => {
  * @param {number} opts.windowMs - Time window in milliseconds (default: 15 min)
  * @param {number} opts.max - Max requests per window (default: 10)
  * @param {string} opts.message - Error message on limit exceeded
+ * @param {boolean} opts.keyByEmail - Also key by request body email (for login endpoint)
  */
-export function rateLimit({ windowMs = 15 * 60 * 1000, max = 10, message = "Too many requests, please try again later" } = {}) {
+export function rateLimit({ windowMs = 15 * 60 * 1000, max = 10, message = "Too many requests, please try again later", keyByEmail = false } = {}) {
   return (req, res, next) => {
-    // Key by IP + route to scope limiting per endpoint
-    const key = `${req.ip}:${req.originalUrl}`;
     const now = Date.now();
 
-    if (!attempts.has(key)) {
-      attempts.set(key, { timestamps: [], windowMs });
+    // Always apply IP-based limiting
+    const ipKey = `ip:${req.ip}:${req.originalUrl}`;
+    checkAndRecord(ipKey, windowMs, max, res, message);
+    if (res.headersSent) return;
+
+    // Optionally also apply account-based limiting (keyed by email)
+    if (keyByEmail) {
+      const email = typeof req.body?.email === "string" ? req.body.email.toLowerCase().trim() : null;
+      if (email) {
+        const emailKey = `email:${email}:${req.originalUrl}`;
+        checkAndRecord(emailKey, windowMs, max, res, message);
+        if (res.headersSent) return;
+      }
     }
 
-    const entry = attempts.get(key);
-    entry.windowMs = windowMs;
-
-    // Remove expired timestamps
-    entry.timestamps = entry.timestamps.filter((t) => now - t < windowMs);
-
-    if (entry.timestamps.length >= max) {
-      const retryAfter = Math.ceil((entry.timestamps[0] + windowMs - now) / 1000);
-      res.set("Retry-After", String(retryAfter));
-      return res.status(429).json({ error: message });
-    }
-
-    entry.timestamps.push(now);
     return next();
   };
+}
+
+/**
+ * Internal helper: check + record a single rate-limit key.
+ * Writes a 429 response (with Retry-After) if limit exceeded.
+ */
+function checkAndRecord(key, windowMs, max, res, message) {
+  const now = Date.now();
+
+  if (!attempts.has(key)) {
+    attempts.set(key, { timestamps: [], windowMs });
+  }
+
+  const entry = attempts.get(key);
+  entry.windowMs = windowMs;
+
+  // Remove expired timestamps
+  entry.timestamps = entry.timestamps.filter((t) => now - t < windowMs);
+
+  if (entry.timestamps.length >= max) {
+    const retryAfter = Math.ceil((entry.timestamps[0] + windowMs - now) / 1000);
+    res.set("Retry-After", String(retryAfter));
+    res.status(429).json({ error: message });
+    return;
+  }
+
+  entry.timestamps.push(now);
 }

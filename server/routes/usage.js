@@ -9,7 +9,7 @@ const router = Router();
 // GET /api/usage — usage history + aggregates
 router.get("/", (req, res) => {
   const userId = req.session.userId;
-  const limit = parseInt(req.query.limit) || 50;
+  const limit = Math.min(parseInt(req.query.limit) || 50, 500);
 
   // Aggregates
   const [agg] = db
@@ -47,6 +47,12 @@ router.post("/", (req, res) => {
 
   if (!agent || !provider) {
     return res.status(400).json({ error: "Agent and provider are required" });
+  }
+  if (typeof agent !== "string" || agent.length > 128) {
+    return res.status(400).json({ error: "Agent must be 128 characters or fewer" });
+  }
+  if (typeof provider !== "string" || provider.length > 64) {
+    return res.status(400).json({ error: "Provider must be 64 characters or fewer" });
   }
 
   const result = db.insert(aiUsage).values({

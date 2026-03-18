@@ -3,6 +3,7 @@
 // Auth: Bearer token (INGEST_TOKEN env var), not session-based.
 
 import { Router } from "express";
+import { timingSafeEqual } from "crypto";
 import { db } from "../db.js";
 import { documents, users } from "../schema.js";
 import { eq, and, sql } from "drizzle-orm";
@@ -21,7 +22,17 @@ function requireIngestToken(req, res, next) {
     return res.status(401).json({ error: "Missing Bearer token" });
   }
 
-  if (header.slice(7) !== token) {
+  const provided = header.slice(7);
+  // Use timingSafeEqual to prevent timing attacks — both buffers must be same length
+  let tokenMatch = false;
+  try {
+    const a = Buffer.from(provided);
+    const b = Buffer.from(token);
+    tokenMatch = a.length === b.length && timingSafeEqual(a, b);
+  } catch {
+    tokenMatch = false;
+  }
+  if (!tokenMatch) {
     return res.status(403).json({ error: "Invalid token" });
   }
 
