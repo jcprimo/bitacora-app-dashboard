@@ -277,7 +277,7 @@ cat > /etc/fail2ban/jail.local <<'EOF'
 [DEFAULT]
 bantime  = 1h
 findtime = 10m
-maxretry = 5
+maxretry = 6
 banaction = ufw
 
 [sshd]
@@ -285,13 +285,13 @@ enabled  = true
 port     = 22
 filter   = sshd
 logpath  = /var/log/auth.log
-maxretry = 5
-bantime  = 3h
+maxretry = 6
+bantime  = 1h
 EOF
 
 systemctl enable fail2ban
 systemctl restart fail2ban
-echo "  ✓ fail2ban active: 3 SSH failures → 3h ban"
+echo "  ✓ fail2ban active: 6 SSH failures → 1h ban"
 
 # ─── 10. Install Claude CLI ─────────────────────────────────────
 echo ""
