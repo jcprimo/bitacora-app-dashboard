@@ -10,6 +10,7 @@
 //   - No raw HTML pass-through (XSS safe)
 
 import { marked } from "marked";
+import DOMPurify from "dompurify";
 
 // Configure marked with sensible defaults
 marked.setOptions({
@@ -110,5 +111,10 @@ marked.use({ renderer });
  */
 export function renderMarkdown(markdown) {
   if (!markdown) return "";
-  return marked.parse(markdown);
+  const raw = marked.parse(markdown);
+  return DOMPurify.sanitize(raw, {
+    USE_PROFILES: { html: true },
+    // Allow heading id anchors and the custom classes we set on elements
+    ADD_ATTR: ["id", "target", "rel", "loading"],
+  });
 }
