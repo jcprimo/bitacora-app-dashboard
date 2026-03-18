@@ -9,7 +9,7 @@ export default function Header({ token, theme, toggleTheme, openSettings, user, 
     <header className="header">
       <div className="header-left">
         <div className="header-icon" style={{ background: "linear-gradient(135deg, #7c6aff20, #7c6aff08)", border: "1px solid #7c6aff40" }}>
-          📋
+          <img src="/bitacora-icon.png" alt="Bitacora" style={{ width: "100%", height: "100%", borderRadius: "inherit", objectFit: "cover" }} />
         </div>
         <div>
           <div className="header-title">Bitacora App Dashboard</div>

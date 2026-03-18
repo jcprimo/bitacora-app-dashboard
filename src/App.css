@@ -29,12 +29,8 @@
   height: 56px;
   margin: 0 auto var(--space-3);
   border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--text-2xl);
-  background: var(--accent-indigo-bg);
-  border: 1px solid var(--accent-indigo-border);
+  display: block;
+  object-fit: cover;
 }
 
 .login-logo-title {

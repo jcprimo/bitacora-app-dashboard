@@ -158,7 +158,7 @@ export default function LoginView({ needsSetup, login, register, error, clearErr
       <div className="login-card animate-fade">
         {/* Logo */}
         <div className="login-logo">
-          <div className="login-logo-icon">📋</div>
+          <img className="login-logo-icon" src="/bitacora-icon.png" alt="Bitacora" />
           <div className="login-logo-title">Bitacora</div>
           <div className="login-logo-subtitle">App Dashboard</div>
         </div>
