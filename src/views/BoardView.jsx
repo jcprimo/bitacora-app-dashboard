@@ -8,7 +8,7 @@
 
 import { useState, useMemo } from "react";
 import { getCustomFieldValue, formatDate, STAGES, PRIORITIES } from "../youtrack";
-import { priorityColor, stageColor } from "../utils/colors";
+import { priorityColor, stageColor, getColorShades } from "../utils/colors";
 
 export default function BoardView({ issues, loading, filterQuery, setFilterQuery, loadIssues, openDetail, changeField }) {
   // ─── Client-side filters ───────────────────────────────────────
@@ -66,15 +66,20 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
             {["All", ...STAGES].map((s) => {
               const isActive = s === stageFilter;
               const color = s === "All" ? "var(--text-secondary)" : stageColor(s);
+              const shades = s === "All" ? null : getColorShades(color);
               return (
                 <button
                   key={s}
                   type="button"
                   className={`board-pill ${isActive ? "board-pill-active" : ""}`}
                   onClick={() => setStageFilter(s)}
-                  style={isActive ? { color, borderColor: color + "60", background: color + "14" } : undefined}
+                  style={isActive ? {
+                    color,
+                    borderColor: shades ? shades.border : color + "60",
+                    background: shades ? shades.bg : color + "14",
+                  } : undefined}
                 >
-                  {s}
+                  {isActive ? "✓ " : ""}{s}
                 </button>
               );
             })}
@@ -88,15 +93,20 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
             {["All", ...PRIORITIES].map((p) => {
               const isActive = p === priorityFilter;
               const color = p === "All" ? "var(--text-secondary)" : priorityColor(p);
+              const shades = p === "All" ? null : getColorShades(color);
               return (
                 <button
                   key={p}
                   type="button"
                   className={`board-pill ${isActive ? "board-pill-active" : ""}`}
                   onClick={() => setPriorityFilter(p)}
-                  style={isActive ? { color, borderColor: color + "60", background: color + "14" } : undefined}
+                  style={isActive ? {
+                    color,
+                    borderColor: shades ? shades.border : color + "60",
+                    background: shades ? shades.bg : color + "14",
+                  } : undefined}
                 >
-                  {p}
+                  {isActive ? "✓ " : ""}{p}
                 </button>
               );
             })}
@@ -109,9 +119,13 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
             type="button"
             className={`board-pill ${!hideDone ? "board-pill-active" : ""}`}
             onClick={() => setHideDone((v) => !v)}
-            style={!hideDone ? { color: stageColor("Done"), borderColor: stageColor("Done") + "60", background: stageColor("Done") + "14" } : undefined}
+            style={!hideDone ? {
+              color: stageColor("Done"),
+              borderColor: getColorShades(stageColor("Done")).border,
+              background: getColorShades(stageColor("Done")).bg,
+            } : undefined}
           >
-            {hideDone ? `Show Done (${doneCount})` : `Showing Done (${doneCount})`}
+            {!hideDone ? "✓ " : ""}{hideDone ? `Show Done (${doneCount})` : `Showing Done (${doneCount})`}
           </button>
           {activeFilterCount > 0 && (
             <button
@@ -186,20 +200,26 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
                     {issue.summary}
                   </div>
                   <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.4rem", flexWrap: "wrap" }}>
-                    {stage && (
-                      <span style={{
-                        fontSize: "0.58rem", fontWeight: 700, padding: "0.15rem 0.45rem",
-                        borderRadius: 10, background: `${stageColor(stage)}15`,
-                        color: stageColor(stage), border: `1px solid ${stageColor(stage)}30`,
-                      }}>{stage}</span>
-                    )}
-                    {priority && (
-                      <span style={{
-                        fontSize: "0.58rem", fontWeight: 700, padding: "0.15rem 0.45rem",
-                        borderRadius: 10, background: `${priorityColor(priority)}15`,
-                        color: priorityColor(priority), border: `1px solid ${priorityColor(priority)}30`,
-                      }}>{priority}</span>
-                    )}
+                    {stage && (() => {
+                      const sc = stageColor(stage);
+                      const ss = getColorShades(sc);
+                      return (
+                        <span style={{
+                          fontSize: "0.58rem", fontWeight: 700, padding: "0.15rem 0.45rem",
+                          borderRadius: 10, background: ss.bg, color: sc, border: `1px solid ${ss.border}`,
+                        }}>{stage}</span>
+                      );
+                    })()}
+                    {priority && (() => {
+                      const pc = priorityColor(priority);
+                      const ps = getColorShades(pc);
+                      return (
+                        <span style={{
+                          fontSize: "0.58rem", fontWeight: 700, padding: "0.15rem 0.45rem",
+                          borderRadius: 10, background: ps.bg, color: pc, border: `1px solid ${ps.border}`,
+                        }}>{priority}</span>
+                      );
+                    })()}
                     <span style={{ fontSize: "0.58rem", color: "var(--text-dim)" }}>
                       {formatDate(issue.updated || issue.created)}
                     </span>

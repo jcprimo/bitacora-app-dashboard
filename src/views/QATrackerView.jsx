@@ -36,6 +36,17 @@ function statusColor(s) {
   }
 }
 
+// Fix 6: non-color indicators for QA status
+function statusLabel(s) {
+  switch (s) {
+    case "Passed":      return "✓ Passed";
+    case "Failed":      return "✗ Failed";
+    case "Not Started": return "— Not Run";
+    case "Blocked":     return "⟳ Blocked";
+    default:            return s;
+  }
+}
+
 // ─── Category color — consistent hues for each category
 const CATEGORY_COLORS = {
   Onboarding:           "#10b981",
@@ -180,6 +191,11 @@ export default function QATrackerView({
               ? "Release to import test cases"
               : "Drag & drop a CSV file here, or click the button below to browse."}
           </p>
+          {!dragging && (
+            <p style={{ fontSize: "0.65rem", color: "var(--text-dim)", maxWidth: 480, margin: "0 auto 1.5rem", lineHeight: 1.6 }}>
+              Expected columns: <span style={{ fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>Test_ID, Test_Case, Category, Priority, Status, Steps, Expected_Result</span>
+            </p>
+          )}
           <input
             ref={fileInputRef}
             type="file"
@@ -372,7 +388,7 @@ export default function QATrackerView({
                           borderColor: statusColor(tc[col.id]) + "40",
                           background: statusColor(tc[col.id]) + "10",
                         }}>
-                          {tc[col.id]}
+                          {statusLabel(tc[col.id])}
                         </span>
                       ) : col.id === "FERPA_Flag" ? (
                         <span className="qa-badge" style={{
