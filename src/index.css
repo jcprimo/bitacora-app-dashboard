@@ -11,8 +11,8 @@
   --glass-blur-sm: blur(10px);
   --text-primary: #f0f0f8;
   --text-secondary: #a0a0c0;
-  --text-muted: #5a5a80;
-  --text-dim: #3a3a5a;
+  --text-muted: #7a7aa0;
+  --text-dim: #4a4a6a;
   --accent-indigo: #7c6aff;
   --accent-green: #34d399;
   --accent-red: #f87171;
@@ -24,11 +24,98 @@
   --radius-xl: 18px;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
-  --shadow-card: 0 2px 16px rgba(0,0,0,0.35);
+
+  /* ─── Shadow elevation system (Fix 4) ───────────────────────── */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.15);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.2), 0 4px 16px rgba(0,0,0,0.15);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.15), 0 8px 24px rgba(0,0,0,0.25);
+  --shadow-xl: 0 8px 24px rgba(0,0,0,0.2), 0 16px 48px rgba(0,0,0,0.3);
+  /* backward-compat alias */
+  --shadow-card: var(--shadow-md);
+
   --step-bar-bg: rgba(6, 6, 11, 0.6);
   --toggle-bg: var(--bg-elevated);
   --toggle-border: var(--border-medium);
   --toggle-color: var(--text-secondary);
+
+  /* ─── Type scale tokens (Fix 1) ─────────────────────────────── */
+  --text-xs: 0.6rem;
+  --text-sm: 0.72rem;
+  --text-base: 0.82rem;
+  --text-md: 0.9rem;
+  --text-lg: 1.1rem;
+  --text-xl: 1.35rem;
+  --text-2xl: 1.6rem;
+  --text-3xl: 2.8rem;
+
+  /* ─── Spacing scale tokens (Fix 1) ──────────────────────────── */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* ─── Accent color shade ramps (Fix 2) ──────────────────────── */
+
+  /* Indigo */
+  --accent-indigo-bg: rgba(124, 106, 255, 0.08);
+  --accent-indigo-bg-hover: rgba(124, 106, 255, 0.15);
+  --accent-indigo-border: rgba(124, 106, 255, 0.35);
+  --accent-indigo-strong: #7c6aff;
+  --accent-indigo-text: #a094ff;
+
+  /* Green */
+  --accent-green-bg: rgba(52, 211, 153, 0.08);
+  --accent-green-bg-hover: rgba(52, 211, 153, 0.15);
+  --accent-green-border: rgba(52, 211, 153, 0.35);
+  --accent-green-strong: #34d399;
+  --accent-green-text: #6ee7b7;
+
+  /* Red */
+  --accent-red-bg: rgba(248, 113, 113, 0.08);
+  --accent-red-bg-hover: rgba(248, 113, 113, 0.15);
+  --accent-red-border: rgba(248, 113, 113, 0.35);
+  --accent-red-strong: #f87171;
+  --accent-red-text: #fca5a5;
+
+  /* Amber */
+  --accent-amber-bg: rgba(251, 191, 36, 0.08);
+  --accent-amber-bg-hover: rgba(251, 191, 36, 0.15);
+  --accent-amber-border: rgba(251, 191, 36, 0.35);
+  --accent-amber-strong: #fbbf24;
+  --accent-amber-text: #fcd34d;
+
+  /* Cyan */
+  --accent-cyan-bg: rgba(34, 211, 238, 0.08);
+  --accent-cyan-bg-hover: rgba(34, 211, 238, 0.15);
+  --accent-cyan-border: rgba(34, 211, 238, 0.35);
+  --accent-cyan-strong: #22d3ee;
+  --accent-cyan-text: #67e8f9;
+
+  /* ─── HSL decomposed accent values (Fix 5) ───────────────────── */
+  --accent-indigo-h: 250;
+  --accent-indigo-s: 100%;
+  --accent-indigo-l: 71%;
+
+  --accent-green-h: 160;
+  --accent-green-s: 68%;
+  --accent-green-l: 52%;
+
+  --accent-red-h: 0;
+  --accent-red-s: 91%;
+  --accent-red-l: 71%;
+
+  --accent-amber-h: 43;
+  --accent-amber-s: 96%;
+  --accent-amber-l: 56%;
+
+  --accent-cyan-h: 188;
+  --accent-cyan-s: 85%;
+  --accent-cyan-l: 53%;
 
   /* QA Tracker — green/black accent palette */
   --qa-accent: #34d399;
@@ -61,19 +148,78 @@
   --text-primary: #1e1a30;
   --text-secondary: #3a3558;
   --text-muted: #605a78;
-  --text-dim: #8a84a0;
+  --text-dim: #6a6480;
   --accent-indigo: #5a45d6;
   --accent-green: #0f8f5e;
   --accent-red: #d03040;
   --accent-amber: #c06a06;
   --accent-cyan: #0780a0;
-  --shadow-card: 0 2px 12px rgba(30, 20, 60, 0.1);
+
+  /* ─── Shadow scale — light mode ─────────────────────────────── */
+  --shadow-sm: 0 1px 3px rgba(30,20,60,0.08), 0 1px 2px rgba(30,20,60,0.08);
+  --shadow-md: 0 2px 8px rgba(30,20,60,0.1), 0 4px 16px rgba(30,20,60,0.08);
+  --shadow-lg: 0 4px 12px rgba(30,20,60,0.1), 0 8px 24px rgba(30,20,60,0.15);
+  --shadow-xl: 0 8px 24px rgba(30,20,60,0.12), 0 16px 48px rgba(30,20,60,0.18);
+  --shadow-card: var(--shadow-md);
+
   --step-bar-bg: rgba(185, 180, 210, 0.6);
   --toggle-bg: var(--bg-card);
   --toggle-border: var(--border-medium);
   --toggle-color: var(--text-secondary);
   --glass-blur: blur(14px);
   --glass-blur-sm: blur(8px);
+
+  /* ─── Accent shade ramps — light mode (Fix 2) ────────────────── */
+  --accent-indigo-bg: rgba(90, 69, 214, 0.08);
+  --accent-indigo-bg-hover: rgba(90, 69, 214, 0.15);
+  --accent-indigo-border: rgba(90, 69, 214, 0.35);
+  --accent-indigo-strong: #5a45d6;
+  --accent-indigo-text: #7c5fe8;
+
+  --accent-green-bg: rgba(15, 143, 94, 0.08);
+  --accent-green-bg-hover: rgba(15, 143, 94, 0.15);
+  --accent-green-border: rgba(15, 143, 94, 0.35);
+  --accent-green-strong: #0f8f5e;
+  --accent-green-text: #1aad73;
+
+  --accent-red-bg: rgba(208, 48, 64, 0.08);
+  --accent-red-bg-hover: rgba(208, 48, 64, 0.15);
+  --accent-red-border: rgba(208, 48, 64, 0.35);
+  --accent-red-strong: #d03040;
+  --accent-red-text: #e04050;
+
+  --accent-amber-bg: rgba(192, 106, 6, 0.08);
+  --accent-amber-bg-hover: rgba(192, 106, 6, 0.15);
+  --accent-amber-border: rgba(192, 106, 6, 0.35);
+  --accent-amber-strong: #c06a06;
+  --accent-amber-text: #d47a10;
+
+  --accent-cyan-bg: rgba(7, 128, 160, 0.08);
+  --accent-cyan-bg-hover: rgba(7, 128, 160, 0.15);
+  --accent-cyan-border: rgba(7, 128, 160, 0.35);
+  --accent-cyan-strong: #0780a0;
+  --accent-cyan-text: #0a96be;
+
+  /* ─── HSL light-mode overrides (Fix 5) ──────────────────────── */
+  --accent-indigo-h: 248;
+  --accent-indigo-s: 65%;
+  --accent-indigo-l: 56%;
+
+  --accent-green-h: 158;
+  --accent-green-s: 81%;
+  --accent-green-l: 31%;
+
+  --accent-red-h: 355;
+  --accent-red-s: 63%;
+  --accent-red-l: 50%;
+
+  --accent-amber-h: 34;
+  --accent-amber-s: 93%;
+  --accent-amber-l: 39%;
+
+  --accent-cyan-h: 195;
+  --accent-cyan-s: 91%;
+  --accent-cyan-l: 33%;
 
   /* QA Tracker — green accent (light) */
   --qa-accent: #059669;

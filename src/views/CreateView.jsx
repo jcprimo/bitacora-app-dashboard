@@ -13,6 +13,7 @@ import { getPlaceholder } from "../constants/prompts";
 import { estimateTokens, estimateCost } from "../constants/pricing";
 import { copyToClipboard } from "../utils/clipboard";
 import { PRIORITIES } from "../youtrack";
+import { getColorShades } from "../utils/colors";
 
 export default function CreateView({
   selectedAgent, setSelectedAgent,
@@ -40,9 +41,14 @@ export default function CreateView({
             {AGENTS.map((agent) => (
               <button
                 key={agent.id}
+                type="button"
                 className={`agent-btn ${selectedAgent.id === agent.id ? "active" : ""}`}
                 onClick={() => { setSelectedAgent(agent); resetCreate(); }}
-                style={selectedAgent.id === agent.id ? { background: `${agent.color}10`, borderColor: `${agent.color}40`, color: agent.color } : {}}
+                style={selectedAgent.id === agent.id ? {
+                  background: getColorShades(agent.color).bg,
+                  borderColor: getColorShades(agent.color).border,
+                  color: agent.color,
+                } : {}}
               >
                 <span className="agent-icon">{agent.icon}</span>
                 <span>{agent.label}</span>
@@ -61,10 +67,15 @@ export default function CreateView({
             {selectedAgent.desc}
           </div>
           <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.4rem" }}>
-            <span style={{
-              fontSize: "0.55rem", fontWeight: 600, padding: "0.15rem 0.45rem",
-              borderRadius: 10, background: `${agentColor}12`, color: agentColor, border: `1px solid ${agentColor}30`,
-            }}>{selectedAgent.defaultPriority}</span>
+            {(() => {
+              const agentShades = getColorShades(agentColor);
+              return (
+                <span style={{
+                  fontSize: "0.55rem", fontWeight: 600, padding: "0.15rem 0.45rem",
+                  borderRadius: 10, background: agentShades.bg, color: agentColor, border: `1px solid ${agentShades.border}`,
+                }}>{selectedAgent.defaultPriority}</span>
+              );
+            })()}
           </div>
         </div>
 
@@ -220,13 +231,14 @@ export default function CreateView({
               )}
               <div className="create-actions">
                 <button
+                  type="button"
                   className="btn-generate"
                   onClick={() => generateWithAI(selectedAgent, recordUsage)}
                   disabled={isGenerating || !rawInput.trim() || !hasAIKey}
                   style={{
                     flex: 1,
-                    background: !hasAIKey ? "var(--bg-elevated)" : `${agentColor}18`,
-                    borderColor: !hasAIKey ? "var(--border-medium)" : `${agentColor}60`,
+                    background: !hasAIKey ? "var(--bg-elevated)" : getColorShades(agentColor).bg,
+                    borderColor: !hasAIKey ? "var(--border-medium)" : getColorShades(agentColor).border,
                     color: !hasAIKey ? "var(--text-dim)" : agentColor,
                   }}
                 >
@@ -239,13 +251,14 @@ export default function CreateView({
                   )}
                 </button>
                 <button
+                  type="button"
                   className="btn-generate"
                   onClick={() => generateFromTemplate(selectedAgent)}
                   disabled={!rawInput.trim()}
                   style={{
                     flex: 1,
-                    background: `${agentColor}0a`,
-                    borderColor: `${agentColor}35`,
+                    background: getColorShades(agentColor).bg,
+                    borderColor: getColorShades(agentColor).border,
                     color: agentColor,
                   }}
                 >
@@ -340,7 +353,11 @@ export default function CreateView({
                   className="btn-ship"
                   onClick={submitTicket}
                   disabled={actionLoading === "create" || !draft.summary.trim() || !token}
-                  style={{ background: `${agentColor}18`, borderColor: `${agentColor}60`, color: agentColor }}
+                  style={{
+                    background: getColorShades(agentColor).bg,
+                    borderColor: getColorShades(agentColor).border,
+                    color: agentColor,
+                  }}
                 >
                   {actionLoading === "create" ? <><span className="spinner" /> Creating...</> : "🚀 Ship to Bitacora"}
                 </button>

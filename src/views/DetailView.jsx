@@ -10,6 +10,47 @@ import { useState } from "react";
 import { getCustomFieldValue, formatDate, STAGES, PRIORITIES } from "../youtrack";
 import { copyToClipboard } from "../utils/clipboard";
 import { renderMarkdown } from "../utils/markdownParser";
+import { stageColor, priorityColor, getColorShades } from "../utils/colors";
+
+// ─── Custom pill selector (Fix 8) ────────────────────────────────
+// Replaces native <select> with clickable pills matching board style
+function PillSelector({ label, options, value, onChange, colorFn, disabled }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+      <div className="review-field-label">{label}</div>
+      <div style={{ display: "flex", gap: "0.3rem", flexWrap: "wrap" }}>
+        {options.map((opt) => {
+          const isActive = opt === value;
+          const color = colorFn(opt);
+          const shades = getColorShades(color);
+          return (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => !disabled && onChange(opt)}
+              style={{
+                fontSize: "0.65rem",
+                fontWeight: isActive ? 700 : 500,
+                fontFamily: "var(--font-sans)",
+                padding: "0.2rem 0.55rem",
+                borderRadius: "12px",
+                border: `1px solid ${isActive ? shades.border : "var(--border-subtle)"}`,
+                background: isActive ? shades.bg : "transparent",
+                color: isActive ? color : "var(--text-muted)",
+                cursor: disabled ? "not-allowed" : "pointer",
+                opacity: disabled ? 0.5 : 1,
+                transition: "all 0.15s ease",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {isActive ? "✓ " : ""}{opt}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 // ─── Comment timestamp helper ────────────────────────────────────
 function commentTime(ts) {
@@ -67,25 +108,23 @@ export default function DetailView({
             onChange={(e) => setEditFields((f) => ({ ...f, summary: e.target.value }))} />
         </div>
 
-        <div className="review-meta">
-          <div className="meta-item">
-            <div className="review-field-label">Stage</div>
-            <select className="review-select"
-              value={getCustomFieldValue(activeIssue, "Stage") || "Backlog"}
-              onChange={(e) => changeField(activeIssue.idReadable, "Stage", e.target.value)}
-              disabled={!!actionLoading}>
-              {STAGES.map((s) => <option key={s}>{s}</option>)}
-            </select>
-          </div>
-          <div className="meta-item">
-            <div className="review-field-label">Priority</div>
-            <select className="review-select"
-              value={getCustomFieldValue(activeIssue, "Priority") || "Normal"}
-              onChange={(e) => changeField(activeIssue.idReadable, "Priority", e.target.value)}
-              disabled={!!actionLoading}>
-              {PRIORITIES.map((p) => <option key={p}>{p}</option>)}
-            </select>
-          </div>
+        <div className="review-meta" style={{ flexDirection: "column", gap: "0.75rem" }}>
+          <PillSelector
+            label="Stage"
+            options={STAGES}
+            value={getCustomFieldValue(activeIssue, "Stage") || "Backlog"}
+            onChange={(v) => changeField(activeIssue.idReadable, "Stage", v)}
+            colorFn={stageColor}
+            disabled={!!actionLoading}
+          />
+          <PillSelector
+            label="Priority"
+            options={PRIORITIES}
+            value={getCustomFieldValue(activeIssue, "Priority") || "Normal"}
+            onChange={(v) => changeField(activeIssue.idReadable, "Priority", v)}
+            colorFn={priorityColor}
+            disabled={!!actionLoading}
+          />
         </div>
 
         <div className="review-field">
@@ -147,7 +186,9 @@ export default function DetailView({
           </div>
         ) : comments.length === 0 ? (
           <div className="detail-comments-empty">
-            No comments yet
+            <span className="detail-comments-empty-icon">💬</span>
+            <span className="detail-comments-empty-text">No comments yet</span>
+            <span className="detail-comments-empty-hint">Start a discussion about this ticket</span>
           </div>
         ) : (
           <div className="detail-comments-list">
