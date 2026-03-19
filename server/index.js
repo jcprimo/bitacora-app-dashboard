@@ -96,6 +96,7 @@ function runMigrations() {
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
     );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_doc_user_name ON documents(user_id, name);
 
     CREATE TABLE IF NOT EXISTS ai_usage (
       id            INTEGER PRIMARY KEY AUTOINCREMENT,

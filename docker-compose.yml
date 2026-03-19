@@ -10,6 +10,7 @@ services:
       - SESSION_SECRET=${SESSION_SECRET}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
       - YOUTRACK_URL=${YOUTRACK_URL:-https://bitacora.youtrack.cloud}
+      - INGEST_TOKEN=${INGEST_TOKEN}
     restart: unless-stopped
 
 volumes:

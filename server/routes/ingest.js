@@ -62,6 +62,18 @@ router.post("/documents", (req, res) => {
     return res.status(400).json({ error: "name and content are required" });
   }
 
+  if (typeof name !== "string" || name.length > 255) {
+    return res.status(400).json({ error: "name must be a string under 255 characters" });
+  }
+
+  if (typeof content !== "string" || content.length > 500_000) {
+    return res.status(400).json({ error: "content must be a string under 500,000 characters" });
+  }
+
+  if (agent !== undefined && (typeof agent !== "string" || !/^[a-z0-9-]+$/i.test(agent))) {
+    return res.status(400).json({ error: "agent must contain only alphanumeric characters and hyphens" });
+  }
+
   const adminId = getAdminId();
   if (!adminId) {
     return res.status(500).json({ error: "No admin user exists yet — run setup first" });
