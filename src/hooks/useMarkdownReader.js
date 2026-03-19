@@ -20,17 +20,24 @@ export function useMarkdownReader(showToast) {
   const [initialLoading, setInitialLoading] = useState(true);
   const loadingIdRef = useRef(null);
 
-  // ─── Fetch document index on mount ──────────────────────────────
-  useEffect(() => {
+  // ─── Fetch document index ────────────────────────────────────────
+  // Extracted as a callback so it can be called imperatively (e.g. from
+  // the SSE ingest event handler) as well as on mount.
+  const refreshIndex = useCallback(() => {
     fetch(API, { credentials: "include" })
       .then((r) => (r.ok ? r.json() : []))
       .then((rows) => {
         setIndex(rows);
-        if (rows.length > 0) setActiveFileId(rows[0].id);
+        // Only set the active file on first load (when none is selected yet)
+        setActiveFileId((prev) => (prev === null && rows.length > 0 ? rows[0].id : prev));
       })
       .catch(() => {})
       .finally(() => setInitialLoading(false));
   }, []);
+
+  useEffect(() => {
+    refreshIndex();
+  }, [refreshIndex]);
 
   // ─── Lazy-load content when activeFileId changes ────────────────
   useEffect(() => {
@@ -193,6 +200,7 @@ export function useMarkdownReader(showToast) {
     importFile,
     importFiles,
     removeFile,
+    refreshIndex,
     contentLoading: contentLoading || initialLoading,
   };
 }

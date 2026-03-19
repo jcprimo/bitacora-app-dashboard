@@ -25,6 +25,7 @@ import qaRoutes from "./routes/qa.js";
 import proxyRoutes from "./routes/proxy.js";
 import ingestRoutes from "./routes/ingest.js";
 import ticketsRoutes from "./routes/tickets.js";
+import eventsRoutes from "./routes/events.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const isProduction = process.env.NODE_ENV === "production";
@@ -237,6 +238,9 @@ app.use("/api/ingest", ingestLimiter, ingestRoutes);
 
 // Tickets routes — token-auth (agents read/query open tickets)
 app.use("/api/tickets", ticketsRoutes);
+
+// SSE event stream — session-auth, used by the browser for live updates
+app.use("/api/events", requireAuth, eventsRoutes);
 
 // Protected routes — require session
 // Credential management (storing/deleting API keys) is admin-only

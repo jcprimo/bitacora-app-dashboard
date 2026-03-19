@@ -8,6 +8,7 @@ import { documents, users, tickets } from "../schema.js";
 import { eq, and, sql, desc } from "drizzle-orm";
 import { requireIngestToken } from "../middleware/ingestAuth.js";
 import { createIssue as ytCreateIssue, updateIssue as ytUpdateIssue } from "../youtrack.js";
+import { broadcast } from "../sse.js";
 
 const router = Router();
 
@@ -66,6 +67,7 @@ router.post("/documents", (req, res) => {
       .set({ content, path, updatedAt: sql`datetime('now')` })
       .where(eq(documents.id, existing.id))
       .run();
+    broadcast("ingest", { type: "document", action: "updated", name });
     return res.json({ ok: true, id: existing.id, action: "updated" });
   }
 
@@ -76,6 +78,7 @@ router.post("/documents", (req, res) => {
     content,
   }).returning().get();
 
+  broadcast("ingest", { type: "document", action: "created", name });
   return res.status(201).json({ ok: true, id: result.id, action: "created" });
 });
 
@@ -200,6 +203,8 @@ router.post("/tickets", (req, res) => {
       .where(eq(tickets.id, existing.id))
       .run();
 
+    broadcast("ingest", { type: "ticket", action: "updated", title: trimmedTitle });
+
     // ── YouTrack sync (update) ──────────────────────────────────
     // Re-fetch the row to get the current youtrackId (may have been
     // set on a previous ingest even if not provided this time).
@@ -250,6 +255,7 @@ router.post("/tickets", (req, res) => {
     });
   }
 
+  broadcast("ingest", { type: "ticket", action: "created", title: trimmedTitle });
   return res.status(201).json({ ok: true, id: result.id, action: "created" });
 });
 
