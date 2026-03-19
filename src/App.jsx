@@ -29,6 +29,7 @@ import { useAnthropicUsage } from "./hooks/useAnthropicUsage";
 import { useOpenAIUsage } from "./hooks/useOpenAIUsage";
 import { useQATracker } from "./hooks/useQATracker";
 import { useMarkdownReader } from "./hooks/useMarkdownReader";
+import { useIngestEvents } from "./hooks/useIngestEvents";
 
 // ─── UI Components ──────────────────────────────────────────────
 import Toast from "./components/Toast";
@@ -109,6 +110,14 @@ function Dashboard({ auth, theme, toggleTheme }) {
   const openai = useOpenAIUsage();
   const qa = useQATracker(token, showToast, loadIssues, detail.openDetail);
   const md = useMarkdownReader(showToast);
+
+  // ─── Live ingest events (SSE) ───────────────────────────────────
+  // When agents push documents or tickets via /api/ingest/*, the server
+  // broadcasts an SSE event and we refresh the relevant data automatically.
+  useIngestEvents({
+    onDocument: md.refreshIndex,
+    onTicket: loadIssues,
+  });
 
   // Anthropic + OpenAI total for the sidebar spend widget
   const combinedSpend = anthropic.totalSpendUsd + openai.openaiTotalSpend;
