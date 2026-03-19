@@ -7,7 +7,7 @@
 //   3. If not authenticated → shows LoginView
 //   4. If authenticated → shows the main dashboard
 //
-// Views:  board | create | qa | docs | usage | detail
+// Views:  board | create | qa | docs | agents | usage | detail
 // State:  all app state lives in custom hooks; this file only wires
 //         them together and renders the active view.
 
@@ -30,6 +30,7 @@ import { useOpenAIUsage } from "./hooks/useOpenAIUsage";
 import { useQATracker } from "./hooks/useQATracker";
 import { useMarkdownReader } from "./hooks/useMarkdownReader";
 import { useIngestEvents } from "./hooks/useIngestEvents";
+import { useAgentJobs } from "./hooks/useAgentJobs";
 import { useVisitedTickets } from "./hooks/useVisitedTickets";
 import { useVisitedDocs } from "./hooks/useVisitedDocs";
 
@@ -46,6 +47,7 @@ import UsageView from "./views/UsageView";
 import DetailView from "./views/DetailView";
 import QATrackerView from "./views/QATrackerView";
 import MarkdownView from "./views/MarkdownView";
+import AgentsView from "./views/AgentsView";
 
 // ═══════════════════════════════════════════════════════════════════
 export default function App() {
@@ -112,6 +114,7 @@ function Dashboard({ auth, theme, toggleTheme }) {
   const openai = useOpenAIUsage();
   const qa = useQATracker(token, showToast, loadIssues, detail.openDetail);
   const md = useMarkdownReader(showToast);
+  const agentJobs = useAgentJobs();
 
   // ─── New ticket tracking (SSE) ──────────────────────────────────
   // When the SSE ingest fires a "ticket" event we mark those IDs as "new"
@@ -217,6 +220,13 @@ function Dashboard({ auth, theme, toggleTheme }) {
           style={{ borderBottom: view === "docs" ? "2px solid var(--md-accent)" : "2px solid transparent" }}
         >
           📖 Docs{md.files.length > 0 ? ` (${md.files.length})` : ""}
+        </button>
+        <button
+          className={`step-btn ${view === "agents" ? "active" : ""}`}
+          onClick={() => setView("agents")}
+          style={{ borderBottom: view === "agents" ? "2px solid var(--accent-cyan)" : "2px solid transparent" }}
+        >
+          ⚡ Agents{agentJobs.jobs.filter((j) => j.status === "running").length > 0 ? ` (${agentJobs.jobs.filter((j) => j.status === "running").length})` : ""}
         </button>
         <button
           className={`step-btn ${view === "usage" ? "active" : ""}`}
@@ -339,6 +349,22 @@ function Dashboard({ auth, theme, toggleTheme }) {
           contentLoading={md.contentLoading}
           visitedDocIds={visitedDocIds}
           markDocVisited={markDocVisited}
+        />
+      )}
+
+      {view === "agents" && (
+        <AgentsView
+          jobs={agentJobs.jobs}
+          loading={agentJobs.loading}
+          activeJob={agentJobs.activeJob}
+          activeJobId={agentJobs.activeJobId}
+          setActiveJobId={agentJobs.setActiveJobId}
+          activeJobLogs={agentJobs.activeJobLogs}
+          dispatching={agentJobs.dispatching}
+          dispatch={agentJobs.dispatch}
+          cancel={agentJobs.cancel}
+          retry={agentJobs.retry}
+          showToast={showToast}
         />
       )}
 

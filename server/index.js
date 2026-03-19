@@ -28,6 +28,7 @@ import ticketsRoutes from "./routes/tickets.js";
 import visitedTicketsRoutes from "./routes/visitedTickets.js";
 import visitedDocsRoutes from "./routes/visitedDocs.js";
 import eventsRoutes from "./routes/events.js";
+import jobsRoutes from "./routes/jobs.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const isProduction = process.env.NODE_ENV === "production";
@@ -256,6 +257,9 @@ app.use("/api/tickets", ticketsRoutes);
 
 // SSE event stream — session-auth, used by the browser for live updates
 app.use("/api/events", requireAuth, eventsRoutes);
+
+// Agent jobs — session-auth, dispatch and manage agent work
+app.use("/api/jobs", requireAuth, jobsRoutes);
 
 // Visited tickets — session-auth (tracks which tickets a user has seen, cross-device)
 app.use("/api/visited-tickets", requireAuth, visitedTicketsRoutes);
