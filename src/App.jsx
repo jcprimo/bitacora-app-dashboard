@@ -11,7 +11,7 @@
 // State:  all app state lives in custom hooks; this file only wires
 //         them together and renders the active view.
 
-import { useState } from "react";
+import { useState, useCallback, useRef } from "react";
 import "./App.css";
 
 // ─── Constants ──────────────────────────────────────────────────
@@ -111,12 +111,43 @@ function Dashboard({ auth, theme, toggleTheme }) {
   const qa = useQATracker(token, showToast, loadIssues, detail.openDetail);
   const md = useMarkdownReader(showToast);
 
+  // ─── New ticket tracking (SSE) ──────────────────────────────────
+  // When the SSE ingest fires a "ticket" event we mark those IDs as "new"
+  // so BoardView can show a visual badge. Each ID is cleared when the user
+  // clicks the card. A 5-minute auto-clear prevents stale highlights.
+  const [newTicketIds, setNewTicketIds] = useState(() => new Set());
+  const newTicketTimers = useRef({});
+
+  const clearNewTicket = useCallback((id) => {
+    if (newTicketTimers.current[id]) {
+      clearTimeout(newTicketTimers.current[id]);
+      delete newTicketTimers.current[id];
+    }
+    setNewTicketIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  }, []);
+
+  const handleTicketIngest = useCallback((payload) => {
+    // Refresh the board first
+    loadIssues();
+    // Mark this ticket as new if we have an ID to identify it
+    const id = payload.id || payload.ticketId;
+    if (!id) return;
+    setNewTicketIds((prev) => new Set([...prev, id]));
+    // Auto-clear after 5 minutes
+    if (newTicketTimers.current[id]) clearTimeout(newTicketTimers.current[id]);
+    newTicketTimers.current[id] = setTimeout(() => clearNewTicket(id), 5 * 60 * 1000);
+  }, [loadIssues, clearNewTicket]);
+
   // ─── Live ingest events (SSE) ───────────────────────────────────
   // When agents push documents or tickets via /api/ingest/*, the server
   // broadcasts an SSE event and we refresh the relevant data automatically.
   useIngestEvents({
     onDocument: md.refreshIndex,
-    onTicket: loadIssues,
+    onTicket: handleTicketIngest,
   });
 
   // Anthropic + OpenAI total for the sidebar spend widget
@@ -212,6 +243,8 @@ function Dashboard({ auth, theme, toggleTheme }) {
           loadIssues={loadIssues}
           openDetail={detail.openDetail}
           changeField={detail.changeField}
+          newTicketIds={newTicketIds}
+          clearNewTicket={clearNewTicket}
         />
       )}
 

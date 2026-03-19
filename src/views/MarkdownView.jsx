@@ -2,8 +2,9 @@
 // Two-panel layout: file list sidebar + rendered Markdown content.
 // Content is lazy-loaded per file. A loading overlay displays while
 // the file is being read from storage and parsed.
+// Panels are resizable via a drag handle between sidebar and reader.
 
-import { useRef, useState, useCallback, useMemo, useEffect } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { renderMarkdown } from "../utils/markdownParser";
 
 export default function MarkdownView({
@@ -17,6 +18,46 @@ export default function MarkdownView({
   // Deferred markdown rendering — parse off the main paint
   const [renderedHtml, setRenderedHtml] = useState("");
   const [rendering, setRendering] = useState(false);
+
+  // ─── Resizable sidebar ─────────────────────────────────────────
+  // sidebarWidth is in pixels; user drags the handle to resize.
+  const [sidebarWidth, setSidebarWidth] = useState(220);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const isDraggingHandle = useRef(false);
+  const dragStartX = useRef(0);
+  const dragStartWidth = useRef(0);
+  const layoutRef = useRef(null);
+
+  const onHandleMouseDown = useCallback((e) => {
+    e.preventDefault();
+    isDraggingHandle.current = true;
+    dragStartX.current = e.clientX;
+    dragStartWidth.current = sidebarWidth;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  }, [sidebarWidth]);
+
+  useEffect(() => {
+    const onMouseMove = (e) => {
+      if (!isDraggingHandle.current) return;
+      const delta = e.clientX - dragStartX.current;
+      const newWidth = Math.max(140, Math.min(420, dragStartWidth.current + delta));
+      setSidebarWidth(newWidth);
+      if (sidebarCollapsed) setSidebarCollapsed(false);
+    };
+    const onMouseUp = () => {
+      if (!isDraggingHandle.current) return;
+      isDraggingHandle.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, [sidebarCollapsed]);
 
   const activeContent = activeFile?.content ?? "";
 
@@ -121,9 +162,13 @@ export default function MarkdownView({
     );
   }
 
-  // ─── Loaded state: sidebar + reader ───────────────────────────────
+  // ─── Loaded state: sidebar + resize handle + reader ───────────────
   return (
-    <div className="animate-fade md-layout" {...dropZoneProps}>
+    <div
+      ref={layoutRef}
+      className="animate-fade md-layout-flex"
+      {...dropZoneProps}
+    >
       {dragging && (
         <div className="qa-drop-overlay">
           <div className="md-drop-overlay-content">
@@ -136,44 +181,66 @@ export default function MarkdownView({
       {fileInput}
 
       {/* Sidebar — file list */}
-      <aside className="md-sidebar">
-        <div className="md-sidebar-header">
-          <span className="md-sidebar-title">Files</span>
-          <button
-            type="button"
-            className="md-add-btn"
-            onClick={() => fileInputRef.current?.click()}
-            title="Add .md files"
-          >
-            +
-          </button>
-        </div>
-        <div className="md-file-list">
-          {files.map((f) => (
-            <div
-              key={f.id}
-              className={`md-file-item ${f.id === activeFileId ? "md-file-active" : ""}`}
-              onClick={() => setActiveFileId(f.id)}
-            >
-              <div className="md-file-info">
-                <span className="md-file-name">{f.name}</span>
-                <span className="md-file-path" title={f.path}>{f.path}</span>
+      <aside
+        className="md-sidebar"
+        style={{ width: sidebarCollapsed ? 0 : sidebarWidth, minWidth: sidebarCollapsed ? 0 : 140, flexShrink: 0 }}
+      >
+        {!sidebarCollapsed && (
+          <>
+            <div className="md-sidebar-header">
+              <span className="md-sidebar-title">Files ({files.length})</span>
+              <div style={{ display: "flex", gap: "0.3rem" }}>
+                <button
+                  type="button"
+                  className="md-add-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Add .md files"
+                >
+                  +
+                </button>
               </div>
-              <button
-                type="button"
-                className="md-file-remove"
-                onClick={(e) => { e.stopPropagation(); removeFile(f.id); }}
-                title="Remove file"
-              >
-                ×
-              </button>
             </div>
-          ))}
-        </div>
+            {/* Scrollable list — shows ~10 items before scroll kicks in */}
+            <div className="md-file-list md-file-list-scroll">
+              {files.map((f) => (
+                <div
+                  key={f.id}
+                  className={`md-file-item ${f.id === activeFileId ? "md-file-active" : ""}`}
+                  onClick={() => setActiveFileId(f.id)}
+                >
+                  <div className="md-file-info">
+                    <span className="md-file-name">{f.name}</span>
+                    <span className="md-file-path" title={f.path}>{f.path}</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="md-file-remove"
+                    onClick={(e) => { e.stopPropagation(); removeFile(f.id); }}
+                    title="Remove file"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </aside>
 
+      {/* Drag handle + collapse toggle */}
+      <div className="md-resize-handle" onMouseDown={onHandleMouseDown}>
+        <button
+          type="button"
+          className="md-collapse-btn"
+          onClick={() => setSidebarCollapsed((v) => !v)}
+          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {sidebarCollapsed ? "›" : "‹"}
+        </button>
+      </div>
+
       {/* Reader — rendered Markdown */}
-      <main className="md-reader">
+      <main className="md-reader" style={{ flex: 1, minWidth: 0 }}>
         {isLoading ? (
           <div className="md-loading-overlay">
             <div className="md-loading-modal">

@@ -17,7 +17,7 @@ if (!existsSync(dataDir)) {
   mkdirSync(dataDir, { recursive: true });
 }
 
-const dbPath = resolve(dataDir, "bitacora.db");
+const dbPath = process.env.TEST_DB_PATH || resolve(dataDir, "bitacora.db");
 
 const sqlite = new Database(dbPath);
 

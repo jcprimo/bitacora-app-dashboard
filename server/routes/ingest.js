@@ -99,6 +99,26 @@ router.get("/documents", (_req, res) => {
   return res.json(rows);
 });
 
+// DELETE /api/ingest/documents/:id — delete an agent-pushed document
+router.delete("/documents/:id", (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) {
+    return res.status(400).json({ error: "Invalid document ID" });
+  }
+
+  const [doc] = db
+    .select({ id: documents.id })
+    .from(documents)
+    .where(eq(documents.id, id))
+    .limit(1)
+    .all();
+
+  if (!doc) return res.status(404).json({ error: "Document not found" });
+
+  db.delete(documents).where(eq(documents.id, id)).run();
+  return res.json({ ok: true, id, action: "deleted" });
+});
+
 // ─── Tickets ─────────────────────────────────────────────────────
 
 const VALID_STATUSES   = ["open", "in-progress", "done", "closed"];
