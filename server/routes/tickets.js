@@ -5,6 +5,7 @@
 //
 // GET /api/tickets            — list all tickets (newest first)
 // GET /api/tickets/:id        — get a single ticket by ID
+// DELETE /api/tickets/:id     — delete a ticket by ID
 //
 // Query params for GET /api/tickets:
 //   status   — open | in-progress | done | closed
@@ -72,6 +73,26 @@ router.get("/:id", (req, res) => {
 
   if (!ticket) return res.status(404).json({ error: "Ticket not found" });
   return res.json(ticket);
+});
+
+// DELETE /api/tickets/:id
+router.delete("/:id", (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) {
+    return res.status(400).json({ error: "Invalid ticket ID" });
+  }
+
+  const [ticket] = db
+    .select({ id: tickets.id })
+    .from(tickets)
+    .where(eq(tickets.id, id))
+    .limit(1)
+    .all();
+
+  if (!ticket) return res.status(404).json({ error: "Ticket not found" });
+
+  db.delete(tickets).where(eq(tickets.id, id)).run();
+  return res.json({ ok: true, id, action: "deleted" });
 });
 
 export default router;
