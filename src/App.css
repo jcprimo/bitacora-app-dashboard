@@ -2461,9 +2461,26 @@
   50% { opacity: 0.85; box-shadow: 0 0 0 4px rgba(124, 106, 255, 0); }
 }
 
-/* Card highlight when new */
+/* Card highlight when new (SSE arrival during session) */
 .board-card-new {
   box-shadow: var(--shadow-md), 0 0 0 1px var(--accent-indigo-border), inset 0 0 12px rgba(124, 106, 255, 0.04);
+}
+
+/* Card highlight for any unvisited ticket (never clicked) */
+.board-card-unvisited {
+  background: var(--board-unvisited-bg, rgba(251, 191, 36, 0.09));
+  box-shadow: var(--shadow-md), inset 0 0 16px rgba(251, 191, 36, 0.06);
+}
+.board-card-unvisited:hover {
+  background: var(--board-unvisited-bg-hover, rgba(251, 191, 36, 0.14));
+}
+
+[data-theme="light"] .board-card-unvisited {
+  background: rgba(192, 106, 6, 0.08);
+  box-shadow: var(--shadow-md), inset 0 0 16px rgba(192, 106, 6, 0.05);
+}
+[data-theme="light"] .board-card-unvisited:hover {
+  background: rgba(192, 106, 6, 0.13);
 }
 
 /* ─── Nav tabs (shared by main nav + usage sub-tabs) ──────────── */
