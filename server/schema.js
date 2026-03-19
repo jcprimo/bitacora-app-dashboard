@@ -12,6 +12,7 @@ export const users = sqliteTable("users", {
   password: text("password").notNull(), // bcrypt hash
   name: text("name"),
   role: text("role").default("member"), // 'admin' | 'member'
+  visitedTicketIds: text("visited_ticket_ids").default("[]"), // JSON array of YouTrack IDs
   createdAt: text("created_at").default(sql`(datetime('now'))`),
   updatedAt: text("updated_at").default(sql`(datetime('now'))`),
 });

@@ -10,7 +10,7 @@ import { useState, useMemo } from "react";
 import { getCustomFieldValue, formatDate, STAGES, PRIORITIES } from "../youtrack";
 import { priorityColor, stageColor, getColorShades } from "../utils/colors";
 
-export default function BoardView({ issues, loading, filterQuery, setFilterQuery, loadIssues, openDetail, changeField, newTicketIds, clearNewTicket }) {
+export default function BoardView({ issues, loading, filterQuery, setFilterQuery, loadIssues, openDetail, changeField, newTicketIds, clearNewTicket, visitedTicketIds, markVisited }) {
   // ─── Client-side filters ───────────────────────────────────────
   const [stageFilter, setStageFilter] = useState("All");
   const [priorityFilter, setPriorityFilter] = useState("All");
@@ -205,14 +205,25 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
           const priority = getCustomFieldValue(issue, "Priority");
           const stage = getCustomFieldValue(issue, "Stage");
           const isNew = newTicketIds && newTicketIds.has(issue.id);
+          // A ticket is unvisited if it's not in the visited set (regardless of
+          // whether it arrived via SSE — covers all tickets never clicked).
+          const isUnvisited = visitedTicketIds ? !visitedTicketIds.has(issue.id) : false;
           return (
             <div
               key={issue.id}
-              className={`panel${isNew ? " board-card-new" : ""}`}
-              style={{ padding: "0.85rem 1rem", cursor: "pointer", borderColor: isNew ? "var(--accent-indigo)" : "var(--border-subtle)" }}
-              onClick={() => { clearNewTicket && clearNewTicket(issue.id); openDetail(issue); }}
-              onMouseEnter={(e) => (e.currentTarget.style.borderColor = isNew ? "var(--accent-indigo)" : "var(--border-medium)")}
-              onMouseLeave={(e) => (e.currentTarget.style.borderColor = isNew ? "var(--accent-indigo)" : "var(--border-subtle)")}
+              className={`panel${isNew ? " board-card-new" : ""}${isUnvisited ? " board-card-unvisited" : ""}`}
+              style={{
+                padding: "0.85rem 1rem",
+                cursor: "pointer",
+                borderColor: isNew ? "var(--accent-indigo)" : isUnvisited ? "var(--accent-amber-border)" : "var(--border-subtle)",
+              }}
+              onClick={() => {
+                clearNewTicket && clearNewTicket(issue.id);
+                markVisited && markVisited(issue.id);
+                openDetail(issue);
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = isNew ? "var(--accent-indigo)" : isUnvisited ? "var(--accent-amber)" : "var(--border-medium)")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = isNew ? "var(--accent-indigo)" : isUnvisited ? "var(--accent-amber-border)" : "var(--border-subtle)")}
             >
               <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", minWidth: "58px", gap: "2px" }}>

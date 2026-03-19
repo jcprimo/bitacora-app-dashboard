@@ -25,6 +25,7 @@ import qaRoutes from "./routes/qa.js";
 import proxyRoutes from "./routes/proxy.js";
 import ingestRoutes from "./routes/ingest.js";
 import ticketsRoutes from "./routes/tickets.js";
+import visitedTicketsRoutes from "./routes/visitedTickets.js";
 import eventsRoutes from "./routes/events.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -164,6 +165,18 @@ function runMigrations() {
       updated_at   TEXT DEFAULT (datetime('now'))
     );
   `);
+
+  // Additive migrations — safe to re-run (ALTER TABLE IF NOT EXISTS not available in SQLite,
+  // so we wrap each in a try/catch and ignore "duplicate column" errors).
+  const addColumnIfMissing = (table, column, definition) => {
+    try {
+      sqlite.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition};`);
+    } catch {
+      // Column already exists — ignore
+    }
+  };
+  addColumnIfMissing("users", "visited_ticket_ids", "TEXT DEFAULT '[]'");
+
   console.log("✓ Database migrations complete");
 }
 
@@ -241,6 +254,9 @@ app.use("/api/tickets", ticketsRoutes);
 
 // SSE event stream — session-auth, used by the browser for live updates
 app.use("/api/events", requireAuth, eventsRoutes);
+
+// Visited tickets — session-auth (tracks which tickets a user has seen, cross-device)
+app.use("/api/visited-tickets", requireAuth, visitedTicketsRoutes);
 
 // Protected routes — require session
 // Credential management (storing/deleting API keys) is admin-only

@@ -30,6 +30,7 @@ import { useOpenAIUsage } from "./hooks/useOpenAIUsage";
 import { useQATracker } from "./hooks/useQATracker";
 import { useMarkdownReader } from "./hooks/useMarkdownReader";
 import { useIngestEvents } from "./hooks/useIngestEvents";
+import { useVisitedTickets } from "./hooks/useVisitedTickets";
 
 // ─── UI Components ──────────────────────────────────────────────
 import Toast from "./components/Toast";
@@ -150,6 +151,12 @@ function Dashboard({ auth, theme, toggleTheme }) {
     onTicket: handleTicketIngest,
   });
 
+  // ─── Visited ticket tracking ─────────────────────────────────────
+  // Tracks which tickets the user has clicked. Persisted to localStorage.
+  // Pre-existing tickets are seeded as visited on first load so only
+  // genuinely new tickets appear highlighted.
+  const { visitedTicketIds, markVisited } = useVisitedTickets(issues);
+
   // Anthropic + OpenAI total for the sidebar spend widget
   const combinedSpend = anthropic.totalSpendUsd + openai.openaiTotalSpend;
 
@@ -245,6 +252,8 @@ function Dashboard({ auth, theme, toggleTheme }) {
           changeField={detail.changeField}
           newTicketIds={newTicketIds}
           clearNewTicket={clearNewTicket}
+          visitedTicketIds={visitedTicketIds}
+          markVisited={markVisited}
         />
       )}
 
