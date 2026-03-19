@@ -14,6 +14,7 @@ import { existsSync } from "fs";
 // ─── Database init (creates tables on first run) ─────────────────
 import { sqlite } from "./db.js";
 import { requireAuth, requireAdmin } from "./middleware/auth.js";
+import { rateLimit } from "./middleware/rateLimiter.js";
 
 // ─── Routes ──────────────────────────────────────────────────────
 import authRoutes from "./routes/auth.js";
@@ -227,7 +228,12 @@ app.get("/health", (_req, res) => {
 app.use("/api/auth", authRoutes);
 
 // Ingest routes — token-auth (agents push markdown plans here)
-app.use("/api/ingest", ingestRoutes);
+const ingestLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 60,             // 60 requests per minute per IP
+  message: "Too many ingest requests. Please slow down.",
+});
+app.use("/api/ingest", ingestLimiter, ingestRoutes);
 
 // Tickets routes — token-auth (agents read/query open tickets)
 app.use("/api/tickets", ticketsRoutes);
