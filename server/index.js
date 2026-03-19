@@ -26,6 +26,7 @@ import proxyRoutes from "./routes/proxy.js";
 import ingestRoutes from "./routes/ingest.js";
 import ticketsRoutes from "./routes/tickets.js";
 import visitedTicketsRoutes from "./routes/visitedTickets.js";
+import visitedDocsRoutes from "./routes/visitedDocs.js";
 import eventsRoutes from "./routes/events.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -176,6 +177,7 @@ function runMigrations() {
     }
   };
   addColumnIfMissing("users", "visited_ticket_ids", "TEXT DEFAULT '[]'");
+  addColumnIfMissing("users", "visited_doc_ids",    "TEXT DEFAULT '[]'");
 
   console.log("✓ Database migrations complete");
 }
@@ -257,6 +259,9 @@ app.use("/api/events", requireAuth, eventsRoutes);
 
 // Visited tickets — session-auth (tracks which tickets a user has seen, cross-device)
 app.use("/api/visited-tickets", requireAuth, visitedTicketsRoutes);
+
+// Visited docs — session-auth (tracks which markdown docs a user has opened, cross-device)
+app.use("/api/visited-docs", requireAuth, visitedDocsRoutes);
 
 // Protected routes — require session
 // Credential management (storing/deleting API keys) is admin-only

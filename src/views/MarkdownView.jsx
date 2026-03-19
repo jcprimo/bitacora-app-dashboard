@@ -10,6 +10,7 @@ import { renderMarkdown } from "../utils/markdownParser";
 export default function MarkdownView({
   files, activeFile, activeFileId, setActiveFileId,
   importFile, importFiles, removeFile, contentLoading,
+  visitedDocIds = new Set(), markDocVisited = () => {},
 }) {
   const fileInputRef = useRef(null);
   const [dragging, setDragging] = useState(false);
@@ -200,13 +201,15 @@ export default function MarkdownView({
                 </button>
               </div>
             </div>
-            {/* Scrollable list — shows ~10 items before scroll kicks in */}
+            {/* File list — sidebar scrolls when list overflows sidebar height */}
             <div className="md-file-list md-file-list-scroll">
-              {files.map((f) => (
+              {files.map((f) => {
+                const isVisited = visitedDocIds.has(Number(f.id));
+                return (
                 <div
                   key={f.id}
-                  className={`md-file-item ${f.id === activeFileId ? "md-file-active" : ""}`}
-                  onClick={() => setActiveFileId(f.id)}
+                  className={`md-file-item ${f.id === activeFileId ? "md-file-active" : ""} ${!isVisited ? "md-file-unvisited" : ""}`}
+                  onClick={() => { setActiveFileId(f.id); markDocVisited(f.id); }}
                 >
                   <div className="md-file-info">
                     <span className="md-file-name">{f.name}</span>
@@ -221,7 +224,8 @@ export default function MarkdownView({
                     ×
                   </button>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </>
         )}

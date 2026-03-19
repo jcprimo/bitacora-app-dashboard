@@ -31,6 +31,7 @@ import { useQATracker } from "./hooks/useQATracker";
 import { useMarkdownReader } from "./hooks/useMarkdownReader";
 import { useIngestEvents } from "./hooks/useIngestEvents";
 import { useVisitedTickets } from "./hooks/useVisitedTickets";
+import { useVisitedDocs } from "./hooks/useVisitedDocs";
 
 // ─── UI Components ──────────────────────────────────────────────
 import Toast from "./components/Toast";
@@ -156,6 +157,7 @@ function Dashboard({ auth, theme, toggleTheme }) {
   // Pre-existing tickets are seeded as visited on first load so only
   // genuinely new tickets appear highlighted.
   const { visitedTicketIds, markVisited } = useVisitedTickets(issues);
+  const { visitedDocIds, markDocVisited } = useVisitedDocs(md.files);
 
   // Anthropic + OpenAI total for the sidebar spend widget
   const combinedSpend = anthropic.totalSpendUsd + openai.openaiTotalSpend;
@@ -335,6 +337,8 @@ function Dashboard({ auth, theme, toggleTheme }) {
           importFiles={md.importFiles}
           removeFile={md.removeFile}
           contentLoading={md.contentLoading}
+          visitedDocIds={visitedDocIds}
+          markDocVisited={markDocVisited}
         />
       )}
 

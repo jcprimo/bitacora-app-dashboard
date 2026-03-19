@@ -13,6 +13,7 @@ export const users = sqliteTable("users", {
   name: text("name"),
   role: text("role").default("member"), // 'admin' | 'member'
   visitedTicketIds: text("visited_ticket_ids").default("[]"), // JSON array of YouTrack IDs
+  visitedDocIds: text("visited_doc_ids").default("[]"),      // JSON array of document IDs
   createdAt: text("created_at").default(sql`(datetime('now'))`),
   updatedAt: text("updated_at").default(sql`(datetime('now'))`),
 });
