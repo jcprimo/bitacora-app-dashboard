@@ -140,6 +140,7 @@ export default function MarkdownView({
         <div className="md-sidebar-header">
           <span className="md-sidebar-title">Files</span>
           <button
+            type="button"
             className="md-add-btn"
             onClick={() => fileInputRef.current?.click()}
             title="Add .md files"
@@ -159,6 +160,7 @@ export default function MarkdownView({
                 <span className="md-file-path" title={f.path}>{f.path}</span>
               </div>
               <button
+                type="button"
                 className="md-file-remove"
                 onClick={(e) => { e.stopPropagation(); removeFile(f.id); }}
                 title="Remove file"

@@ -115,13 +115,16 @@ export function useMarkdownReader(showToast) {
 
     let lastId = null;
     let lastContent = "";
+    // Track names created during this batch so we don't double-POST
+    // when index state hasn't updated yet between loop iterations.
+    const seen = new Map(); // name → created doc
 
     for (const file of mdFiles) {
       const content = await file.text();
       const name = file.name;
       const path = file.webkitRelativePath || file.name;
 
-      const existing = index.find((f) => f.name === name);
+      const existing = index.find((f) => f.name === name) || seen.get(name);
 
       if (existing) {
         const res = await fetch(`${API}/${existing.id}`, {
@@ -149,6 +152,7 @@ export function useMarkdownReader(showToast) {
         if (res.ok) {
           const created = await res.json();
           setIndex((prev) => [...prev, created]);
+          seen.set(name, created);
           lastId = created.id;
           lastContent = content;
         }
