@@ -48,8 +48,28 @@ function buildTestApp() {
 }
 
 // ── Create + teardown the tickets table in the in-memory DB ─────────────────
-function createTicketsTable() {
+function createTables() {
   sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      username   TEXT NOT NULL UNIQUE,
+      password   TEXT NOT NULL,
+      role       TEXT DEFAULT 'viewer',
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+    INSERT OR IGNORE INTO users (id, username, password, role) VALUES (1, 'admin', 'unused', 'admin');
+
+    CREATE TABLE IF NOT EXISTS documents (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id    INTEGER NOT NULL REFERENCES users(id),
+      name       TEXT NOT NULL,
+      path       TEXT,
+      content    TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_doc_user_name ON documents(user_id, name);
+
     CREATE TABLE IF NOT EXISTS tickets (
       id           INTEGER PRIMARY KEY AUTOINCREMENT,
       title        TEXT NOT NULL,
@@ -66,8 +86,8 @@ function createTicketsTable() {
   `);
 }
 
-function dropTicketsTable() {
-  sqlite.exec("DROP TABLE IF EXISTS tickets;");
+function dropTables() {
+  sqlite.exec("DROP TABLE IF EXISTS tickets; DROP TABLE IF EXISTS documents; DROP TABLE IF EXISTS users;");
 }
 
 // ── HTTP helper ──────────────────────────────────────────────────────────────
@@ -118,14 +138,14 @@ let app;
 
 // Shared before/after: start the HTTP server once for all suites
 before(() => {
-  createTicketsTable();
+  createTables();
   app = buildTestApp();
   server = http.createServer(app);
   return new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
 });
 
 after(() => {
-  dropTicketsTable();
+  dropTables();
   return new Promise((resolve, reject) => {
     server.close((err) => { if (err) reject(err); else resolve(); });
   });
@@ -378,5 +398,47 @@ describe("DELETE /api/tickets/:id", () => {
     assert.equal(res.status, 200);
     const ids = res.body.map((t) => t.id);
     assert.ok(!ids.includes(ticketId), `deleted ticket ${ticketId} should not be in list`);
+  });
+});
+
+// ── DELETE documents tests ───────────────────────────────────────────────────
+
+describe("DELETE /api/ingest/documents/:id", () => {
+  let docId;
+
+  before(async () => {
+    const res = await request(server, "POST", "/api/ingest/documents", {
+      headers: VALID_AUTH,
+      body: { name: "test-doc-to-delete.md", content: "# Test", agent: "qa-testing" },
+    });
+    docId = res.body.id;
+  });
+
+  it("returns 401 without auth", async () => {
+    const res = await request(server, "DELETE", `/api/ingest/documents/${docId}`);
+    assert.equal(res.status, 401);
+  });
+
+  it("returns 404 for nonexistent document", async () => {
+    const res = await request(server, "DELETE", "/api/ingest/documents/999999", { headers: VALID_AUTH });
+    assert.equal(res.status, 404);
+  });
+
+  it("returns 400 for invalid id", async () => {
+    const res = await request(server, "DELETE", "/api/ingest/documents/abc", { headers: VALID_AUTH });
+    assert.equal(res.status, 400);
+  });
+
+  it("deletes an existing document — returns { ok, id, action: 'deleted' }", async () => {
+    const res = await request(server, "DELETE", `/api/ingest/documents/${docId}`, { headers: VALID_AUTH });
+    assert.equal(res.status, 200);
+    assert.equal(res.body.ok, true);
+    assert.equal(res.body.id, docId);
+    assert.equal(res.body.action, "deleted");
+  });
+
+  it("returns 404 when trying to delete the same document again", async () => {
+    const res = await request(server, "DELETE", `/api/ingest/documents/${docId}`, { headers: VALID_AUTH });
+    assert.equal(res.status, 404);
   });
 });
