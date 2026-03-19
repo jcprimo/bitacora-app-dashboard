@@ -1603,11 +1603,17 @@
 }
 
 /* Resizable flex layout — replaces grid on desktop */
+/* flex: 1 + max-height together: grow to fill the shell column, but never
+   exceed the viewport. The 12rem offset accounts for shell padding, header,
+   and nav tabs above this element. min-height: 0 lets flex children shrink
+   (the default min-height: auto blocks overflow-y from working). */
 .md-layout-flex {
   display: flex;
   align-items: stretch;
   gap: 0;
-  min-height: 500px;
+  flex: 1;
+  min-height: 0;
+  max-height: calc(100vh - 12rem);
   position: relative;
 }
 
@@ -1619,6 +1625,7 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  min-height: 0;
   scrollbar-width: thin;
   scrollbar-color: var(--text-dim) var(--surface-inset, rgba(0,0,0,0.08));
   -webkit-backdrop-filter: var(--glass-blur);
