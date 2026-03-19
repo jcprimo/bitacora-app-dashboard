@@ -96,3 +96,20 @@ export const agentLogs = sqliteTable("agent_logs", {
   message: text("message").notNull(),
   createdAt: text("created_at").default(sql`(datetime('now'))`),
 });
+
+// ─── Tickets (agent-managed work items) ──────────────────────────
+// Created and updated by agents via POST /api/ingest/tickets.
+// Read by agents and the dashboard via GET /api/tickets.
+export const tickets = sqliteTable("tickets", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  title: text("title").notNull(),
+  description: text("description"),
+  status: text("status").default("open"),      // open | in-progress | done | closed
+  priority: text("priority").default("normal"), // low | normal | high | critical
+  type: text("type").default("task"),           // feature | bug | task | chore
+  source: text("source"),                       // agent slug that created it (e.g. 'baal')
+  assignee: text("assignee"),                   // agent or human name
+  youtrackId: text("youtrack_id"),              // optional link to YouTrack ticket
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at").default(sql`(datetime('now'))`),
+});

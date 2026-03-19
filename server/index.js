@@ -23,6 +23,7 @@ import usageRoutes from "./routes/usage.js";
 import qaRoutes from "./routes/qa.js";
 import proxyRoutes from "./routes/proxy.js";
 import ingestRoutes from "./routes/ingest.js";
+import ticketsRoutes from "./routes/tickets.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const isProduction = process.env.NODE_ENV === "production";
@@ -146,6 +147,20 @@ function runMigrations() {
       message    TEXT NOT NULL,
       created_at TEXT DEFAULT (datetime('now'))
     );
+
+    CREATE TABLE IF NOT EXISTS tickets (
+      id           INTEGER PRIMARY KEY AUTOINCREMENT,
+      title        TEXT NOT NULL,
+      description  TEXT,
+      status       TEXT DEFAULT 'open',
+      priority     TEXT DEFAULT 'normal',
+      type         TEXT DEFAULT 'task',
+      source       TEXT,
+      assignee     TEXT,
+      youtrack_id  TEXT,
+      created_at   TEXT DEFAULT (datetime('now')),
+      updated_at   TEXT DEFAULT (datetime('now'))
+    );
   `);
   console.log("✓ Database migrations complete");
 }
@@ -213,6 +228,9 @@ app.use("/api/auth", authRoutes);
 
 // Ingest routes — token-auth (agents push markdown plans here)
 app.use("/api/ingest", ingestRoutes);
+
+// Tickets routes — token-auth (agents read/query open tickets)
+app.use("/api/tickets", ticketsRoutes);
 
 // Protected routes — require session
 // Credential management (storing/deleting API keys) is admin-only
