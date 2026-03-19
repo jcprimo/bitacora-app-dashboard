@@ -10,11 +10,17 @@ import { useState, useMemo } from "react";
 import { getCustomFieldValue, formatDate, STAGES, PRIORITIES } from "../youtrack";
 import { priorityColor, stageColor, getColorShades } from "../utils/colors";
 
-export default function BoardView({ issues, loading, filterQuery, setFilterQuery, loadIssues, openDetail, changeField }) {
+export default function BoardView({ issues, loading, filterQuery, setFilterQuery, loadIssues, openDetail, changeField, newTicketIds, clearNewTicket }) {
   // ─── Client-side filters ───────────────────────────────────────
   const [stageFilter, setStageFilter] = useState("All");
   const [priorityFilter, setPriorityFilter] = useState("All");
   const [hideDone, setHideDone] = useState(true);
+
+  // ─── Sort state ────────────────────────────────────────────────
+  // Default: newest first (desc by idReadable numeric part)
+  const [sortDir, setSortDir] = useState("desc");
+
+  const toggleSort = () => setSortDir((d) => (d === "desc" ? "asc" : "desc"));
 
   // Count done tickets for the indicator
   const doneCount = useMemo(
@@ -22,9 +28,9 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
     [issues]
   );
 
-  // Apply client-side filters
+  // Apply client-side filters + sort
   const filteredIssues = useMemo(() => {
-    return issues.filter((issue) => {
+    const filtered = issues.filter((issue) => {
       const stage = getCustomFieldValue(issue, "Stage");
       const priority = getCustomFieldValue(issue, "Priority");
 
@@ -34,7 +40,16 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
 
       return true;
     });
-  }, [issues, stageFilter, priorityFilter, hideDone]);
+
+    // Sort by the numeric portion of idReadable (e.g. "BIT-42" → 42)
+    filtered.sort((a, b) => {
+      const numA = parseInt((a.idReadable || "").replace(/\D/g, ""), 10) || 0;
+      const numB = parseInt((b.idReadable || "").replace(/\D/g, ""), 10) || 0;
+      return sortDir === "desc" ? numB - numA : numA - numB;
+    });
+
+    return filtered;
+  }, [issues, stageFilter, priorityFilter, hideDone, sortDir]);
 
   const activeFilterCount =
     (stageFilter !== "All" ? 1 : 0) +
@@ -139,12 +154,22 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
         </div>
       </div>
 
-      {/* Issue count */}
-      <div className="board-count">
-        {filteredIssues.length} of {issues.length} tickets
-        {hideDone && doneCount > 0 && (
-          <span className="board-count-hidden"> · {doneCount} done hidden</span>
-        )}
+      {/* Issue count + sort control */}
+      <div className="board-count" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span>
+          {filteredIssues.length} of {issues.length} tickets
+          {hideDone && doneCount > 0 && (
+            <span className="board-count-hidden"> · {doneCount} done hidden</span>
+          )}
+        </span>
+        <button
+          type="button"
+          className="board-sort-btn"
+          onClick={toggleSort}
+          title={`Sort by ticket # — currently ${sortDir === "desc" ? "newest first" : "oldest first"}`}
+        >
+          # {sortDir === "desc" ? "↓" : "↑"}
+        </button>
       </div>
 
       {/* Issue list */}
@@ -179,22 +204,28 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
         {filteredIssues.map((issue) => {
           const priority = getCustomFieldValue(issue, "Priority");
           const stage = getCustomFieldValue(issue, "Stage");
+          const isNew = newTicketIds && newTicketIds.has(issue.id);
           return (
             <div
               key={issue.id}
-              className="panel"
-              style={{ padding: "0.85rem 1rem", cursor: "pointer", borderColor: "var(--border-subtle)" }}
-              onClick={() => openDetail(issue)}
-              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--border-medium)")}
-              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border-subtle)")}
+              className={`panel${isNew ? " board-card-new" : ""}`}
+              style={{ padding: "0.85rem 1rem", cursor: "pointer", borderColor: isNew ? "var(--accent-indigo)" : "var(--border-subtle)" }}
+              onClick={() => { clearNewTicket && clearNewTicket(issue.id); openDetail(issue); }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = isNew ? "var(--accent-indigo)" : "var(--border-medium)")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = isNew ? "var(--accent-indigo)" : "var(--border-subtle)")}
             >
               <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
-                <span style={{
-                  fontSize: "0.68rem", fontWeight: 700, fontFamily: "var(--font-mono)",
-                  color: "var(--accent-indigo)", minWidth: "58px", paddingTop: "2px",
-                }}>
-                  {issue.idReadable}
-                </span>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", minWidth: "58px", gap: "2px" }}>
+                  <span style={{
+                    fontSize: "0.68rem", fontWeight: 700, fontFamily: "var(--font-mono)",
+                    color: "var(--accent-indigo)", paddingTop: "2px",
+                  }}>
+                    {issue.idReadable}
+                  </span>
+                  {isNew && (
+                    <span className="board-new-badge">NEW</span>
+                  )}
+                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--text-primary)", lineHeight: 1.3 }}>
                     {issue.summary}
