@@ -1,0 +1,32 @@
+[
+  {
+    "id": "deploy-bitacora.sh",
+    "execute-command": "/opt/bitacora/bitacora-app-dashboard/scripts/force-recreate.sh",
+    "command-working-directory": "/opt/bitacora/bitacora-app-dashboard",
+    "response-message": "Deploy triggered.",
+    "trigger-rule": {
+      "and": [
+        {
+          "match": {
+            "type": "payload-hmac-sha256",
+            "secret": "{{ getenv \"WEBHOOK_SECRET\" }}",
+            "parameter": {
+              "source": "header",
+              "name": "X-Hub-Signature-256"
+            }
+          }
+        },
+        {
+          "match": {
+            "type": "value",
+            "value": "refs/heads/master",
+            "parameter": {
+              "source": "payload",
+              "name": "ref"
+            }
+          }
+        }
+      ]
+    }
+  }
+]
