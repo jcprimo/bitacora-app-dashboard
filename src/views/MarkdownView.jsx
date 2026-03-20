@@ -3,8 +3,12 @@
 // Content is lazy-loaded per file. A loading overlay displays while
 // the file is being read from storage and parsed.
 // Panels are resizable via a drag handle between sidebar and reader.
+//
+// Desktop: resizable sidebar + reader, collapsible with chevron button.
+// Mobile (≤768px): reader fills full width; file list is a fixed
+// overlay drawer opened by the "Files" button in the reader header.
 
-import { useRef, useState, useCallback, useEffect, useMemo } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { renderMarkdown } from "../utils/markdownParser";
 
 export default function MarkdownView({
@@ -20,7 +24,7 @@ export default function MarkdownView({
   const [renderedHtml, setRenderedHtml] = useState("");
   const [rendering, setRendering] = useState(false);
 
-  // ─── Resizable sidebar ─────────────────────────────────────────
+  // ─── Resizable sidebar (desktop) ───────────────────────────────
   const [sidebarWidth, setSidebarWidth] = useState(220);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const isDraggingHandle = useRef(false);
@@ -59,6 +63,24 @@ export default function MarkdownView({
     };
   }, [sidebarCollapsed]);
 
+  // ─── Mobile overlay drawer ─────────────────────────────────────
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // Close drawer when a file is selected on mobile
+  const handleFileSelect_mobile = useCallback((id) => {
+    setActiveFileId(id);
+    markDocVisited(id);
+    setMobileDrawerOpen(false);
+  }, [setActiveFileId, markDocVisited]);
+
+  // ─── Markdown rendering ────────────────────────────────────────
   const activeContent = activeFile?.content ?? "";
 
   useEffect(() => {
@@ -77,18 +99,8 @@ export default function MarkdownView({
 
   const isLoading = contentLoading || rendering;
 
-  // Mobile detection for full-screen reader mode
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
-  useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth <= 768);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  // On mobile: show file list OR reader, not both
-  const mobileShowReader = isMobile && activeFileId != null;
-
-  const handleFileSelect = (e) => {
+  // ─── File input handlers ───────────────────────────────────────
+  const handleFileInputChange = (e) => {
     const selected = e.target.files;
     if (selected?.length) importFiles(selected);
     e.target.value = "";
@@ -129,19 +141,64 @@ export default function MarkdownView({
       type="file"
       accept=".md"
       multiple
-      onChange={handleFileSelect}
+      onChange={handleFileInputChange}
       style={{ display: "none" }}
     />
+  );
+
+  // ─── File list (shared between desktop sidebar and mobile drawer) ─
+  const fileList = (
+    <>
+      <div className="md-sidebar-header">
+        <span className="md-sidebar-title">Files ({files.length})</span>
+        <div className="md-sidebar-header-actions">
+          <button
+            type="button"
+            className="md-add-btn"
+            onClick={() => fileInputRef.current?.click()}
+            aria-label="Add .md files"
+            title="Add .md files"
+          >
+            +
+          </button>
+        </div>
+      </div>
+      <div className="md-file-list md-file-list-scroll">
+        {files.map((f) => {
+          const isVisited = visitedDocIds.has(Number(f.id));
+          return (
+            <div
+              key={f.id}
+              className={`md-file-item ${f.id === activeFileId ? "md-file-active" : ""} ${!isVisited ? "md-file-unvisited" : ""}`}
+              onClick={() => isMobile ? handleFileSelect_mobile(f.id) : (setActiveFileId(f.id), markDocVisited(f.id))}
+            >
+              <div className="md-file-info">
+                <span className="md-file-name">{f.name}</span>
+                <span className="md-file-path" title={f.path}>{f.path}</span>
+              </div>
+              <button
+                type="button"
+                className="md-file-remove"
+                onClick={(e) => { e.stopPropagation(); removeFile(f.id); }}
+                title="Remove file"
+              >
+                ×
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 
   // ─── Empty state ───────────────────────────────────────────────
   if (files.length === 0) {
     return (
-      <div className="animate-fade">
+      <div className="animate-fade" style={{ flex: 1, display: "flex", flexDirection: "column", padding: "2rem" }}>
         {fileInput}
         <div
           className={`content-panel md-dropzone ${dragging ? "md-dropzone-active" : ""}`}
-          style={{ padding: "3rem 2rem", textAlign: "center" }}
+          style={{ padding: "3rem 2rem", textAlign: "center", flex: 1 }}
           {...dropZoneProps}
         >
           <div style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>{dragging ? "📥" : "📖"}</div>
@@ -192,73 +249,58 @@ export default function MarkdownView({
 
       {fileInput}
 
-      {/* Sidebar — file list (hidden on mobile when reading a file) */}
-      <aside
-        className={`md-sidebar ${mobileShowReader ? "md-sidebar--mobile-hidden" : ""}`}
-        style={{ width: sidebarCollapsed ? 0 : sidebarWidth, minWidth: sidebarCollapsed ? 0 : 140, flexShrink: 0 }}
-      >
-        {!sidebarCollapsed && (
-          <>
-            <div className="md-sidebar-header">
-              <span className="md-sidebar-title">Files ({files.length})</span>
-              <div className="md-sidebar-header-actions">
-                <button
-                  type="button"
-                  className="md-add-btn"
-                  onClick={() => fileInputRef.current?.click()}
-                  aria-label="Add .md files"
-                  title="Add .md files"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-            <div className="md-file-list md-file-list-scroll">
-              {files.map((f) => {
-                const isVisited = visitedDocIds.has(Number(f.id));
-                return (
-                  <div
-                    key={f.id}
-                    className={`md-file-item ${f.id === activeFileId ? "md-file-active" : ""} ${!isVisited ? "md-file-unvisited" : ""}`}
-                    onClick={() => { setActiveFileId(f.id); markDocVisited(f.id); }}
-                  >
-                    <div className="md-file-info">
-                      <span className="md-file-name">{f.name}</span>
-                      <span className="md-file-path" title={f.path}>{f.path}</span>
-                    </div>
-                    <button
-                      type="button"
-                      className="md-file-remove"
-                      onClick={(e) => { e.stopPropagation(); removeFile(f.id); }}
-                      title="Remove file"
-                    >
-                      ×
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
-      </aside>
+      {/* ── Mobile overlay backdrop ─────────────────────────────── */}
+      {isMobile && (
+        <div
+          className={`md-mobile-overlay-backdrop${mobileDrawerOpen ? " md-mobile-overlay-backdrop--open" : ""}`}
+          onClick={() => setMobileDrawerOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
-      {/* Drag handle + collapse toggle (hidden on mobile when reading) */}
-      {!mobileShowReader && (
-        <div className="md-resize-handle" onMouseDown={onHandleMouseDown}>
-          <button
-            type="button"
-            className="md-collapse-btn"
-            onClick={() => setSidebarCollapsed((v) => !v)}
-            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {sidebarCollapsed ? "›" : "‹"}
-          </button>
+      {/* ── Mobile file drawer ──────────────────────────────────── */}
+      {isMobile && (
+        <div
+          className={`md-mobile-file-drawer${mobileDrawerOpen ? " md-mobile-file-drawer--open" : ""}`}
+          role="dialog"
+          aria-label="File list"
+        >
+          {fileList}
         </div>
       )}
 
-      {/* Reader — rendered Markdown (full screen on mobile) */}
-      <main className={`md-reader ${mobileShowReader ? "md-reader--mobile-full" : ""}`} style={{ flex: 1, minWidth: 0 }}>
+      {/* ── Desktop sidebar (hidden on mobile via CSS) ──────────── */}
+      <aside
+        className="md-sidebar"
+        style={{
+          width: sidebarCollapsed ? 0 : sidebarWidth,
+          minWidth: sidebarCollapsed ? 0 : 140,
+          flexShrink: 0,
+          borderWidth: sidebarCollapsed ? 0 : undefined,
+        }}
+        aria-hidden={sidebarCollapsed}
+      >
+        {!sidebarCollapsed && fileList}
+      </aside>
+
+      {/* ── Resize handle + collapse toggle (desktop only) ─────── */}
+      <div
+        className={`md-resize-handle${sidebarCollapsed ? " md-resize-handle--collapsed" : ""}`}
+        onMouseDown={sidebarCollapsed ? undefined : onHandleMouseDown}
+      >
+        <button
+          type="button"
+          className="md-collapse-btn"
+          onClick={() => setSidebarCollapsed((v) => !v)}
+          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {sidebarCollapsed ? "›" : "‹"}
+        </button>
+      </div>
+
+      {/* ── Reader panel ────────────────────────────────────────── */}
+      <main className="md-reader" style={{ flex: 1, minWidth: 0 }}>
         {isLoading ? (
           <div className="md-loading-overlay">
             <div className="md-loading-modal">
@@ -269,14 +311,15 @@ export default function MarkdownView({
         ) : activeFile ? (
           <>
             <div className="md-reader-header">
+              {/* Mobile: "Files" button opens the drawer */}
               {isMobile && (
                 <button
                   type="button"
-                  className="md-back-btn"
-                  onClick={() => setActiveFileId(null)}
-                  aria-label="Back to file list"
+                  className="md-mobile-files-btn"
+                  onClick={() => setMobileDrawerOpen(true)}
+                  aria-label="Open file list"
                 >
-                  ← Files
+                  ☰ Files
                 </button>
               )}
               <span className="md-reader-filename">{activeFile.name}</span>
@@ -293,7 +336,16 @@ export default function MarkdownView({
           </>
         ) : (
           <div className="md-reader-select-hint">
-            Select a file from the sidebar
+            {isMobile
+              ? (
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <button type="button" className="md-mobile-files-btn" onClick={() => setMobileDrawerOpen(true)}>
+                    ☰ Open Files
+                  </button>
+                </div>
+              )
+              : "Select a file from the sidebar"
+            }
           </div>
         )}
       </main>
