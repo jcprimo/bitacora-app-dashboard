@@ -74,6 +74,7 @@ export default function DetailView({
   comments, commentsLoading, postComment,
 }) {
   const [newComment, setNewComment] = useState("");
+  const [descView, setDescView] = useState("preview");
 
   const handlePostComment = async () => {
     if (!newComment.trim()) return;
@@ -128,10 +129,35 @@ export default function DetailView({
         </div>
 
         <div className="review-field">
-          <div className="review-field-label">Description</div>
-          <textarea className="review-textarea" style={{ minHeight: 260 }}
-            value={editFields.description}
-            onChange={(e) => setEditFields((f) => ({ ...f, description: e.target.value }))} />
+          <div className="desc-field-header">
+            <div className="review-field-label" style={{ marginBottom: 0 }}>Description</div>
+            <div className="desc-view-tabs">
+              <button
+                type="button"
+                className={`desc-view-tab${descView === "preview" ? " desc-view-tab-active" : ""}`}
+                onClick={() => setDescView("preview")}
+              >
+                Preview
+              </button>
+              <button
+                type="button"
+                className={`desc-view-tab${descView === "raw" ? " desc-view-tab-active" : ""}`}
+                onClick={() => setDescView("raw")}
+              >
+                Raw
+              </button>
+            </div>
+          </div>
+          {descView === "preview" ? (
+            <div
+              className="md-content desc-preview"
+              dangerouslySetInnerHTML={{ __html: renderMarkdown(editFields.description) }}
+            />
+          ) : (
+            <textarea className="review-textarea" style={{ minHeight: 260 }}
+              value={editFields.description}
+              onChange={(e) => setEditFields((f) => ({ ...f, description: e.target.value }))} />
+          )}
         </div>
 
         <div className="action-bar">

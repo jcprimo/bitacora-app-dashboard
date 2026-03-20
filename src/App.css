@@ -1000,6 +1000,59 @@
   border-color: var(--accent-indigo);
 }
 
+/* ─── Description preview/raw toggle ─────────────────────────── */
+.desc-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.desc-view-tabs {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.desc-view-tab {
+  padding: 0.2rem 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  line-height: 1.6;
+}
+
+.desc-view-tab:first-child {
+  border-left: none;
+}
+
+.desc-view-tab:hover:not(.desc-view-tab-active) {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+}
+
+.desc-view-tab-active {
+  background: var(--bg-input);
+  color: var(--text-primary);
+  cursor: default;
+}
+
+.desc-preview {
+  min-height: 260px;
+  padding: 0.8rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
 .review-meta {
   display: flex;
   gap: var(--space-4);
