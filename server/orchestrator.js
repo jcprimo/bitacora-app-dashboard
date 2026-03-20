@@ -176,6 +176,13 @@ export async function dispatchJob(jobId) {
 
   runningJobs.set(jobId, { process: proc, worktreePath, branch });
 
+  // Debug: log spawn result
+  const hasToken = !!process.env.CLAUDE_CODE_TOKEN;
+  addLog(jobId, "info", `Spawned PID ${proc.pid || "NONE"} | cwd: ${worktreePath} | token: ${hasToken} | agent: ${agentType}`);
+  proc.on("error", (err) => {
+    addLog(jobId, "error", `Spawn error: ${err.message}`);
+  });
+
   // Timeout kill
   const timeout = setTimeout(() => {
     addLog(jobId, "error", `Job timed out after ${JOB_TIMEOUT_MS / 1000}s`);
