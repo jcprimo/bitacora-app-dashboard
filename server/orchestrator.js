@@ -161,7 +161,7 @@ export async function dispatchJob(jobId) {
   //    uid/gid 1000 matches the `agent` system user created in the Dockerfile.
   //    HOME must point to /home/agent so claude can read its config/agents.
   const agentPrompt = buildPrompt(agentType, repo, prompt);
-  const proc = spawn("claude", ["-p", agentPrompt, "--agent", agentType, "--dangerously-skip-permissions", "--output-format", "stream-json"], {
+  const proc = spawn("claude", ["-p", agentPrompt, "--agent", agentType, "--dangerously-skip-permissions", "--output-format", "stream-json", "--verbose"], {
     cwd: worktreePath,
     uid: 1000,
     gid: 1000,
