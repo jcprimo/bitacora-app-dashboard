@@ -3558,6 +3558,16 @@
   color: var(--text-primary);
 }
 
+.dispatch-section-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-2);
+}
+
+/* ─── Agent pills ─────────────────────────────────────────────── */
 .agent-selector {
   display: flex;
   gap: var(--space-2);
@@ -3567,26 +3577,65 @@
 
 .agent-type-btn {
   min-height: 44px;
-  padding: 8px 12px;
+  padding: 8px 14px;
   font-size: var(--text-xs);
   font-weight: 600;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-family: var(--font-sans);
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-muted);
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.agent-type-btn:hover {
+  border-color: var(--agent-color, var(--accent-cyan));
+  color: var(--agent-color, var(--accent-cyan));
+}
+
+.agent-type-btn--active {
+  border: 2px solid var(--agent-color, var(--accent-cyan));
+  background: color-mix(in srgb, var(--agent-color, var(--accent-cyan)) 12%, transparent);
+  color: var(--agent-color, var(--accent-cyan));
+}
+
+/* ─── Project pills ───────────────────────────────────────────── */
+.project-selector {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.project-pill {
+  min-height: 48px;
+  padding: 10px 18px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  border: 2px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  flex: 1;
+  min-width: 72px;
+}
+
+.project-pill:hover {
+  border-color: var(--accent-indigo);
+  color: var(--accent-indigo);
+}
+
+.project-pill--active {
+  border-color: var(--accent-indigo);
+  background: color-mix(in srgb, var(--accent-indigo) 14%, transparent);
+  color: var(--accent-indigo);
 }
 
 .dispatch-select {
-  width: 100%;
-  padding: 6px 10px;
-  font-size: var(--text-xs);
-  background: var(--bg-input, var(--bg-card));
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  margin-bottom: var(--space-3);
-}
-
-.dispatch-input {
   width: 100%;
   padding: 6px 10px;
   font-size: var(--text-xs);
