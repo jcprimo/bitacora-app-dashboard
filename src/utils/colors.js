@@ -21,7 +21,7 @@ export function stageColor(s) {
     case "Backlog": return "#64748b";
     case "Develop": return "#7c6aff";
     case "Review": return "#f59e0b";
-    case "Test": return "#8b5cf6";
+    case "Test": return "#22d3ee";
     case "Staging": return "#06b6d4";
     case "Done": return "#34d399";
     default: return "#64748b";

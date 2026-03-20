@@ -119,19 +119,7 @@
   --accent-cyan-s: 85%;
   --accent-cyan-l: 53%;
 
-  /* QA Tracker — green/black accent palette */
-  --qa-accent: #34d399;
-  --qa-accent-strong: #10b981;
-  --qa-accent-bg: rgba(52, 211, 153, 0.08);
-  --qa-accent-border: rgba(52, 211, 153, 0.3);
-  --qa-bg-hover: rgba(52, 211, 153, 0.03);
-  --qa-bg-subtle: rgba(52, 211, 153, 0.04);
-  --qa-drop-border: rgba(52, 211, 153, 0.5);
-
-  /* Markdown Reader — warm neutral accent */
-  --md-accent: #a78bfa;
-  --md-accent-bg: rgba(167, 139, 250, 0.08);
-  --md-accent-border: rgba(167, 139, 250, 0.3);
+  /* Markdown Reader — structural tokens (not accent) */
   --md-sidebar-bg: rgba(8, 8, 16, 0.75);
   --md-code-bg: rgba(22, 22, 42, 0.8);
   --md-blockquote-border: rgba(42, 42, 74, 0.6);
@@ -223,19 +211,7 @@
   --accent-cyan-s: 91%;
   --accent-cyan-l: 33%;
 
-  /* QA Tracker — green accent (light) */
-  --qa-accent: #059669;
-  --qa-accent-strong: #047857;
-  --qa-accent-bg: rgba(5, 150, 105, 0.1);
-  --qa-accent-border: rgba(5, 150, 105, 0.3);
-  --qa-bg-hover: rgba(5, 150, 105, 0.06);
-  --qa-bg-subtle: rgba(5, 150, 105, 0.07);
-  --qa-drop-border: rgba(5, 150, 105, 0.5);
-
-  /* Markdown Reader — warm neutral accent (light) */
-  --md-accent: #7c3aed;
-  --md-accent-bg: rgba(124, 58, 237, 0.08);
-  --md-accent-border: rgba(124, 58, 237, 0.3);
+  /* Markdown Reader — structural tokens (not accent) */
   --md-sidebar-bg: rgba(175, 170, 200, 0.7);
   --md-code-bg: rgba(185, 180, 210, 0.75);
   --md-blockquote-border: rgba(120, 112, 160, 0.45);

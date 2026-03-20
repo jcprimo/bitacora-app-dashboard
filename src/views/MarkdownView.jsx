@@ -4,7 +4,7 @@
 // the file is being read from storage and parsed.
 // Panels are resizable via a drag handle between sidebar and reader.
 
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { renderMarkdown } from "../utils/markdownParser";
 
 export default function MarkdownView({
@@ -76,6 +76,17 @@ export default function MarkdownView({
   }, [activeContent]);
 
   const isLoading = contentLoading || rendering;
+
+  // Mobile detection for full-screen reader mode
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // On mobile: show file list OR reader, not both
+  const mobileShowReader = isMobile && activeFileId != null;
 
   const handleFileSelect = (e) => {
     const selected = e.target.files;
@@ -150,9 +161,9 @@ export default function MarkdownView({
               style={{
                 maxWidth: 280,
                 margin: "0 auto",
-                background: "var(--md-accent-bg)",
-                borderColor: "var(--md-accent-border)",
-                color: "var(--md-accent)",
+                background: "var(--accent-indigo-bg)",
+                borderColor: "var(--accent-indigo-border)",
+                color: "var(--accent-indigo)",
               }}
             >
               📂 Import .md Files
@@ -181,9 +192,9 @@ export default function MarkdownView({
 
       {fileInput}
 
-      {/* Sidebar — file list */}
+      {/* Sidebar — file list (hidden on mobile when reading a file) */}
       <aside
-        className="md-sidebar"
+        className={`md-sidebar ${mobileShowReader ? "md-sidebar--mobile-hidden" : ""}`}
         style={{ width: sidebarCollapsed ? 0 : sidebarWidth, minWidth: sidebarCollapsed ? 0 : 140, flexShrink: 0 }}
       >
         {!sidebarCollapsed && (
@@ -231,21 +242,23 @@ export default function MarkdownView({
         )}
       </aside>
 
-      {/* Drag handle + collapse toggle */}
-      <div className="md-resize-handle" onMouseDown={onHandleMouseDown}>
-        <button
-          type="button"
-          className="md-collapse-btn"
-          onClick={() => setSidebarCollapsed((v) => !v)}
-          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {sidebarCollapsed ? "›" : "‹"}
-        </button>
-      </div>
+      {/* Drag handle + collapse toggle (hidden on mobile when reading) */}
+      {!mobileShowReader && (
+        <div className="md-resize-handle" onMouseDown={onHandleMouseDown}>
+          <button
+            type="button"
+            className="md-collapse-btn"
+            onClick={() => setSidebarCollapsed((v) => !v)}
+            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {sidebarCollapsed ? "›" : "‹"}
+          </button>
+        </div>
+      )}
 
-      {/* Reader — rendered Markdown */}
-      <main className="md-reader" style={{ flex: 1, minWidth: 0 }}>
+      {/* Reader — rendered Markdown (full screen on mobile) */}
+      <main className={`md-reader ${mobileShowReader ? "md-reader--mobile-full" : ""}`} style={{ flex: 1, minWidth: 0 }}>
         {isLoading ? (
           <div className="md-loading-overlay">
             <div className="md-loading-modal">
@@ -256,6 +269,16 @@ export default function MarkdownView({
         ) : activeFile ? (
           <>
             <div className="md-reader-header">
+              {isMobile && (
+                <button
+                  type="button"
+                  className="md-back-btn"
+                  onClick={() => setActiveFileId(null)}
+                  aria-label="Back to file list"
+                >
+                  ← Files
+                </button>
+              )}
               <span className="md-reader-filename">{activeFile.name}</span>
               <span className="md-reader-meta">
                 {new Date(activeFile.updatedAt).toLocaleDateString("en-US", {
