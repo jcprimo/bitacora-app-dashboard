@@ -2541,6 +2541,104 @@
   color: var(--accent-indigo);
 }
 
+/* ─── Board inline search toggle ─────────────────────────────── */
+.board-search-wrap {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  position: relative;
+  gap: 0;
+}
+
+.board-search-input {
+  max-width: 0;
+  width: 320px;
+  overflow: hidden;
+  opacity: 0;
+  background: var(--bg-input);
+  border: 1px solid transparent;
+  border-right: none;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  padding: 0;
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-family: var(--font-sans);
+  outline: none;
+  transition: max-width 200ms ease-out, opacity 200ms ease-out, padding 200ms ease-out, border-color 200ms ease-out;
+  white-space: nowrap;
+}
+
+.board-search-input--open {
+  max-width: 320px;
+  opacity: 1;
+  padding: 0.45rem 0.6rem;
+  border-color: var(--border-subtle);
+}
+
+.board-search-input--open:focus {
+  border-color: var(--accent-indigo);
+  box-shadow: 0 0 0 2px var(--accent-indigo-bg);
+}
+
+.board-search-input::placeholder {
+  color: var(--text-dim);
+}
+
+.board-search-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 100%;
+  padding: 0 var(--space-1);
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-left: none;
+  border-right: none;
+  color: var(--text-dim);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.board-search-clear:hover {
+  color: var(--text-primary);
+}
+
+.board-search-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  min-height: 30px;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.board-search-input--open + .board-search-clear + .board-search-toggle,
+.board-search-input--open + .board-search-toggle {
+  border-left: none;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.board-search-toggle:hover {
+  border-color: var(--accent-indigo);
+  color: var(--accent-indigo);
+}
+
+.board-search-toggle--active {
+  border-color: var(--accent-indigo);
+  color: var(--accent-indigo);
+  background: var(--accent-indigo-bg);
+}
+
 /* ─── Board "NEW" badge ──────────────────────────────────────── */
 .board-new-badge {
   font-size: var(--text-xs);
@@ -3392,20 +3490,19 @@
   /* Compliance alert */
   .compliance-alert { font-size: var(--text-sm); padding: var(--space-2) var(--space-3); }
 
-  /* Board filter bar */
-  .board-filter-bar {
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-  .board-filter-bar .btn { width: 100%; }
-
   /* Board pills */
   .board-pills { padding: var(--space-2) 0.65rem; }
   .board-pill-label { min-width: unset; font-size: var(--text-xs); }
   .board-pill { font-size: var(--text-xs); padding: var(--space-1) 0.4rem; min-height: 28px; }
 
+  /* Board inline search — full width on mobile when open */
+  .board-search-input--open {
+    max-width: 200px;
+    width: 200px;
+  }
+
   /* Board issue cards */
-  .board-filter-bar + div .panel {
+  .board-pills + .board-count + .board-list .panel {
     padding: 0.65rem var(--space-3);
   }
 

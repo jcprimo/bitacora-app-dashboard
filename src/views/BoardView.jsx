@@ -6,7 +6,7 @@
 // with a toggle to reveal them.
 // Click a card → opens DetailView. Stage dropdown allows inline updates.
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { getCustomFieldValue, formatDate, STAGES, PRIORITIES } from "../youtrack";
 import { priorityColor, stageColor, getColorShades } from "../utils/colors";
 
@@ -19,6 +19,40 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
   // ─── Sort state ────────────────────────────────────────────────
   const [sortDir, setSortDir] = useState("desc");
   const toggleSort = () => setSortDir((d) => (d === "desc" ? "asc" : "desc"));
+
+  // ─── Inline search toggle ──────────────────────────────────────
+  const [searchOpen, setSearchOpen] = useState(!!filterQuery);
+  const searchInputRef = useRef(null);
+
+  const openSearch = useCallback(() => {
+    setSearchOpen(true);
+    // defer focus until after the input becomes visible
+    requestAnimationFrame(() => searchInputRef.current?.focus());
+  }, []);
+
+  const closeSearch = useCallback(() => {
+    if (filterQuery) return; // keep open when there's an active query
+    setSearchOpen(false);
+  }, [filterQuery]);
+
+  const clearSearch = useCallback(() => {
+    setFilterQuery("");
+    setSearchOpen(false);
+    searchInputRef.current?.blur();
+  }, [setFilterQuery]);
+
+  // "/" shortcut to open search (only when not focused on another input)
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key !== "/") return;
+      const tag = document.activeElement?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      e.preventDefault();
+      openSearch();
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [openSearch]);
 
   const doneCount = useMemo(
     () => issues.filter((i) => getCustomFieldValue(i, "Stage") === "Done").length,
@@ -48,24 +82,9 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
 
   return (
     <div className="animate-fade">
-      {/* Search bar */}
-      <div className="board-filter-bar">
-        <input
-          className="config-input"
-          style={{ flex: 1, fontSize: "var(--text-sm)", padding: "0.55rem 0.85rem", borderRadius: "var(--radius-md)" }}
-          placeholder="Search YouTrack: priority: Critical  or  Stage: Develop  or  free text..."
-          value={filterQuery}
-          onChange={(e) => setFilterQuery(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && loadIssues()}
-        />
-        <button type="button" className="btn btn-config" style={{ padding: "0.55rem 1rem", width: "auto" }} onClick={loadIssues}>
-          Search
-        </button>
-      </div>
-
       {/* Pill filters */}
       <div className="board-pills">
-        {/* Stage filter */}
+        {/* Stage filter — inline search toggle lives at the end of this row */}
         <div className="board-pill-row">
           <span className="board-pill-label">Stage</span>
           <div className="board-pill-group">
@@ -90,6 +109,57 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
               );
             })}
           </div>
+
+          {/* Inline search toggle — right-anchored */}
+          <div className="board-search-wrap">
+            <input
+              ref={searchInputRef}
+              type="text"
+              className={`board-search-input${searchOpen ? " board-search-input--open" : ""}`}
+              placeholder="YouTrack query…"
+              value={filterQuery}
+              onChange={(e) => setFilterQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") loadIssues();
+                if (e.key === "Escape") closeSearch();
+              }}
+              onBlur={() => closeSearch()}
+              aria-label="Search issues"
+            />
+            {filterQuery && searchOpen && (
+              <button
+                type="button"
+                className="board-search-clear"
+                onMouseDown={(e) => e.preventDefault()} // prevent blur before click
+                onClick={clearSearch}
+                aria-label="Clear search"
+              >
+                ×
+              </button>
+            )}
+            <button
+              type="button"
+              className={`board-search-toggle${searchOpen ? " board-search-toggle--active" : ""}`}
+              onClick={searchOpen ? loadIssues : openSearch}
+              title={searchOpen ? "Search (Enter)" : "Search (/)"}
+              aria-label="Toggle search"
+            >
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" strokeWidth="1.6"/>
+                <line x1="9.9" y1="9.9" x2="14" y2="14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+              </svg>
+            </button>
+          </div>
+
+          {/* Sort button */}
+          <button
+            type="button"
+            className="board-sort-btn"
+            onClick={toggleSort}
+            title={`Sort by ticket # — currently ${sortDir === "desc" ? "newest first" : "oldest first"}`}
+          >
+            # {sortDir === "desc" ? "↓" : "↑"}
+          </button>
         </div>
 
         {/* Priority filter */}
@@ -145,22 +215,12 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
         </div>
       </div>
 
-      {/* Issue count + sort control */}
-      <div className="board-count board-count-row">
-        <span>
-          {filteredIssues.length} of {issues.length} tickets
-          {hideDone && doneCount > 0 && (
-            <span className="board-count-hidden"> · {doneCount} done hidden</span>
-          )}
-        </span>
-        <button
-          type="button"
-          className="board-sort-btn"
-          onClick={toggleSort}
-          title={`Sort by ticket # — currently ${sortDir === "desc" ? "newest first" : "oldest first"}`}
-        >
-          # {sortDir === "desc" ? "↓" : "↑"}
-        </button>
+      {/* Issue count */}
+      <div className="board-count">
+        {filteredIssues.length} of {issues.length} tickets
+        {hideDone && doneCount > 0 && (
+          <span className="board-count-hidden"> · {doneCount} done hidden</span>
+        )}
       </div>
 
       {/* Issue list */}
