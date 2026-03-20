@@ -12,7 +12,7 @@
 //         them together and renders the active view.
 // Layout: sidebar nav (desktop fixed left) + hamburger overlay (mobile)
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import "./App.css";
 
 // ─── Constants ──────────────────────────────────────────────────
@@ -103,6 +103,20 @@ function Dashboard({ auth, theme, toggleTheme }) {
   const [view, setView] = useState("board");
   // Mobile sidebar overlay state
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  // Desktop sidebar collapsed state — persisted to localStorage
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try { return localStorage.getItem("bitacora-sidebar-collapsed") === "true"; }
+    catch { return false; }
+  });
+
+  const toggleSidebar = useCallback(() => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try { localStorage.setItem("bitacora-sidebar-collapsed", String(next)); }
+      catch { /* ignore */ }
+      return next;
+    });
+  }, []);
 
   // ─── Hook composition ──────────────────────────────────────────
   const { toast, showToast } = useToast();
@@ -177,7 +191,7 @@ function Dashboard({ auth, theme, toggleTheme }) {
 
   // ═════════════════════════════════════════════════════════════
   return (
-    <div className="app-shell app-shell--sidebar">
+    <div className={`app-shell app-shell--sidebar${sidebarCollapsed ? " sidebar-is-collapsed" : ""}`}>
       <Toast toast={toast} />
 
       <SettingsModal
@@ -189,7 +203,11 @@ function Dashboard({ auth, theme, toggleTheme }) {
       />
 
       {/* ─── Mobile top bar (hamburger) — hidden on desktop ────── */}
-      <MobileTopBar onOpenMenu={() => setMobileSidebarOpen(true)} />
+      <MobileTopBar
+        onOpenMenu={() => setMobileSidebarOpen(true)}
+        theme={theme}
+        toggleTheme={toggleTheme}
+      />
 
       {/* ─── Sidebar navigation ─────────────────────────────────── */}
       <Sidebar
@@ -209,6 +227,8 @@ function Dashboard({ auth, theme, toggleTheme }) {
         agentJobCount={runningJobCount}
         docCount={md.files.length}
         resetCreate={resetCreate}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={toggleSidebar}
       />
 
       {/* ─── Main content area ───────────────────────────────────── */}
