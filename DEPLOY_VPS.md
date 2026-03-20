@@ -8,6 +8,29 @@ Docker Compose deployment with persistent SQLite database, session auth, and enc
 
 ---
 
+## Secret Generation
+
+Before deploying, generate fresh secrets. **Never copy the `REPLACE_ME` placeholders from `.env.example` into production.**
+
+```bash
+# SESSION_SECRET — any long random string
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+
+# ENCRYPTION_KEY — must be exactly 64 hex characters (32 bytes)
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Both `openssl` alternatives also work:
+
+```bash
+openssl rand -base64 48   # SESSION_SECRET
+openssl rand -hex 32      # ENCRYPTION_KEY
+```
+
+The server will refuse to start in production if either value is missing, wrong length, or still set to `REPLACE_ME`.
+
+---
+
 ## What Changed (vs. old deploy)
 
 | Before (nginx) | Now (Express + SQLite) |

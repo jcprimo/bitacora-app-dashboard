@@ -33,25 +33,41 @@ import jobsRoutes from "./routes/jobs.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const isProduction = process.env.NODE_ENV === "production";
 
+// ─── Known weak/placeholder SESSION_SECRET values ───────────────
+const WEAK_SESSION_SECRETS = new Set([
+  "bitacora-dev-secret-change-in-production",
+  "change-me-to-a-random-string",
+  "REPLACE_ME",
+]);
+
 // ─── Session secret warning (all environments) ──────────────────
-const DEFAULT_SECRET = "bitacora-dev-secret-change-in-production";
-if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET === DEFAULT_SECRET) {
-  console.warn("[SECURITY] SESSION_SECRET is using the insecure default. Set a strong random value in .env.");
+if (!process.env.SESSION_SECRET || WEAK_SESSION_SECRETS.has(process.env.SESSION_SECRET)) {
+  console.warn("[SECURITY] SESSION_SECRET is unset or using a placeholder. Set a strong random value in .env.");
+  console.warn("           Generate one with: node -e \"console.log(require('crypto').randomBytes(64).toString('hex'))\"");
 }
 
 // ─── Production env validation (fail-fast) ──────────────────────
 if (isProduction) {
   const missing = [];
-  if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET === "bitacora-dev-secret-change-in-production") {
-    missing.push("SESSION_SECRET (must be a strong random string, not the default)");
+
+  if (!process.env.SESSION_SECRET || WEAK_SESSION_SECRETS.has(process.env.SESSION_SECRET)) {
+    missing.push(
+      "SESSION_SECRET — must be a strong random string, not a placeholder\n" +
+      "     Generate: node -e \"console.log(require('crypto').randomBytes(64).toString('hex'))\""
+    );
   }
-  if (!process.env.ENCRYPTION_KEY || process.env.ENCRYPTION_KEY.length !== 64) {
-    missing.push("ENCRYPTION_KEY (must be a 64-char hex string — generate with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\")");
+
+  const encKey = process.env.ENCRYPTION_KEY || "";
+  if (!encKey || encKey === "REPLACE_ME" || encKey.length !== 64) {
+    missing.push(
+      "ENCRYPTION_KEY — must be exactly 64 hex characters (32 bytes), not a placeholder\n" +
+      "     Generate: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+    );
   }
+
   if (missing.length > 0) {
-    console.error("🚨 MATUTE — Production security check FAILED:");
+    console.error("[SECURITY] Production security check FAILED — server cannot start:");
     missing.forEach((m) => console.error(`   ✗ ${m}`));
-    console.error("\n   Server cannot start with insecure defaults in production.");
     process.exit(1);
   }
 }
