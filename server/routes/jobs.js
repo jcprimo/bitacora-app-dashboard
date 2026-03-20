@@ -117,7 +117,16 @@ router.get("/:id", (req, res) => {
     .orderBy(agentLogs.createdAt)
     .all();
 
-  return res.json({ ...job, logs });
+  // Hoist debrief out of resultJson for convenient access by the UI
+  let debrief = null;
+  if (job.resultJson) {
+    try {
+      const parsed = JSON.parse(job.resultJson);
+      debrief = parsed.debrief ?? null;
+    } catch { /* malformed resultJson — ignore */ }
+  }
+
+  return res.json({ ...job, logs, debrief });
 });
 
 // ─── POST /api/jobs/:id/cancel — Cancel a queued/running job ────
