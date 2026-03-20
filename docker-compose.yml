@@ -5,7 +5,7 @@ services:
       - "127.0.0.1:8080:8080"
     volumes:
       - bitacora-data:/app/data
-      - ${REPO_TEAM_PATH:-/home/bitacora-ops/repos/primo-engineering-team}/agents:/root/.claude/agents:ro
+      - ${REPO_TEAM_PATH:-/opt/bitacora/repos/primo-engineering-team}/agents:/root/.claude/agents:ro
     environment:
       - NODE_ENV=production
       - SESSION_SECRET=${SESSION_SECRET}
@@ -14,7 +14,7 @@ services:
       - INGEST_TOKEN=${INGEST_TOKEN}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
-      - REPO_BASE_DIR=${REPO_BASE_DIR:-/home/bitacora-ops/repos}
+      - REPO_BASE_DIR=${REPO_BASE_DIR:-/opt/bitacora/repos}
       - REPO_DASHBOARD_PATH=${REPO_DASHBOARD_PATH}
       - REPO_IOS_PATH=${REPO_IOS_PATH}
       - REPO_PRIMO_PATH=${REPO_PRIMO_PATH}
