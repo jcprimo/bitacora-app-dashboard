@@ -25,15 +25,15 @@ export default function SettingsModal({ showSettings, setShowSettings, settingsF
   return (
     <div className="settings-overlay" onClick={() => setShowSettings(false)}>
       <div className="settings-modal animate-fade" onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
+        <div className="settings-header">
           <div>
-            <div style={{ fontSize: "var(--text-lg)", fontWeight: 700 }}>Connection Settings</div>
-            <div style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", marginTop: "0.15rem" }}>Configure your YouTrack and AI credentials</div>
+            <div className="settings-header-title">Connection Settings</div>
+            <div className="settings-header-subtitle">Configure your YouTrack and AI credentials</div>
           </div>
           <button
             type="button"
+            className="settings-close-btn"
             onClick={() => setShowSettings(false)}
-            style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "var(--text-xl)", cursor: "pointer", padding: "0.25rem" }}
           >
             ✕
           </button>
@@ -70,7 +70,10 @@ export default function SettingsModal({ showSettings, setShowSettings, settingsF
         </div>
 
         <div className="settings-field">
-          <label className="settings-label">Anthropic API Key <span style={{ color: "var(--text-dim)", fontWeight: 400 }}>(optional)</span></label>
+          <label className="settings-label">
+            Anthropic API Key{" "}
+            <span className="settings-label-optional">(optional)</span>
+          </label>
           <div className="settings-input-wrap">
             <input
               className={`settings-input ${!showTokens.anthropicKey ? "settings-input-masked" : ""}`}
@@ -100,7 +103,10 @@ export default function SettingsModal({ showSettings, setShowSettings, settingsF
         </div>
 
         <div className="settings-field">
-          <label className="settings-label">OpenAI API Key <span style={{ color: "var(--text-dim)", fontWeight: 400 }}>(optional)</span></label>
+          <label className="settings-label">
+            OpenAI API Key{" "}
+            <span className="settings-label-optional">(optional)</span>
+          </label>
           <div className="settings-input-wrap">
             <input
               className={`settings-input ${!showTokens.openaiKey ? "settings-input-masked" : ""}`}
@@ -125,11 +131,11 @@ export default function SettingsModal({ showSettings, setShowSettings, settingsF
             </button>
           </div>
           <div className="settings-hint">
-            For OpenAI usage & balance tracking (Whisper, GPT-4o-mini).
+            For OpenAI usage &amp; balance tracking (Whisper, GPT-4o-mini).
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.25rem" }}>
+        <div className="settings-actions">
           <button
             type="button"
             className="btn-ship"

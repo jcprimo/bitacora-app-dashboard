@@ -87,6 +87,7 @@ function PillFilterRow({ label, items, active, onSelect, colorFn }) {
           return (
             <button
               key={item}
+              type="button"
               className={`qa-pill ${isActive ? "qa-pill-active" : ""}`}
               onClick={() => onSelect(item)}
               style={isActive ? {
@@ -167,13 +168,12 @@ export default function QATrackerView({
     onDragLeave: handleDragLeave,
   };
 
-  // Count active filters for the badge
   const activeFilterCount =
     (categoryFilter !== "All" ? 1 : 0) +
     (priorityFilter !== "All" ? 1 : 0) +
     (statusFilter !== "All" ? 1 : 0);
 
-  // ─── Empty state: no CSV loaded ──────────────────────────────────
+  // ─── Empty state: no CSV loaded ────────────────────────────────
   if (testCases.length === 0) {
     return (
       <div className="animate-fade">
@@ -182,18 +182,18 @@ export default function QATrackerView({
           style={{ padding: "3rem 2rem", textAlign: "center" }}
           {...dropZoneProps}
         >
-          <div style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>{dragging ? "📥" : "🧪"}</div>
-          <h2 style={{ fontSize: "var(--text-xl)", fontWeight: 700, color: "var(--text-primary)", marginBottom: "0.5rem" }}>
+          <div className="qa-empty-icon">{dragging ? "📥" : "🧪"}</div>
+          <h2 className="qa-empty-title">
             {dragging ? "Drop CSV file here" : "QA Test Case Tracker"}
           </h2>
-          <p style={{ fontSize: "var(--text-base)", color: "var(--text-muted)", marginBottom: "1.5rem", maxWidth: 420, margin: "0 auto 1.5rem" }}>
+          <p className="qa-empty-desc">
             {dragging
               ? "Release to import test cases"
               : "Drag & drop a CSV file here, or click the button below to browse."}
           </p>
           {!dragging && (
-            <p style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", maxWidth: 480, margin: "0 auto 1.5rem", lineHeight: 1.6 }}>
-              Expected columns: <span style={{ fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>Test_ID, Test_Case, Category, Priority, Status, Steps, Expected_Result</span>
+            <p className="qa-expected-cols">
+              Expected columns: <span className="qa-expected-cols-code">Test_ID, Test_Case, Category, Priority, Status, Steps, Expected_Result</span>
             </p>
           )}
           <input
@@ -205,6 +205,7 @@ export default function QATrackerView({
           />
           {!dragging && (
             <button
+              type="button"
               className="btn-generate"
               onClick={() => fileInputRef.current?.click()}
               style={{
@@ -226,7 +227,7 @@ export default function QATrackerView({
     );
   }
 
-  // ─── Loaded state ────────────────────────────────────────────────
+  // ─── Loaded state ─────────────────────────────────────────────
   return (
     <div className="animate-fade" {...dropZoneProps}>
       {dragging && (
@@ -241,10 +242,8 @@ export default function QATrackerView({
       {/* Toolbar: file info, search, filter toggle, column picker */}
       <div className="qa-toolbar">
         <div className="qa-toolbar-top">
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-            <span style={{ fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--text-muted)" }}>
-              📄 {fileName}
-            </span>
+          <div className="qa-toolbar-file-info">
+            <span className="qa-file-name">📄 {fileName}</span>
             <span className="footer-badge" style={{
               color: "var(--accent-green)", borderColor: "rgba(52,211,153,0.3)",
               background: "rgba(52,211,153,0.06)"
@@ -259,6 +258,7 @@ export default function QATrackerView({
               style={{ display: "none" }}
             />
             <button
+              type="button"
               className="btn-back"
               onClick={() => fileInputRef.current?.click()}
               style={{ fontSize: "var(--text-sm)", padding: "0.35rem 0.75rem" }}
@@ -267,7 +267,7 @@ export default function QATrackerView({
             </button>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <div className="qa-toolbar-right">
             {/* Search */}
             <input
               className="qa-search"
@@ -279,6 +279,7 @@ export default function QATrackerView({
 
             {/* Filter toggle */}
             <button
+              type="button"
               className={`btn-back qa-filter-toggle ${filtersExpanded ? "qa-filter-toggle-active" : ""}`}
               onClick={() => setFiltersExpanded((v) => !v)}
               style={{ fontSize: "var(--text-sm)", padding: "0.4rem 0.75rem", position: "relative" }}
@@ -336,6 +337,7 @@ export default function QATrackerView({
             />
             {activeFilterCount > 0 && (
               <button
+                type="button"
                 className="qa-pill qa-pill-clear"
                 onClick={() => {
                   setCategoryFilter("All");
@@ -408,17 +410,16 @@ export default function QATrackerView({
                           {tc[col.id]}
                         </span>
                       ) : col.id === "Test_ID" ? (
-                        <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--qa-accent)" }}>
-                          {tc[col.id]}
-                        </span>
+                        <span className="qa-test-id">{tc[col.id]}</span>
                       ) : (
                         <span className="qa-cell-text">{tc[col.id]}</span>
                       )}
                     </td>
                   ))}
-                  <td style={{ textAlign: "center" }}>
+                  <td className="qa-table-action-cell">
                     {!ticket ? (
                       <button
+                        type="button"
                         className="qa-action-btn qa-action-create"
                         onClick={() => createBugTicket(tc)}
                         disabled={!!loading}
@@ -431,6 +432,7 @@ export default function QATrackerView({
                       </button>
                     ) : ticket.stage === "Backlog" ? (
                       <button
+                        type="button"
                         className="qa-action-btn qa-action-dev"
                         onClick={() => startDevelopment(testId)}
                         disabled={!!loading}
@@ -443,8 +445,9 @@ export default function QATrackerView({
                         )}
                       </button>
                     ) : (
-                      <div style={{ display: "flex", gap: "0.3rem", justifyContent: "center" }}>
+                      <div className="qa-indev-actions">
                         <button
+                          type="button"
                           className="qa-action-btn qa-action-indev qa-action-clickable"
                           title={`View ${ticket.ticketId} details`}
                           onClick={() => viewTicket(testId)}
@@ -452,6 +455,7 @@ export default function QATrackerView({
                           ⚡ {ticket.ticketId}
                         </button>
                         <button
+                          type="button"
                           className="qa-action-btn qa-action-copy"
                           onClick={() => copyContextBundle(testId)}
                           title="Copy agent context bundle"
@@ -459,6 +463,7 @@ export default function QATrackerView({
                           📋
                         </button>
                         <button
+                          type="button"
                           className="qa-action-btn qa-action-copy"
                           onClick={() => copyLaunchCommand(testId)}
                           title="Copy Claude Code launch command"
@@ -479,6 +484,7 @@ export default function QATrackerView({
       {totalPages > 1 && (
         <div className="qa-pagination">
           <button
+            type="button"
             className="btn-back"
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage <= 1}
@@ -486,10 +492,11 @@ export default function QATrackerView({
           >
             ← Prev
           </button>
-          <span style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", fontWeight: 600 }}>
+          <span className="qa-pagination-label">
             Page {currentPage} of {totalPages}
           </span>
           <button
+            type="button"
             className="btn-back"
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage >= totalPages}

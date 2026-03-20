@@ -79,25 +79,19 @@ export default function AgentsView({
   const selectedAgent = CODE_AGENTS.find((a) => a.id === agentType);
 
   return (
-    <div className="animate-fade" style={{ display: "flex", gap: "var(--space-4)", height: "calc(100vh - 180px)", minHeight: 500 }}>
-      {/* ─── Left: Dispatch + Job List ──────────────────────────── */}
-      <div style={{ width: 360, flexShrink: 0, display: "flex", flexDirection: "column", gap: "var(--space-4)", overflow: "hidden" }}>
+    <div className="animate-fade agents-layout">
+      {/* Left: Dispatch + Job List */}
+      <div className="agents-left-col">
         {/* Dispatch Form */}
-        <div style={{
-          background: "var(--bg-card)",
-          border: "1px solid var(--border-subtle)",
-          borderRadius: "var(--radius-lg)",
-          padding: "var(--space-4)",
-        }}>
-          <div style={{ fontSize: "var(--text-sm)", fontWeight: 700, marginBottom: "var(--space-3)", color: "var(--text-primary)" }}>
-            Dispatch Agent
-          </div>
+        <div className="dispatch-panel">
+          <div className="dispatch-title">Dispatch Agent</div>
 
           {/* Agent selector */}
-          <div style={{ display: "flex", gap: "var(--space-2)", marginBottom: "var(--space-3)", flexWrap: "wrap" }}>
+          <div className="agent-selector">
             {CODE_AGENTS.map((agent) => (
               <button
                 key={agent.id}
+                type="button"
                 onClick={() => setAgentType(agent.id)}
                 style={{
                   padding: "4px 10px",
@@ -117,18 +111,9 @@ export default function AgentsView({
 
           {/* Repo selector */}
           <select
+            className="dispatch-select"
             value={repo}
             onChange={(e) => setRepo(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "6px 10px",
-              fontSize: "var(--text-xs)",
-              background: "var(--bg-input, var(--bg-card))",
-              border: "1px solid var(--border-subtle)",
-              borderRadius: "var(--radius-sm)",
-              color: "var(--text-primary)",
-              marginBottom: "var(--space-3)",
-            }}
           >
             {REPOS.map((r) => (
               <option key={r.id} value={r.id}>{r.icon} {r.label}</option>
@@ -138,90 +123,43 @@ export default function AgentsView({
           {/* Ticket ID (optional) */}
           <input
             type="text"
+            className="dispatch-input"
             placeholder="Ticket ID (optional, e.g. BIT-37)"
             value={ticketId}
             onChange={(e) => setTicketId(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "6px 10px",
-              fontSize: "var(--text-xs)",
-              background: "var(--bg-input, var(--bg-card))",
-              border: "1px solid var(--border-subtle)",
-              borderRadius: "var(--radius-sm)",
-              color: "var(--text-primary)",
-              marginBottom: "var(--space-3)",
-              boxSizing: "border-box",
-            }}
           />
 
           {/* Prompt */}
           <textarea
+            className="dispatch-textarea"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder={`What should ${selectedAgent?.id || "the agent"} do?`}
             rows={4}
-            style={{
-              width: "100%",
-              padding: "8px 10px",
-              fontSize: "var(--text-xs)",
-              fontFamily: "inherit",
-              background: "var(--bg-input, var(--bg-card))",
-              border: "1px solid var(--border-subtle)",
-              borderRadius: "var(--radius-sm)",
-              color: "var(--text-primary)",
-              resize: "vertical",
-              marginBottom: "var(--space-3)",
-              boxSizing: "border-box",
-            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleDispatch();
             }}
           />
 
           <button
+            type="button"
             onClick={handleDispatch}
             disabled={dispatching || !prompt.trim()}
-            style={{
-              width: "100%",
-              padding: "8px",
-              fontSize: "var(--text-sm)",
-              fontWeight: 700,
-              borderRadius: "var(--radius-sm)",
-              border: "none",
-              background: selectedAgent?.color || "var(--accent-indigo)",
-              color: "#000",
-              cursor: dispatching || !prompt.trim() ? "not-allowed" : "pointer",
-              opacity: dispatching || !prompt.trim() ? 0.5 : 1,
-            }}
+            className="dispatch-submit"
+            style={{ background: selectedAgent?.color || "var(--accent-indigo)" }}
           >
             {dispatching ? "Dispatching..." : "Dispatch"}
           </button>
         </div>
 
         {/* Job List */}
-        <div style={{
-          flex: 1,
-          overflow: "auto",
-          background: "var(--bg-card)",
-          border: "1px solid var(--border-subtle)",
-          borderRadius: "var(--radius-lg)",
-          padding: "var(--space-3)",
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-3)" }}>
-            <span style={{ fontSize: "var(--text-sm)", fontWeight: 700, color: "var(--text-primary)" }}>
-              Jobs ({filteredJobs.length})
-            </span>
+        <div className="job-list-panel">
+          <div className="job-list-header">
+            <span className="job-list-title">Jobs ({filteredJobs.length})</span>
             <select
+              className="job-filter-select"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              style={{
-                padding: "2px 8px",
-                fontSize: "var(--text-xs)",
-                background: "transparent",
-                border: "1px solid var(--border-subtle)",
-                borderRadius: "var(--radius-sm)",
-                color: "var(--text-muted)",
-              }}
             >
               <option value="all">All</option>
               <option value="running">Running</option>
@@ -231,10 +169,10 @@ export default function AgentsView({
             </select>
           </div>
 
-          {loading && <div style={{ color: "var(--text-muted)", fontSize: "var(--text-xs)", padding: "var(--space-4)", textAlign: "center" }}>Loading...</div>}
+          {loading && <div className="job-empty">Loading...</div>}
 
           {!loading && filteredJobs.length === 0 && (
-            <div style={{ color: "var(--text-muted)", fontSize: "var(--text-xs)", padding: "var(--space-4)", textAlign: "center" }}>
+            <div className="job-empty">
               No jobs yet. Dispatch an agent to get started.
             </div>
           )}
@@ -246,35 +184,35 @@ export default function AgentsView({
             return (
               <div
                 key={job.id}
+                className="job-item"
                 onClick={() => setActiveJobId(job.id)}
                 style={{
-                  padding: "8px 10px",
-                  marginBottom: "var(--space-2)",
-                  borderRadius: "var(--radius-sm)",
-                  border: isActive ? `1px solid ${agent?.color || "var(--accent-indigo)"}` : "1px solid var(--border-subtle)",
-                  background: isActive ? `${agent?.color || "var(--accent-indigo)"}08` : "transparent",
-                  cursor: "pointer",
+                  border: isActive
+                    ? `1px solid ${agent?.color || "var(--accent-indigo)"}`
+                    : "1px solid var(--border-subtle)",
+                  background: isActive
+                    ? `${agent?.color || "var(--accent-indigo)"}08`
+                    : "transparent",
                 }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
-                  <span style={{ fontSize: "var(--text-xs)", fontWeight: 700, color: agent?.color || "var(--text-primary)" }}>
+                <div className="job-item-header">
+                  <span className="job-item-agent" style={{ color: agent?.color || "var(--text-primary)" }}>
                     {agent?.icon} {job.agentType} #{job.id}
                   </span>
-                  <span style={{
-                    fontSize: "var(--text-xs)",
-                    fontWeight: 600,
-                    padding: "1px 6px",
-                    borderRadius: "var(--radius-sm)",
-                    color: STATUS_COLORS[job.status] || "var(--text-muted)",
-                    border: `1px solid ${STATUS_COLORS[job.status] || "var(--border-subtle)"}`,
-                  }}>
+                  <span
+                    className="job-status-badge"
+                    style={{
+                      color: STATUS_COLORS[job.status] || "var(--text-muted)",
+                      border: `1px solid ${STATUS_COLORS[job.status] || "var(--border-subtle)"}`,
+                    }}
+                  >
                     {STATUS_LABELS[job.status] || job.status}
                   </span>
                 </div>
-                <div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div className="job-item-repo">
                   {input?.repo || "—"} {job.ticketId ? `• ${job.ticketId}` : ""}
                 </div>
-                <div style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", marginTop: 2 }}>
+                <div className="job-item-time">
                   {formatTime(job.createdAt)}
                   {job.finishedAt && ` • ${elapsed(job.startedAt, job.finishedAt)}`}
                 </div>
@@ -284,41 +222,46 @@ export default function AgentsView({
         </div>
       </div>
 
-      {/* ─── Right: Live Terminal + Actions ─────────────────────── */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "var(--space-3)", overflow: "hidden" }}>
+      {/* Right: Live Terminal + Actions */}
+      <div className="agents-right-col">
         {/* Job header */}
         {activeJob && (
-          <div style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "var(--space-3) var(--space-4)",
-            background: "var(--bg-card)",
-            border: "1px solid var(--border-subtle)",
-            borderRadius: "var(--radius-lg)",
-          }}>
+          <div className="job-header-panel">
             <div>
-              <span style={{ fontWeight: 700, fontSize: "var(--text-sm)", color: "var(--text-primary)" }}>
-                Job #{activeJob.id}
-              </span>
-              <span style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", marginLeft: "var(--space-3)" }}>
+              <span className="job-header-title">Job #{activeJob.id}</span>
+              <span className="job-header-meta">
                 {activeJob.agentType} • {safeParseJson(activeJob.inputJson)?.repo}
                 {activeJob.ticketId ? ` • ${activeJob.ticketId}` : ""}
               </span>
             </div>
-            <div style={{ display: "flex", gap: "var(--space-2)" }}>
+            <div className="job-header-actions">
               {activeJob.status === "running" && (
-                <button onClick={() => cancel(activeJob.id)} className="step-btn" style={{ fontSize: "var(--text-xs)", color: "var(--accent-red, #ef4444)" }}>
+                <button
+                  type="button"
+                  onClick={() => cancel(activeJob.id)}
+                  className="step-btn"
+                  style={{ fontSize: "var(--text-xs)", color: "var(--accent-red, #ef4444)" }}
+                >
                   Stop
                 </button>
               )}
               {["failed", "cancelled"].includes(activeJob.status) && (
-                <button onClick={() => retry(activeJob.id)} className="step-btn" style={{ fontSize: "var(--text-xs)", color: "var(--accent-cyan)" }}>
+                <button
+                  type="button"
+                  onClick={() => retry(activeJob.id)}
+                  className="step-btn"
+                  style={{ fontSize: "var(--text-xs)", color: "var(--accent-cyan)" }}
+                >
                   Retry
                 </button>
               )}
               {activeJob.status === "done" && safeParseJson(activeJob.resultJson)?.diff && (
-                <button onClick={() => showToast("Review modal coming soon", "info")} className="step-btn" style={{ fontSize: "var(--text-xs)", color: "var(--accent-green)" }}>
+                <button
+                  type="button"
+                  onClick={() => showToast("Review modal coming soon", "info")}
+                  className="step-btn"
+                  style={{ fontSize: "var(--text-xs)", color: "var(--accent-green)" }}
+                >
                   Review Changes
                 </button>
               )}
@@ -327,23 +270,9 @@ export default function AgentsView({
         )}
 
         {/* Terminal */}
-        <div
-          ref={terminalRef}
-          style={{
-            flex: 1,
-            background: "#0d1117",
-            border: "1px solid var(--border-subtle)",
-            borderRadius: "var(--radius-lg)",
-            padding: "var(--space-3)",
-            fontFamily: "'SF Mono', 'Fira Code', 'Cascadia Code', monospace",
-            fontSize: "var(--text-xs)",
-            lineHeight: 1.6,
-            overflow: "auto",
-            color: "#c9d1d9",
-          }}
-        >
+        <div ref={terminalRef} className="agent-terminal">
           {!activeJobId && (
-            <div style={{ color: "#484f58", padding: "var(--space-4)", textAlign: "center" }}>
+            <div className="terminal-placeholder">
               Select a job or dispatch an agent to see live output here.
             </div>
           )}
@@ -355,8 +284,11 @@ export default function AgentsView({
           )}
 
           {activeJobLogs.map((log, i) => (
-            <div key={i} style={{ color: log.level === "error" ? "#f85149" : "#c9d1d9", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-              <span style={{ color: "#484f58", marginRight: 8, userSelect: "none" }}>
+            <div
+              key={i}
+              className={`terminal-log ${log.level === "error" ? "terminal-log-error" : "terminal-log-normal"}`}
+            >
+              <span className="terminal-log-ts">
                 {formatLogTime(log.ts || log.createdAt)}
               </span>
               {log.message}
@@ -364,9 +296,7 @@ export default function AgentsView({
           ))}
 
           {activeJob?.status === "running" && (
-            <div style={{ color: "var(--accent-cyan)", animation: "pulse 1.5s infinite" }}>
-              ▋
-            </div>
+            <div className="terminal-cursor">▋</div>
           )}
         </div>
       </div>
@@ -377,7 +307,11 @@ export default function AgentsView({
 // ─── Helpers ──────────────────────────────────────────────────────
 
 function safeParseJson(str) {
-  try { return JSON.parse(str); } catch { return null; }
+  try {
+    return JSON.parse(str);
+  } catch {
+    return null;
+  }
 }
 
 function formatTime(iso) {
