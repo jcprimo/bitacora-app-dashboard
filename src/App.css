@@ -1687,6 +1687,7 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  overscroll-behavior: contain;
   min-height: 0;
   scrollbar-width: thin;
   scrollbar-color: var(--text-dim) var(--surface-inset, rgba(0,0,0,0.08));
@@ -1924,6 +1925,7 @@
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   overflow-y: auto;
+  overscroll-behavior: contain;
   min-height: 0;
   display: flex;
   flex-direction: column;
