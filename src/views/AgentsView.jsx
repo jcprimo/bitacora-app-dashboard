@@ -134,7 +134,12 @@ export default function AgentsView({
   const selectedProject = PROJECTS.find((p) => p.id === repo);
 
   return (
-    <div className="animate-fade agents-layout">
+    <div className="animate-fade">
+      <div className="view-header">
+        <h1 className="view-title">Agents</h1>
+        <p className="view-desc">Dispatch AI agents to work on tasks across your projects.</p>
+      </div>
+    <div className="agents-layout">
       {/* Left: Dispatch + Job List */}
       <div className="agents-left-col">
         {/* Dispatch Form */}
@@ -447,6 +452,7 @@ export default function AgentsView({
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }

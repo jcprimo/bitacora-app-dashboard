@@ -1848,8 +1848,9 @@
   display: block;
 }
 
+/* File drawer — slide-in from left, used on all screen sizes */
 .md-mobile-file-drawer {
-  display: none;
+  display: flex;
   position: fixed;
   top: 0;
   left: 0;
@@ -1868,9 +1869,9 @@
   transform: translateX(0);
 }
 
-/* "Files" toggle button shown in the reader header on mobile */
+/* "Files" trigger button — always visible in the reader header */
 .md-mobile-files-btn {
-  display: none;
+  display: flex;
   align-items: center;
   gap: var(--space-2);
   padding: 6px 12px;
@@ -1885,6 +1886,10 @@
   white-space: nowrap;
   flex-shrink: 0;
   transition: background 0.15s ease;
+}
+.md-mobile-files-btn:hover {
+  background: var(--accent-indigo-bg);
+  border-color: var(--accent-indigo-border);
 }
 .md-mobile-files-btn:active {
   background: var(--accent-indigo-bg);
@@ -3241,14 +3246,8 @@
   .header { flex-direction: column; gap: var(--space-3); align-items: flex-start; }
   .budget-grid { grid-template-columns: 1fr; }
 
-  /* Markdown viewer — mobile overlay drawer mode */
-  /* On mobile the sidebar becomes a fixed drawer; the layout stays as a row
-     so the reader can always fill the full width. */
+  /* Markdown viewer — drawer is used on all screen sizes; no mobile-specific overrides needed */
   .md-layout-flex { flex-direction: row; }
-  .md-layout-flex .md-resize-handle { display: none; }
-  .md-layout-flex .md-sidebar { display: none; } /* desktop sidebar hidden; drawer used instead */
-  .md-mobile-file-drawer { display: flex; }
-  .md-mobile-files-btn { display: flex; }
 
   /* ─── Sidebar — mobile layout ─────────────────────────────────── */
 
@@ -4458,6 +4457,24 @@
 .qa-table-action-cell { text-align: center; }
 .qa-indev-actions { display: flex; gap: 0.3rem; justify-content: center; }
 .qa-pagination-label { font-size: var(--text-sm); color: var(--text-muted); font-weight: 600; }
+
+/* ─── View Headers ────────────────────────────────────────────── */
+.view-header {
+  margin-bottom: var(--space-4);
+}
+
+.view-title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.view-desc {
+  font-size: var(--text-sm);
+  color: var(--text-dim);
+  margin: var(--space-1) 0 0;
+}
 
 /* ─── MarkdownView ────────────────────────────────────────────── */
 .md-reader-select-hint { padding: 2rem; text-align: center; color: var(--text-muted); }

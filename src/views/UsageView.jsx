@@ -30,6 +30,11 @@ export default function UsageView({
 
   return (
     <div className="animate-fade">
+      <div className="view-header">
+        <h1 className="view-title">AI Usage</h1>
+        <p className="view-desc">Monitor API spend, token consumption, and cost trends.</p>
+      </div>
+
       {/* Sub-tabs */}
       <div className="nav-tabs">
         <button
