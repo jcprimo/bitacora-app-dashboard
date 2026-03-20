@@ -21,7 +21,6 @@ export default function MarkdownView({
   const [rendering, setRendering] = useState(false);
 
   // ─── Resizable sidebar ─────────────────────────────────────────
-  // sidebarWidth is in pixels; user drags the handle to resize.
   const [sidebarWidth, setSidebarWidth] = useState(220);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const isDraggingHandle = useRef(false);
@@ -124,7 +123,7 @@ export default function MarkdownView({
     />
   );
 
-  // ─── Empty state ──────────────────────────────────────────────────
+  // ─── Empty state ───────────────────────────────────────────────
   if (files.length === 0) {
     return (
       <div className="animate-fade">
@@ -145,6 +144,7 @@ export default function MarkdownView({
           </p>
           {!dragging && (
             <button
+              type="button"
               className="btn-generate"
               onClick={() => fileInputRef.current?.click()}
               style={{
@@ -163,7 +163,7 @@ export default function MarkdownView({
     );
   }
 
-  // ─── Loaded state: sidebar + resize handle + reader ───────────────
+  // ─── Loaded state: sidebar + resize handle + reader ────────────
   return (
     <div
       ref={layoutRef}
@@ -190,7 +190,7 @@ export default function MarkdownView({
           <>
             <div className="md-sidebar-header">
               <span className="md-sidebar-title">Files ({files.length})</span>
-              <div style={{ display: "flex", gap: "0.3rem" }}>
+              <div className="md-sidebar-header-actions">
                 <button
                   type="button"
                   className="md-add-btn"
@@ -201,29 +201,28 @@ export default function MarkdownView({
                 </button>
               </div>
             </div>
-            {/* File list — sidebar scrolls when list overflows sidebar height */}
             <div className="md-file-list md-file-list-scroll">
               {files.map((f) => {
                 const isVisited = visitedDocIds.has(Number(f.id));
                 return (
-                <div
-                  key={f.id}
-                  className={`md-file-item ${f.id === activeFileId ? "md-file-active" : ""} ${!isVisited ? "md-file-unvisited" : ""}`}
-                  onClick={() => { setActiveFileId(f.id); markDocVisited(f.id); }}
-                >
-                  <div className="md-file-info">
-                    <span className="md-file-name">{f.name}</span>
-                    <span className="md-file-path" title={f.path}>{f.path}</span>
-                  </div>
-                  <button
-                    type="button"
-                    className="md-file-remove"
-                    onClick={(e) => { e.stopPropagation(); removeFile(f.id); }}
-                    title="Remove file"
+                  <div
+                    key={f.id}
+                    className={`md-file-item ${f.id === activeFileId ? "md-file-active" : ""} ${!isVisited ? "md-file-unvisited" : ""}`}
+                    onClick={() => { setActiveFileId(f.id); markDocVisited(f.id); }}
                   >
-                    ×
-                  </button>
-                </div>
+                    <div className="md-file-info">
+                      <span className="md-file-name">{f.name}</span>
+                      <span className="md-file-path" title={f.path}>{f.path}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="md-file-remove"
+                      onClick={(e) => { e.stopPropagation(); removeFile(f.id); }}
+                      title="Remove file"
+                    >
+                      ×
+                    </button>
+                  </div>
                 );
               })}
             </div>
@@ -268,7 +267,7 @@ export default function MarkdownView({
             />
           </>
         ) : (
-          <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-muted)" }}>
+          <div className="md-reader-select-hint">
             Select a file from the sidebar
           </div>
         )}

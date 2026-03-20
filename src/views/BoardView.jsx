@@ -17,37 +17,28 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
   const [hideDone, setHideDone] = useState(true);
 
   // ─── Sort state ────────────────────────────────────────────────
-  // Default: newest first (desc by idReadable numeric part)
   const [sortDir, setSortDir] = useState("desc");
-
   const toggleSort = () => setSortDir((d) => (d === "desc" ? "asc" : "desc"));
 
-  // Count done tickets for the indicator
   const doneCount = useMemo(
     () => issues.filter((i) => getCustomFieldValue(i, "Stage") === "Done").length,
     [issues]
   );
 
-  // Apply client-side filters + sort
   const filteredIssues = useMemo(() => {
     const filtered = issues.filter((issue) => {
       const stage = getCustomFieldValue(issue, "Stage");
       const priority = getCustomFieldValue(issue, "Priority");
-
       if (hideDone && stage === "Done") return false;
       if (stageFilter !== "All" && stage !== stageFilter) return false;
       if (priorityFilter !== "All" && priority !== priorityFilter) return false;
-
       return true;
     });
-
-    // Sort by the numeric portion of idReadable (e.g. "BIT-42" → 42)
     filtered.sort((a, b) => {
       const numA = parseInt((a.idReadable || "").replace(/\D/g, ""), 10) || 0;
       const numB = parseInt((b.idReadable || "").replace(/\D/g, ""), 10) || 0;
       return sortDir === "desc" ? numB - numA : numA - numB;
     });
-
     return filtered;
   }, [issues, stageFilter, priorityFilter, hideDone, sortDir]);
 
@@ -155,7 +146,7 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
       </div>
 
       {/* Issue count + sort control */}
-      <div className="board-count" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div className="board-count board-count-row">
         <span>
           {filteredIssues.length} of {issues.length} tickets
           {hideDone && doneCount > 0 && (
@@ -173,30 +164,26 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
       </div>
 
       {/* Issue list */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+      <div className="board-list">
         {filteredIssues.length === 0 && !loading && (
-          <div style={{ textAlign: "center", padding: "3rem", color: "var(--text-dim)" }}>
-            <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>
+          <div className="board-empty-state">
+            <div className="board-empty-icon">
               {issues.length > 0 ? "🔍" : "📭"}
             </div>
-            <div style={{ fontSize: "var(--text-base)" }}>
+            <div className="board-empty-msg">
               {issues.length > 0 ? "No tickets match the current filters" : "No issues in Bitacora"}
             </div>
             {issues.length > 0 && (
               <button
                 type="button"
+                className="board-clear-btn"
                 onClick={() => { setStageFilter("All"); setPriorityFilter("All"); setHideDone(false); }}
-                style={{
-                  marginTop: "0.75rem", background: "none", border: "1px solid var(--border-subtle)",
-                  borderRadius: "var(--radius-sm)", color: "var(--accent-indigo)", fontSize: "var(--text-sm)",
-                  fontWeight: 600, padding: "0.4rem 0.85rem", cursor: "pointer", fontFamily: "var(--font-sans)",
-                }}
               >
                 Clear all filters
               </button>
             )}
             {issues.length === 0 && (
-              <div style={{ fontSize: "var(--text-xs)", marginTop: "0.25rem" }}>Create your first ticket to get started</div>
+              <div className="board-empty-hint">Create your first ticket to get started</div>
             )}
           </div>
         )}
@@ -205,8 +192,6 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
           const priority = getCustomFieldValue(issue, "Priority");
           const stage = getCustomFieldValue(issue, "Stage");
           const isNew = newTicketIds && newTicketIds.has(issue.id);
-          // A ticket is unvisited if it's not in the visited set (regardless of
-          // whether it arrived via SSE — covers all tickets never clicked).
           const isUnvisited = visitedTicketIds ? !visitedTicketIds.has(issue.id) : false;
           return (
             <div
@@ -225,44 +210,33 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
               onMouseEnter={(e) => (e.currentTarget.style.borderColor = isNew ? "var(--accent-indigo)" : isUnvisited ? "var(--accent-amber)" : "var(--border-medium)")}
               onMouseLeave={(e) => (e.currentTarget.style.borderColor = isNew ? "var(--accent-indigo)" : isUnvisited ? "var(--accent-amber-border)" : "var(--border-subtle)")}
             >
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", minWidth: "58px", gap: "2px" }}>
-                  <span style={{
-                    fontSize: "var(--text-xs)", fontWeight: 700, fontFamily: "var(--font-mono)",
-                    color: "var(--accent-indigo)", paddingTop: "2px",
-                  }}>
-                    {issue.idReadable}
-                  </span>
-                  {isNew && (
-                    <span className="board-new-badge">NEW</span>
-                  )}
+              <div className="board-card-inner">
+                <div className="board-card-id-col">
+                  <span className="board-card-id">{issue.idReadable}</span>
+                  {isNew && <span className="board-new-badge">NEW</span>}
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: "var(--text-base)", fontWeight: 600, color: "var(--text-primary)", lineHeight: 1.3 }}>
-                    {issue.summary}
-                  </div>
-                  <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.4rem", flexWrap: "wrap" }}>
+                <div className="board-card-body">
+                  <div className="board-card-summary">{issue.summary}</div>
+                  <div className="board-card-badges">
                     {stage && (() => {
                       const sc = stageColor(stage);
                       const ss = getColorShades(sc);
                       return (
-                        <span style={{
-                          fontSize: "var(--text-xs)", fontWeight: 700, padding: "0.15rem 0.45rem",
-                          borderRadius: 10, background: ss.bg, color: sc, border: `1px solid ${ss.border}`,
-                        }}>{stage}</span>
+                        <span className="issue-badge" style={{ background: ss.bg, color: sc, border: `1px solid ${ss.border}` }}>
+                          {stage}
+                        </span>
                       );
                     })()}
                     {priority && (() => {
                       const pc = priorityColor(priority);
                       const ps = getColorShades(pc);
                       return (
-                        <span style={{
-                          fontSize: "var(--text-xs)", fontWeight: 700, padding: "0.15rem 0.45rem",
-                          borderRadius: 10, background: ps.bg, color: pc, border: `1px solid ${ps.border}`,
-                        }}>{priority}</span>
+                        <span className="issue-badge" style={{ background: ps.bg, color: pc, border: `1px solid ${ps.border}` }}>
+                          {priority}
+                        </span>
                       );
                     })()}
-                    <span style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)" }}>
+                    <span className="board-card-date">
                       {formatDate(issue.updated || issue.created)}
                     </span>
                   </div>

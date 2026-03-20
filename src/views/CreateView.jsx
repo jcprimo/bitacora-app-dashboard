@@ -60,20 +60,18 @@ export default function CreateView({
         {/* Active agent info */}
         <div className="panel" style={{ borderColor: `${agentColor}20` }}>
           <div className="panel-label" style={{ color: agentColor }}>Active Agent</div>
-          <div style={{ fontSize: "var(--text-base)", fontWeight: 600, marginBottom: "0.25rem" }}>
-            {selectedAgent.icon} {selectedAgent.label}
-          </div>
-          <div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", lineHeight: 1.5 }}>
-            {selectedAgent.desc}
-          </div>
-          <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.4rem" }}>
+          <div className="agent-info-name">{selectedAgent.icon} {selectedAgent.label}</div>
+          <div className="agent-info-desc">{selectedAgent.desc}</div>
+          <div className="agent-tag-row">
             {(() => {
               const agentShades = getColorShades(agentColor);
               return (
-                <span style={{
-                  fontSize: "var(--text-xs)", fontWeight: 600, padding: "0.15rem 0.45rem",
-                  borderRadius: 10, background: agentShades.bg, color: agentColor, border: `1px solid ${agentShades.border}`,
-                }}>{selectedAgent.defaultPriority}</span>
+                <span
+                  className="agent-default-priority"
+                  style={{ background: agentShades.bg, color: agentColor, border: `1px solid ${agentShades.border}` }}
+                >
+                  {selectedAgent.defaultPriority}
+                </span>
               );
             })()}
           </div>
@@ -84,41 +82,32 @@ export default function CreateView({
           <div className="panel" style={{ borderColor: hasAIKey ? "rgba(124,106,255,0.15)" : "rgba(248,113,113,0.15)" }}>
             <div className="panel-label">{hasAIKey ? "AI Token Estimate" : "🔑 AI Not Configured"}</div>
             {!hasAIKey && (
-              <div style={{ fontSize: "var(--text-xs)", color: "var(--accent-red)", lineHeight: 1.6, marginBottom: "0.5rem" }}>
-                Add your Anthropic API key to <code style={{ fontSize: "var(--text-xs)", background: "var(--bg-input)", padding: "1px 4px", borderRadius: 3 }}>.env</code>:
-                <div style={{ fontFamily: "var(--font-mono)", marginTop: "0.3rem", color: "var(--text-secondary)" }}>
-                  VITE_ANTHROPIC_KEY=sk-ant-...
-                </div>
-                <div style={{ marginTop: "0.3rem", color: "var(--text-dim)" }}>Then restart the dev server.</div>
+              <div className="ai-unconfigured-msg">
+                Add your Anthropic API key to <code style={{ fontSize: "0.6rem", background: "var(--bg-input)", padding: "1px 4px", borderRadius: 3 }}>.env</code>:
+                <div className="ai-unconfigured-mono">VITE_ANTHROPIC_KEY=sk-ant-...</div>
+                <div className="ai-unconfigured-hint">Then restart the dev server.</div>
               </div>
             )}
-            <div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", lineHeight: 1.6 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
+            <div className="token-est-rows">
+              <div className="token-est-row">
                 <span>System prompt</span>
-                <span style={{ fontFamily: "var(--font-mono)", color: "var(--text-secondary)" }}>~250</span>
+                <span className="token-est-value">~250</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
+              <div className="token-est-row">
                 <span>Your input</span>
-                <span style={{ fontFamily: "var(--font-mono)", color: "var(--text-secondary)" }}>~{tokenEst.input - 250}</span>
+                <span className="token-est-value">~{tokenEst.input - 250}</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
+              <div className="token-est-row">
                 <span>JSON output (est.)</span>
-                <span style={{ fontFamily: "var(--font-mono)", color: "var(--text-secondary)" }}>~{tokenEst.output}</span>
+                <span className="token-est-value">~{tokenEst.output}</span>
               </div>
-              <div style={{
-                display: "flex", justifyContent: "space-between",
-                borderTop: "1px solid var(--border-subtle)", paddingTop: "0.35rem", marginTop: "0.35rem",
-                fontWeight: 600, color: "var(--text-primary)",
-              }}>
+              <div className="token-est-total">
                 <span>Total</span>
-                <span style={{ fontFamily: "var(--font-mono)" }}>~{tokenEst.total} tokens</span>
+                <span className="token-est-total-value">~{tokenEst.total} tokens</span>
               </div>
-              <div style={{
-                display: "flex", justifyContent: "space-between", marginTop: "0.25rem",
-                fontSize: "var(--text-xs)", color: "var(--accent-green)",
-              }}>
+              <div className="token-est-cost">
                 <span>Est. cost</span>
-                <span style={{ fontFamily: "var(--font-mono)" }}>${costEst.toFixed(4)}</span>
+                <span className="token-est-cost-value">${costEst.toFixed(4)}</span>
               </div>
             </div>
             <div style={{
@@ -134,11 +123,11 @@ export default function CreateView({
         {createStep === "input" && (
           <div className="panel" style={{ borderColor: "rgba(251,191,36,0.15)" }}>
             <div className="panel-label" style={{ color: "var(--accent-amber)" }}>AI Prompt Tips</div>
-            <ul style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", lineHeight: 1.7, paddingLeft: "1rem", margin: 0 }}>
-              <li><strong style={{ color: "var(--text-secondary)" }}>Be specific</strong> — "teachers on iPhone need to log incidents in under 30 seconds" beats "add logging"</li>
+            <ul style={{ fontSize: "0.63rem", color: "var(--text-muted)", lineHeight: 1.7, paddingLeft: "1rem", margin: 0 }}>
+              <li><strong style={{ color: "var(--text-secondary)" }}>Be specific</strong> — &ldquo;teachers on iPhone need to log incidents in under 30 seconds&rdquo; beats &ldquo;add logging&rdquo;</li>
               <li><strong style={{ color: "var(--text-secondary)" }}>Name the user</strong> — teacher, principal, or admin. The agent tailors the ticket to that persona</li>
               <li><strong style={{ color: "var(--text-secondary)" }}>Mention compliance</strong> — if it touches student data, say so. The agent will flag FERPA/LFPDPPP risks</li>
-              <li><strong style={{ color: "var(--text-secondary)" }}>One task per ticket</strong> — "build the form AND redesign the dashboard" should be two separate tickets</li>
+              <li><strong style={{ color: "var(--text-secondary)" }}>One task per ticket</strong> — &ldquo;build the form AND redesign the dashboard&rdquo; should be two separate tickets</li>
               <li><strong style={{ color: "var(--text-secondary)" }}>Include constraints</strong> — deadlines, device targets (iPhone only?), language requirements (EN, ES, both)</li>
               <li><strong style={{ color: "var(--text-secondary)" }}>Shorter is fine</strong> — even 1-2 sentences work. The agent expands with structure, acceptance criteria, and compliance checks</li>
             </ul>
@@ -150,33 +139,28 @@ export default function CreateView({
           <div className="panel-label" style={{ color: overBudget ? "var(--accent-red)" : "var(--accent-cyan)" }}>
             {overBudget ? "Budget Exceeded" : "AI Spend"}
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--text-sm)", fontWeight: 700, color: overBudget ? "var(--accent-red)" : "var(--accent-green)" }}>
+          <div className="create-spend-row" style={{ color: overBudget ? "var(--accent-red)" : "var(--accent-green)" }}>
             <span>{aiUsage.totalRequests} requests</span>
             <span style={{ fontFamily: "var(--font-mono)" }}>${combinedSpend.toFixed(4)}</span>
           </div>
           {openaiTotalSpend > 0 && (
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--text-xs)", color: "var(--text-dim)", marginTop: "0.2rem" }}>
+            <div className="create-spend-breakdown">
               <span>Anthropic ${totalSpendUsd.toFixed(4)}</span>
               <span>OpenAI ${openaiTotalSpend.toFixed(4)}</span>
             </div>
           )}
           {aiUsage.budgetUsd && (
-            <div style={{ marginTop: "0.45rem" }}>
-              <div style={{ width: "100%", height: "4px", borderRadius: "2px", background: "var(--bg-input)", overflow: "hidden" }}>
-                <div style={{
-                  width: `${budgetPct}%`, height: "100%", borderRadius: "2px",
-                  background: budgetPct > 90 ? "var(--accent-red)" : budgetPct > 70 ? "var(--accent-amber)" : "var(--accent-green)",
-                }} />
-              </div>
+            <div className="budget-mini-bar-track">
+              <div style={{
+                width: `${budgetPct}%`, height: "100%", borderRadius: "2px",
+                background: budgetPct > 90 ? "var(--accent-red)" : budgetPct > 70 ? "var(--accent-amber)" : "var(--accent-green)",
+              }} />
             </div>
           )}
           <button
+            type="button"
+            className="create-spend-btn"
             onClick={() => setView("usage")}
-            style={{
-              marginTop: "0.5rem", width: "100%", background: "none", border: "1px solid var(--border-subtle)",
-              borderRadius: "var(--radius-sm)", color: "var(--accent-cyan)", fontSize: "var(--text-xs)", fontWeight: 600,
-              padding: "0.35rem", cursor: "pointer", transition: "border-color 0.2s",
-            }}
           >
             View full usage →
           </button>
@@ -218,13 +202,9 @@ export default function CreateView({
                 placeholder={getPlaceholder(selectedAgent.id)}
               />
               {aiError && (
-                <div style={{
-                  marginTop: "0.75rem", padding: "0.6rem 0.85rem", borderRadius: "var(--radius-md)",
-                  background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.25)",
-                  fontSize: "var(--text-xs)", color: "var(--accent-red)", lineHeight: 1.5,
-                }}>
+                <div className="ai-error-banner">
                   <strong>AI Error:</strong> {aiError}
-                  <div style={{ marginTop: "0.3rem", color: "var(--text-muted)" }}>
+                  <div className="ai-error-hint">
                     Use <strong>Template Generate</strong> instead — no API key needed.
                   </div>
                 </div>
@@ -265,6 +245,7 @@ export default function CreateView({
                   📝 Template Generate
                 </button>
                 <button
+                  type="button"
                   className="btn-generate"
                   onClick={() => {
                     setDraft({
@@ -314,7 +295,7 @@ export default function CreateView({
                   <div className="review-field-label">Effort</div>
                   <div className="effort-badges">
                     {EFFORTS.map((e) => (
-                      <button key={e} className={`effort-btn ${draft.estimated_effort === e ? "active" : ""}`}
+                      <button key={e} type="button" className={`effort-btn ${draft.estimated_effort === e ? "active" : ""}`}
                         onClick={() => setDraft((d) => ({ ...d, estimated_effort: e }))}>{e}</button>
                     ))}
                   </div>
@@ -332,8 +313,9 @@ export default function CreateView({
               </div>
 
               <div className="action-bar">
-                <button className="btn-back" onClick={() => setCreateStep("input")}>← Back</button>
+                <button type="button" className="btn-back" onClick={() => setCreateStep("input")}>← Back</button>
                 <button
+                  type="button"
                   className="btn-back"
                   title="Copy ticket as JSON for agent handoff"
                   onClick={() => copyToClipboard({
@@ -350,6 +332,7 @@ export default function CreateView({
                   📋 Copy JSON
                 </button>
                 <button
+                  type="button"
                   className="btn-ship"
                   onClick={submitTicket}
                   disabled={actionLoading === "create" || !draft.summary.trim() || !token}
@@ -374,14 +357,19 @@ export default function CreateView({
                 <div className="success-id">{draft?.createdId}</div>
                 <div className="success-summary">{draft?.summary}</div>
               </div>
-              <div style={{ marginBottom: "1rem", fontSize: "var(--text-xs)", color: agentColor, fontWeight: 600 }}>
+              <div className="success-agent-credit" style={{ color: agentColor }}>
                 {selectedAgent.icon} Created by {selectedAgent.label}
               </div>
-              <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center" }}>
-                <button className="btn-new-ticket" onClick={resetCreate}>+ Create Another</button>
-                <button className="btn-new-ticket"
+              <div className="success-nav">
+                <button type="button" className="btn-new-ticket" onClick={resetCreate}>+ Create Another</button>
+                <button
+                  type="button"
+                  className="btn-new-ticket"
                   style={{ background: "rgba(52,211,153,0.1)", borderColor: "rgba(52,211,153,0.3)", color: "var(--accent-green)" }}
-                  onClick={() => { setView("board"); loadIssues(); }}>← Back to Board</button>
+                  onClick={() => { setView("board"); loadIssues(); }}
+                >
+                  ← Back to Board
+                </button>
               </div>
             </div>
           )}

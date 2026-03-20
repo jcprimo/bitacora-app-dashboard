@@ -12,13 +12,13 @@ import { copyToClipboard } from "../utils/clipboard";
 import { renderMarkdown } from "../utils/markdownParser";
 import { stageColor, priorityColor, getColorShades } from "../utils/colors";
 
-// ─── Custom pill selector (Fix 8) ────────────────────────────────
+// ─── Custom pill selector ─────────────────────────────────────────
 // Replaces native <select> with clickable pills matching board style
 function PillSelector({ label, options, value, onChange, colorFn, disabled }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+    <div className="pill-selector-wrap">
       <div className="review-field-label">{label}</div>
-      <div style={{ display: "flex", gap: "0.3rem", flexWrap: "wrap" }}>
+      <div className="pill-selector-pills">
         {options.map((opt) => {
           const isActive = opt === value;
           const color = colorFn(opt);
@@ -27,20 +27,13 @@ function PillSelector({ label, options, value, onChange, colorFn, disabled }) {
             <button
               key={opt}
               type="button"
+              className="pill-selector-btn"
               onClick={() => !disabled && onChange(opt)}
               style={{
-                fontSize: "var(--text-xs)",
                 fontWeight: isActive ? 700 : 500,
-                fontFamily: "var(--font-sans)",
-                padding: "0.2rem 0.55rem",
-                borderRadius: "12px",
                 border: `1px solid ${isActive ? shades.border : "var(--border-subtle)"}`,
                 background: isActive ? shades.bg : "transparent",
                 color: isActive ? color : "var(--text-muted)",
-                cursor: disabled ? "not-allowed" : "pointer",
-                opacity: disabled ? 0.5 : 1,
-                transition: "all 0.15s ease",
-                whiteSpace: "nowrap",
               }}
             >
               {isActive ? "✓ " : ""}{opt}
@@ -52,7 +45,7 @@ function PillSelector({ label, options, value, onChange, colorFn, disabled }) {
   );
 }
 
-// ─── Comment timestamp helper ────────────────────────────────────
+// ─── Comment timestamp helper ─────────────────────────────────────
 function commentTime(ts) {
   if (!ts) return "";
   const d = new Date(ts);
@@ -91,14 +84,12 @@ export default function DetailView({
 
   return (
     <div className="animate-fade">
-      <button className="btn-back" onClick={() => setView("board")} style={{ marginBottom: "1rem" }}>← Back to Board</button>
+      <button type="button" className="btn-back" onClick={() => setView("board")} style={{ marginBottom: "1rem" }}>← Back to Board</button>
       <div className="content-panel" style={{ padding: "1.5rem" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.25rem" }}>
-          <span style={{ fontSize: "var(--text-base)", fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--accent-indigo)" }}>
-            {activeIssue.idReadable}
-          </span>
-          <div style={{ flex: 1 }} />
-          <span style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)" }}>
+        <div className="detail-header">
+          <span className="detail-issue-id">{activeIssue.idReadable}</span>
+          <div className="detail-spacer" />
+          <span className="detail-timestamps">
             Created {formatDate(activeIssue.created)} · Updated {formatDate(activeIssue.updated)}
           </span>
         </div>
@@ -162,6 +153,7 @@ export default function DetailView({
 
         <div className="action-bar">
           <button
+            type="button"
             className="btn-back"
             title="Copy ticket as JSON for agent handoff"
             onClick={() => copyToClipboard({
@@ -177,28 +169,28 @@ export default function DetailView({
           >
             📋 Copy JSON
           </button>
-          <button className="btn-ship" onClick={saveEdit} disabled={actionLoading === "save"}
+          <button type="button" className="btn-ship" onClick={saveEdit} disabled={actionLoading === "save"}
             style={{ flex: 1, background: "rgba(124,106,255,0.15)", borderColor: "rgba(124,106,255,0.5)", color: "var(--accent-indigo)" }}>
             {actionLoading === "save" ? <><span className="spinner" /> Saving...</> : "💾 Save Changes"}
           </button>
           {!confirmDelete ? (
-            <button className="btn-back" style={{ color: "var(--accent-red)", borderColor: "rgba(248,113,113,0.3)" }}
+            <button type="button" className="btn-back" style={{ color: "var(--accent-red)", borderColor: "rgba(248,113,113,0.3)" }}
               onClick={() => setConfirmDelete(true)}>🗑 Delete</button>
           ) : (
-            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-              <span style={{ fontSize: "var(--text-xs)", color: "var(--accent-red)", fontWeight: 600 }}>Confirm?</span>
-              <button className="btn-back"
+            <div className="detail-confirm-delete">
+              <span className="detail-confirm-text">Confirm?</span>
+              <button type="button" className="btn-back"
                 style={{ color: "var(--accent-red)", borderColor: "rgba(248,113,113,0.5)", background: "rgba(248,113,113,0.08)" }}
                 onClick={handleDelete} disabled={actionLoading === "delete"}>
                 {actionLoading === "delete" ? "Deleting..." : "Yes, delete"}
               </button>
-              <button className="btn-back" onClick={() => setConfirmDelete(false)}>Cancel</button>
+              <button type="button" className="btn-back" onClick={() => setConfirmDelete(false)}>Cancel</button>
             </div>
           )}
         </div>
       </div>
 
-      {/* ─── Comments Section ───────────────────────────────────────── */}
+      {/* ─── Comments Section ─────────────────────────────────────── */}
       <div className="detail-comments">
         <div className="detail-comments-header">
           <span className="detail-comments-title">
@@ -246,6 +238,7 @@ export default function DetailView({
             rows={2}
           />
           <button
+            type="button"
             className="detail-comment-submit"
             onClick={handlePostComment}
             disabled={!newComment.trim() || actionLoading === "comment"}
