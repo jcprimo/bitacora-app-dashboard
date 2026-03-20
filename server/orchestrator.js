@@ -16,9 +16,10 @@
 
 import { spawn } from "child_process";
 import { resolve } from "path";
+import { existsSync, readFileSync } from "fs";
 import { db } from "./db.js";
-import { agentJobs, agentLogs } from "./schema.js";
-import { eq } from "drizzle-orm";
+import { agentJobs, agentLogs, documents, users } from "./schema.js";
+import { eq, and, sql } from "drizzle-orm";
 import { broadcast } from "./sse.js";
 import {
   createWorktree,
@@ -57,6 +58,69 @@ function updateJobStatus(jobId, status, extra = {}) {
 
   const job = db.select().from(agentJobs).where(eq(agentJobs.id, jobId)).get();
   broadcast("job", { action: "updated", job });
+}
+
+/**
+ * Read DEBRIEF.md from the worktree if the agent wrote one.
+ * Returns the content string, or null if missing or unreadable.
+ */
+function collectDebrief(worktreePath) {
+  const debriefPath = resolve(worktreePath, "DEBRIEF.md");
+  try {
+    if (existsSync(debriefPath)) {
+      return readFileSync(debriefPath, "utf-8");
+    }
+  } catch (err) {
+    // Non-fatal — just means the agent didn't produce one
+    console.warn(`[orchestrator] Could not read DEBRIEF.md: ${err.message}`);
+  }
+  return null;
+}
+
+/**
+ * Store a debrief in the documents table so it appears in the Docs viewer.
+ * Uses the admin user (same as the ingest route convention).
+ * No-ops silently on any error so it never blocks job completion.
+ */
+function ingestDebrief(jobId, agentType, debriefContent) {
+  try {
+    const [admin] = db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.role, "admin"))
+      .limit(1)
+      .all();
+    if (!admin) return;
+
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const name = `DEBRIEF-job-${jobId}-${agentType}-${today}.md`;
+    const path = `agents/${agentType}`;
+
+    const [existing] = db
+      .select({ id: documents.id })
+      .from(documents)
+      .where(and(eq(documents.name, name), eq(documents.userId, admin.id)))
+      .limit(1)
+      .all();
+
+    if (existing) {
+      db.update(documents)
+        .set({ content: debriefContent, updatedAt: sql`datetime('now')` })
+        .where(eq(documents.id, existing.id))
+        .run();
+    } else {
+      db.insert(documents).values({
+        userId: admin.id,
+        name,
+        path,
+        content: debriefContent,
+      }).run();
+    }
+
+    broadcast("ingest", { type: "document", action: "created", name });
+  } catch (err) {
+    console.error(`[orchestrator] Failed to ingest debrief for job ${jobId}: ${err.message}`);
+  }
 }
 
 /**
@@ -153,6 +217,15 @@ export async function dispatchJob(jobId) {
     clearTimeout(timeout);
     runningJobs.delete(jobId);
 
+    // Collect debrief BEFORE any worktree cleanup — files are gone after
+    const debriefContent = collectDebrief(worktreePath);
+    if (debriefContent) {
+      addLog(jobId, "info", "Debrief captured from DEBRIEF.md");
+      ingestDebrief(jobId, agentType, debriefContent);
+    } else {
+      addLog(jobId, "info", "No DEBRIEF.md found — skipping debrief ingestion");
+    }
+
     if (code === 0) {
       // Check if the agent made any changes
       try {
@@ -164,12 +237,19 @@ export async function dispatchJob(jobId) {
             diff,
             autoMerge: input.autoMerge,
             repo,
+            debrief: debriefContent ?? null,
           });
           updateJobStatus(jobId, "done", { resultJson });
           addLog(jobId, "info", `Job completed. Branch: ${branch}. Changes detected.`);
         } else {
           updateJobStatus(jobId, "done", {
-            resultJson: JSON.stringify({ branch, diff: null, noChanges: true, repo }),
+            resultJson: JSON.stringify({
+              branch,
+              diff: null,
+              noChanges: true,
+              repo,
+              debrief: debriefContent ?? null,
+            }),
           });
           addLog(jobId, "info", "Job completed. No file changes.");
           // Clean up worktree if no changes
@@ -180,7 +260,14 @@ export async function dispatchJob(jobId) {
         updateJobStatus(jobId, "failed");
       }
     } else {
-      updateJobStatus(jobId, "failed");
+      updateJobStatus(jobId, "failed", {
+        resultJson: JSON.stringify({
+          branch,
+          repo,
+          exitCode: code,
+          debrief: debriefContent ?? null,
+        }),
+      });
       addLog(jobId, "error", `Process exited with code ${code}`);
       // Clean up worktree on failure
       try {
@@ -225,6 +312,27 @@ function buildPrompt(agentType, repo, userPrompt) {
     "- Commit with a clear message describing what you did and why.",
     "- If tests exist, run them before committing.",
     "- If you cannot complete the task, explain why clearly.",
+    "",
+    "## Debrief (required)",
+    "Before you finish — whether you succeeded or not — create a file called DEBRIEF.md",
+    "in the repo root (not committed, just written to disk). Use this exact structure:",
+    "",
+    "## What Was Done",
+    "List files changed and key actions taken.",
+    "",
+    "## Lessons Learned",
+    "Non-obvious issues encountered, debugging insights, or gotchas worth recording.",
+    "",
+    "## Testing Considerations",
+    "What should be tested. What might break.",
+    "",
+    "## Critical Changes",
+    "Anything that affects other parts of the system or other team members.",
+    "",
+    "## Status",
+    "Success or failure, and why.",
+    "",
+    "Keep it concise. Do not commit DEBRIEF.md — write it to disk only.",
   ];
   return context.join("\n");
 }
