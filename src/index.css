@@ -124,6 +124,14 @@
   --md-code-bg: rgba(22, 22, 42, 0.8);
   --md-blockquote-border: rgba(42, 42, 74, 0.6);
   --md-table-stripe: rgba(255,255,255,0.02);
+
+  /* ─── Dispatch panel tokens ──────────────────────────────────── */
+  --dispatch-trigger-bg: rgba(18, 18, 31, 0.55);
+  --dispatch-trigger-border: rgba(42, 42, 74, 0.5);
+  --dispatch-trigger-hover: rgba(42, 42, 74, 0.7);
+  --dispatch-dropdown-bg: rgba(14, 14, 28, 0.96);
+  --dispatch-dropdown-border: rgba(42, 42, 74, 0.6);
+  --dispatch-dropdown-item-hover: rgba(124, 106, 255, 0.08);
 }
 
 /* ─── Light mode — deep lavender-slate, no harsh whites ─────────── */
@@ -216,6 +224,14 @@
   --md-code-bg: rgba(185, 180, 210, 0.75);
   --md-blockquote-border: rgba(120, 112, 160, 0.45);
   --md-table-stripe: rgba(0,0,0,0.03);
+
+  /* ─── Dispatch panel tokens — light mode ─────────────────────── */
+  --dispatch-trigger-bg: rgba(185, 180, 210, 0.55);
+  --dispatch-trigger-border: rgba(120, 112, 160, 0.4);
+  --dispatch-trigger-hover: rgba(140, 132, 175, 0.55);
+  --dispatch-dropdown-bg: rgba(195, 190, 218, 0.97);
+  --dispatch-dropdown-border: rgba(120, 112, 160, 0.45);
+  --dispatch-dropdown-item-hover: rgba(90, 69, 214, 0.08);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

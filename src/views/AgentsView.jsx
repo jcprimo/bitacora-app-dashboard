@@ -8,25 +8,32 @@ import { fetchIssues, getCustomFieldValue } from "../youtrack";
 
 // Full PE team roster available for dispatch
 const DISPATCH_AGENTS = [
-  { id: "baal",               label: "baal",            icon: "⚡", color: "#22d3ee" },
-  { id: "beast",              label: "beast",           icon: "🦁", color: "#34d399" },
-  { id: "qa-testing",         label: "qa-testing",      icon: "🧪", color: "#f59e0b" },
-  { id: "hades",              label: "hades",           icon: "😈", color: "#a78bfa" },
-  { id: "matute",             label: "matute",          icon: "🔒", color: "#ef4444" },
-  { id: "lucifer",            label: "lucifer",         icon: "📋", color: "#7c6aff" },
-  { id: "security-compliance",label: "sec-compliance",  icon: "🛡️", color: "#f97316" },
-  { id: "ux-ui-designer",     label: "ux-designer",     icon: "🎨", color: "#ec4899" },
-  { id: "data-analytics",     label: "data-analytics",  icon: "📊", color: "#8b5cf6" },
-  { id: "engineer-mentor",    label: "eng-mentor",      icon: "🎓", color: "#06b6d4" },
-  { id: "customer-success",   label: "cust-success",    icon: "🤝", color: "#10b981" },
-  { id: "gtm-agent",          label: "gtm",             icon: "📢", color: "#f59e0b" },
+  { id: "baal",                label: "baal",            color: "#22d3ee", group: "engineering", desc: "Full-stack" },
+  { id: "beast",               label: "beast",           color: "#34d399", group: "engineering", desc: "iOS / Swift" },
+  { id: "qa-testing",          label: "qa-testing",      color: "#f59e0b", group: "engineering", desc: "QA & testing" },
+  { id: "hades",               label: "hades",           color: "#a78bfa", group: "security",    desc: "Pen testing" },
+  { id: "matute",              label: "matute",          color: "#ef4444", group: "security",    desc: "Red team" },
+  { id: "security-compliance", label: "sec-compliance",  color: "#f97316", group: "security",    desc: "FERPA / LFPDPPP" },
+  { id: "ux-ui-designer",      label: "ux-designer",     color: "#ec4899", group: "design",      desc: "UI & research" },
+  { id: "lucifer",             label: "lucifer",         color: "#7c6aff", group: "business",    desc: "Product mgmt" },
+  { id: "data-analytics",      label: "data-analytics",  color: "#8b5cf6", group: "business",    desc: "Analytics" },
+  { id: "engineer-mentor",     label: "eng-mentor",      color: "#06b6d4", group: "business",    desc: "Mentorship" },
+  { id: "customer-success",    label: "cust-success",    color: "#10b981", group: "business",    desc: "CS & retention" },
+  { id: "gtm-agent",           label: "gtm",             color: "#f59e0b", group: "business",    desc: "Growth" },
+];
+
+const AGENT_GROUPS = [
+  { label: "Engineering", agents: DISPATCH_AGENTS.filter((a) => a.group === "engineering") },
+  { label: "Security",    agents: DISPATCH_AGENTS.filter((a) => a.group === "security") },
+  { label: "Design",      agents: DISPATCH_AGENTS.filter((a) => a.group === "design") },
+  { label: "Business",    agents: DISPATCH_AGENTS.filter((a) => a.group === "business") },
 ];
 
 const PROJECTS = [
-  { id: "bitacora-app-dashboard",  label: "Dashboard", icon: "🖥️" },
-  { id: "bitacora-app-ios",        label: "iOS",       icon: "📱" },
-  { id: "primo-engineering",       label: "Portfolio", icon: "🌐" },
-  { id: "primo-engineering-team",  label: "Team",      icon: "🤖" },
+  { id: "bitacora-app-dashboard", label: "Dashboard" },
+  { id: "bitacora-app-ios",       label: "iOS" },
+  { id: "primo-engineering",      label: "Portfolio" },
+  { id: "primo-engineering-team", label: "Team" },
 ];
 
 const STATUS_COLORS = {
@@ -59,12 +66,14 @@ export default function AgentsView({
   showToast,
   token,
 }) {
-  const [agentId, setAgentId]       = useState(DISPATCH_AGENTS[0].id);
-  const [repo, setRepo]             = useState(PROJECTS[0].id);
-  const [prompt, setPrompt]         = useState("");
-  const [ticketId, setTicketId]     = useState("");
-  const [openTickets, setOpenTickets]  = useState([]);
+  const [agentId, setAgentId]               = useState(DISPATCH_AGENTS[0].id);
+  const [repo, setRepo]                     = useState(PROJECTS[0].id);
+  const [prompt, setPrompt]                 = useState("");
+  const [ticketId, setTicketId]             = useState("");
+  const [openTickets, setOpenTickets]       = useState([]);
   const [ticketsLoading, setTicketsLoading] = useState(false);
+  const [agentDropdownOpen, setAgentDropdownOpen]     = useState(false);
+  const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
   const terminalRef = useRef(null);
 
   // Fetch open tickets from YouTrack for the dropdown
@@ -83,6 +92,18 @@ export default function AgentsView({
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
     }
   }, [activeJobLogs]);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(".dispatch-trigger")) {
+        setAgentDropdownOpen(false);
+        setProjectDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // ─── Dispatch handler ─────────────────────────────────────────
   const handleDispatch = async () => {
@@ -109,7 +130,8 @@ export default function AgentsView({
     return jobs.filter((j) => j.status === statusFilter);
   }, [jobs, statusFilter]);
 
-  const selectedAgent = DISPATCH_AGENTS.find((a) => a.id === agentId);
+  const selectedAgent   = DISPATCH_AGENTS.find((a) => a.id === agentId);
+  const selectedProject = PROJECTS.find((p) => p.id === repo);
 
   return (
     <div className="animate-fade agents-layout">
@@ -117,86 +139,161 @@ export default function AgentsView({
       <div className="agents-left-col">
         {/* Dispatch Form */}
         <div className="dispatch-panel">
-          <div className="dispatch-title">Dispatch Agent</div>
+          <div className="dispatch-title">Dispatch</div>
 
-          {/* 1 — Agent pills */}
-          <div className="dispatch-section-label">Agent</div>
-          <div className="agent-selector">
-            {DISPATCH_AGENTS.map((agent) => (
+          {/* 1 — Agent + Project dropdowns */}
+          <div className="dispatch-trigger-row">
+            {/* Agent trigger */}
+            <div className="dispatch-trigger">
               <button
-                key={agent.id}
                 type="button"
-                className={`agent-type-btn${agentId === agent.id ? " agent-type-btn--active" : ""}`}
-                onClick={() => setAgentId(agent.id)}
-                style={{
-                  "--agent-color": agent.color,
+                className={`dispatch-trigger-btn${agentDropdownOpen ? " dispatch-trigger-btn--open" : ""}`}
+                onClick={() => {
+                  setAgentDropdownOpen((v) => !v);
+                  setProjectDropdownOpen(false);
                 }}
               >
-                {agent.icon} {agent.label}
+                <span
+                  className="agent-dot"
+                  style={{ background: selectedAgent?.color || "#7c6aff" }}
+                />
+                <span className="dispatch-trigger-label">{selectedAgent?.label || "Agent"}</span>
+                <svg
+                  className={`dispatch-trigger-chevron${agentDropdownOpen ? " dispatch-trigger-chevron--open" : ""}`}
+                  width="12"
+                  height="12"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </button>
-            ))}
-          </div>
 
-          {/* 2 — Project pills */}
-          <div className="dispatch-section-label">Project</div>
-          <div className="project-selector">
-            {PROJECTS.map((project) => (
+              {agentDropdownOpen && (
+                <div className="dispatch-dropdown dispatch-dropdown--agent">
+                  {AGENT_GROUPS.map((group) => (
+                    <div key={group.label}>
+                      <div className="dispatch-dropdown-group">{group.label}</div>
+                      {group.agents.map((agent) => (
+                        <button
+                          key={agent.id}
+                          type="button"
+                          className={`dispatch-dropdown-item${agentId === agent.id ? " dispatch-dropdown-item--active" : ""}`}
+                          onClick={() => {
+                            setAgentId(agent.id);
+                            setAgentDropdownOpen(false);
+                          }}
+                        >
+                          <span
+                            className="agent-dot"
+                            style={{ background: agent.color }}
+                          />
+                          <span className="dispatch-dropdown-item-label">{agent.label}</span>
+                          <span className="dispatch-dropdown-item-desc">{agent.desc}</span>
+                        </button>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Project trigger */}
+            <div className="dispatch-trigger">
               <button
-                key={project.id}
                 type="button"
-                className={`project-pill${repo === project.id ? " project-pill--active" : ""}`}
-                onClick={() => setRepo(project.id)}
+                className={`dispatch-trigger-btn${projectDropdownOpen ? " dispatch-trigger-btn--open" : ""}`}
+                onClick={() => {
+                  setProjectDropdownOpen((v) => !v);
+                  setAgentDropdownOpen(false);
+                }}
               >
-                {project.icon} {project.label}
+                <span className="dispatch-trigger-label">{selectedProject?.label || "Project"}</span>
+                <svg
+                  className={`dispatch-trigger-chevron${projectDropdownOpen ? " dispatch-trigger-chevron--open" : ""}`}
+                  width="12"
+                  height="12"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </button>
-            ))}
+
+              {projectDropdownOpen && (
+                <div className="dispatch-dropdown dispatch-dropdown--project">
+                  {PROJECTS.map((project) => (
+                    <button
+                      key={project.id}
+                      type="button"
+                      className={`dispatch-dropdown-item${repo === project.id ? " dispatch-dropdown-item--active" : ""}`}
+                      onClick={() => {
+                        setRepo(project.id);
+                        setProjectDropdownOpen(false);
+                      }}
+                    >
+                      <span className="dispatch-dropdown-item-label">{project.label}</span>
+                      <span className="dispatch-dropdown-item-desc">{project.id}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* 3 — Ticket dropdown */}
-          <div className="dispatch-section-label">Ticket (optional)</div>
-          <select
-            className="dispatch-select"
-            value={ticketId}
-            onChange={(e) => setTicketId(e.target.value)}
-            disabled={ticketsLoading}
-          >
-            <option value="">
-              {ticketsLoading ? "Loading tickets..." : "— No ticket —"}
-            </option>
-            {openTickets.map((issue) => {
-              const stage = getCustomFieldValue(issue, "Stage");
-              const summary = issue.summary || "";
-              const label = `${issue.idReadable} — ${summary.length > 50 ? summary.slice(0, 50) + "…" : summary}`;
-              return (
-                <option key={issue.id} value={issue.idReadable}>
-                  {label}
-                </option>
-              );
-            })}
-          </select>
+          {/* 2 — Ticket dropdown (only when tickets exist) */}
+          {(openTickets.length > 0 || ticketsLoading) && (
+            <select
+              className="dispatch-select"
+              value={ticketId}
+              onChange={(e) => setTicketId(e.target.value)}
+              disabled={ticketsLoading}
+            >
+              <option value="">
+                {ticketsLoading ? "Loading tickets..." : "— No ticket —"}
+              </option>
+              {openTickets.map((issue) => {
+                getCustomFieldValue(issue, "Stage");
+                const summary = issue.summary || "";
+                const label = `${issue.idReadable} — ${summary.length > 50 ? summary.slice(0, 50) + "…" : summary}`;
+                return (
+                  <option key={issue.id} value={issue.idReadable}>
+                    {label}
+                  </option>
+                );
+              })}
+            </select>
+          )}
 
-          {/* 4 — Prompt textarea */}
+          {/* 3 — Prompt textarea */}
           <textarea
             className="dispatch-textarea"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder={`What should ${selectedAgent?.label || "the agent"} do?`}
-            rows={4}
+            rows={5}
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleDispatch();
             }}
           />
 
-          {/* 5 — Dispatch button */}
+          {/* 4 — Dispatch button */}
           <button
             type="button"
             onClick={handleDispatch}
             disabled={dispatching || !prompt.trim()}
             className="dispatch-submit"
-            style={{ background: selectedAgent?.color || "var(--accent-indigo)" }}
+            style={
+              dispatching || !prompt.trim()
+                ? undefined
+                : { background: selectedAgent?.color || "var(--accent-indigo)" }
+            }
           >
             {dispatching ? "Dispatching..." : "Dispatch"}
           </button>
+          <div className="dispatch-hint">Cmd+Enter to dispatch</div>
         </div>
 
         {/* Job List */}
@@ -229,7 +326,7 @@ export default function AgentsView({
             const dispatchAgent = DISPATCH_AGENTS.find((a) => a.id === job.agentType);
             const legacyAgent = AGENTS.find((a) => a.id === job.agentType);
             const agentColor = dispatchAgent?.color || legacyAgent?.color || "var(--accent-indigo)";
-            const agentIcon  = dispatchAgent?.icon  || legacyAgent?.icon  || "🤖";
+            const agentIcon  = legacyAgent?.icon || "●";
             const isActive = job.id === activeJobId;
             return (
               <div
