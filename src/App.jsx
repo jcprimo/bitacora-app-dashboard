@@ -232,7 +232,7 @@ function Dashboard({ auth, theme, toggleTheme }) {
       />
 
       {/* ─── Main content area ───────────────────────────────────── */}
-      <main className="sidebar-main">
+      <main className={`sidebar-main${["docs", "agents"].includes(view) ? " sidebar-main--fullscreen" : ""}`}>
         {/* Compliance / error banners */}
         {!token && (
           <div className="compliance-alert ferpa" style={{ marginBottom: "1rem", cursor: "pointer" }} onClick={settings.openSettings}>
