@@ -4,7 +4,7 @@
 // the file is being read from storage and parsed.
 // Panels are resizable via a drag handle between sidebar and reader.
 
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { renderMarkdown } from "../utils/markdownParser";
 
 export default function MarkdownView({
@@ -76,6 +76,17 @@ export default function MarkdownView({
   }, [activeContent]);
 
   const isLoading = contentLoading || rendering;
+
+  // Mobile detection for full-screen reader mode
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // On mobile: show file list OR reader, not both
+  const mobileShowReader = isMobile && activeFileId != null;
 
   const handleFileSelect = (e) => {
     const selected = e.target.files;
@@ -150,9 +161,9 @@ export default function MarkdownView({
               style={{
                 maxWidth: 280,
                 margin: "0 auto",
-                background: "var(--md-accent-bg)",
-                borderColor: "var(--md-accent-border)",
-                color: "var(--md-accent)",
+                background: "var(--accent-indigo-bg)",
+                borderColor: "var(--accent-indigo-border)",
+                color: "var(--accent-indigo)",
               }}
             >
               📂 Import .md Files

@@ -83,7 +83,7 @@ function PillFilterRow({ label, items, active, onSelect, colorFn }) {
       <div className="qa-pill-group">
         {items.map((item) => {
           const isActive = item === active;
-          const color = item === "All" ? "var(--text-secondary)" : (colorFn ? colorFn(item) : "var(--qa-accent)");
+          const color = item === "All" ? "var(--text-secondary)" : (colorFn ? colorFn(item) : "var(--accent-indigo)");
           return (
             <button
               key={item}
@@ -211,9 +211,9 @@ export default function QATrackerView({
               style={{
                 maxWidth: 280,
                 margin: "0 auto",
-                background: "var(--qa-accent-bg)",
-                borderColor: "var(--qa-accent-border)",
-                color: "var(--qa-accent)",
+                background: "var(--accent-indigo-bg)",
+                borderColor: "var(--accent-indigo-border)",
+                color: "var(--accent-indigo)",
               }}
             >
               📂 Import CSV File
