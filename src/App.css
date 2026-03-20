@@ -3118,6 +3118,23 @@
   height: 100%;
 }
 
+/* The direct child view (animate-fade) must stretch to fill the
+   fullscreen container as a flex column so inner layouts can use
+   flex: 1 to fill remaining height below the view-header. */
+.sidebar-main--fullscreen > .animate-fade {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Restore the same horizontal + top padding that .sidebar-main normally
+   provides, so the view-header sits at the same position as other views. */
+.sidebar-main--fullscreen .view-header {
+  padding: var(--space-6) var(--space-8) 0;
+  flex-shrink: 0;
+}
+
 /* ─── Mobile top bar ───────────────────────────────────────────── */
 .mobile-topbar {
   display: none;
@@ -3289,7 +3306,7 @@
   }
 
   /* AgentsView — stack panels on mobile */
-  .agents-layout { flex-direction: column; height: auto; min-height: unset; }
+  .agents-layout { flex-direction: column; padding: var(--space-3); }
   .agents-left-col { width: 100%; }
   .agents-right-col { width: 100%; height: 50vh; min-height: 300px; }
 }
@@ -3555,8 +3572,9 @@
 .agents-layout {
   display: flex;
   gap: var(--space-4);
-  height: calc(100vh - 48px);
-  min-height: 500px;
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-4) var(--space-8) var(--space-4);
 }
 
 .agents-left-col {
@@ -4480,6 +4498,11 @@
 .md-reader-select-hint { padding: 2rem; text-align: center; color: var(--text-muted); }
 .md-sidebar-header-actions { display: flex; gap: 0.3rem; }
 
+/* Empty state wrapper — adds padding since the fullscreen parent has none */
+.md-empty-state-pad {
+  padding: var(--space-6) var(--space-8) var(--space-4);
+}
+
 /* ─── SettingsModal ───────────────────────────────────────────── */
 .settings-header {
   display: flex;
@@ -4561,10 +4584,6 @@
   }
 
   /* AgentsView — keep terminal visible in landscape */
-  .agents-layout {
-    height: calc(100vh - 48px);
-    min-height: unset;
-  }
   .agents-right-col {
     min-height: 200px;
   }
