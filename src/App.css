@@ -3691,6 +3691,7 @@
 
 .dispatch-dropdown--project {
   min-width: 320px;
+  width: max-content;
 }
 
 .dispatch-dropdown-group {
