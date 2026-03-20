@@ -1667,7 +1667,10 @@
 
 /* Resizable flex layout — replaces grid on desktop */
 /* flex: 1 fills the parent (.sidebar-main--fullscreen which is height:100dvh).
-   min-height: 0 lets flex children shrink so overflow-y works on panels. */
+   min-height: 0 lets flex children shrink so overflow-y works on panels.
+   overflow: clip (not hidden) — clips visually without creating a scroll
+   container, which preserves position:sticky in WebKit/Safari/DuckDuckGo.
+   overflow: hidden would break sticky on those engines. */
 .md-layout-flex {
   display: flex;
   align-items: stretch;
@@ -1675,7 +1678,7 @@
   flex: 1;
   min-height: 0;
   position: relative;
-  overflow: hidden;
+  overflow: clip;
 }
 
 /* Sidebar — scrolls as a whole when file list overflows */
@@ -2007,7 +2010,10 @@
 
 /* Reader panel — must be a block scroll container (not flex) so that
    .md-reader-header's position:sticky works. Flex on a scroll container
-   breaks sticky for direct flex children in column direction. */
+   breaks sticky for direct flex children in column direction.
+   overflow-x: hidden is set explicitly (alongside overflow-y: auto)
+   because WebKit requires both axes to be declared separately — shorthand
+   overflow:auto sets both axes and can interfere with sticky in some cases. */
 .md-reader {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
@@ -2015,6 +2021,7 @@
   box-shadow: var(--shadow-md);
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   min-height: 0;
@@ -3130,10 +3137,12 @@
    Removes padding and constrains height so child panels can fill
    the viewport without the parent scrolling out from under them.
    height: 100% is unreliable when the parent only has min-height (no
-   concrete height), so we anchor directly to the viewport instead. */
+   concrete height), so we anchor directly to the viewport instead.
+   overflow: clip (not hidden) — same as .md-layout-flex: clips without
+   creating a scroll container so position:sticky works in WebKit. */
 .sidebar-main--fullscreen {
   padding: 0;
-  overflow: hidden;
+  overflow: clip;
   height: 100vh;
   height: 100dvh;
 }
