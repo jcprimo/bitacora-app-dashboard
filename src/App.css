@@ -1925,7 +1925,7 @@
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   overflow-y: auto;
-  max-height: 80vh;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
@@ -2604,6 +2604,14 @@
   border-right: 1px solid var(--border-subtle);
   z-index: 50;
   overflow: hidden;
+  transition: width 0.25s ease, min-width 0.25s ease;
+}
+
+/* Collapsed state — icon-only rail (desktop only) */
+.sidebar-rail--collapsed {
+  width: 56px;
+  min-width: 56px;
+  transition: width 0.25s ease, min-width 0.25s ease;
 }
 
 /* Mobile overlay variant — hidden by default, slides in */
@@ -2619,6 +2627,74 @@
   overflow-x: hidden;
   padding: var(--space-5) var(--space-4);
   gap: var(--space-4);
+}
+
+/* Collapsed inner: center icons */
+.sidebar-rail--collapsed .sidebar-inner {
+  padding: var(--space-5) var(--space-2);
+  align-items: center;
+}
+
+/* ─── Sidebar collapse toggle button ───────────────────────────── */
+.sidebar-collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.sidebar-collapse-btn:hover {
+  background: var(--accent-indigo-bg);
+  color: var(--accent-indigo);
+  border-color: var(--accent-indigo);
+}
+
+/* When collapsed, the logo row centers, so push the button to be centered too */
+.sidebar-logo--collapsed {
+  flex-direction: column;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: var(--space-3);
+}
+
+.sidebar-logo--collapsed .sidebar-collapse-btn {
+  margin-left: 0;
+}
+
+/* ─── Icon-only nav items ─────────────────────────────────────── */
+.sidebar-nav-item--icon-only {
+  padding: 0.55rem;
+  justify-content: center;
+}
+
+.sidebar-nav-item--icon-only .sidebar-nav-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 14px;
+  height: 14px;
+  font-size: 9px;
+  padding: 0 3px;
+}
+
+/* ─── Icon-only action buttons ────────────────────────────────── */
+.sidebar-action-btn--icon-only {
+  justify-content: center;
+  padding: 0.45rem;
+}
+
+/* ─── Collapsed user section ──────────────────────────────────── */
+.sidebar-user--collapsed {
+  align-items: center;
 }
 
 /* ─── Sidebar logo ─────────────────────────────────────────────── */
@@ -2707,7 +2783,7 @@
   transition: background 0.15s ease, color 0.15s ease, border-left-color 0.15s ease;
   border-left: 3px solid transparent;
   position: relative;
-  min-height: 40px;
+  min-height: 44px;
 }
 
 .sidebar-nav-item:hover {
@@ -2727,12 +2803,14 @@
   background: var(--accent-indigo-bg-hover);
 }
 
-.sidebar-nav-emoji {
-  font-size: var(--text-lg);
+.sidebar-nav-icon,
+.sidebar-action-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 1.4rem;
-  text-align: center;
   flex-shrink: 0;
-  line-height: 1;
+  color: currentColor;
 }
 
 .sidebar-nav-label {
@@ -2786,7 +2864,7 @@
   color: var(--text-muted);
   text-align: left;
   transition: background 0.15s ease, color 0.15s ease;
-  min-height: 40px;
+  min-height: 44px;
 }
 
 .sidebar-action-btn:hover:not(:disabled) {
@@ -2840,6 +2918,7 @@
   transition: all 0.2s ease;
   flex-shrink: 0;
   white-space: nowrap;
+  min-height: 44px;
 }
 
 .sidebar-logout-btn:hover {
@@ -2878,6 +2957,27 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--text-primary);
+  flex: 1;
+}
+
+.mobile-theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.mobile-theme-toggle:hover {
+  background: var(--accent-indigo-bg);
+  color: var(--accent-indigo);
+  border-color: var(--accent-indigo-border);
 }
 
 .mobile-hamburger {
@@ -2885,8 +2985,8 @@
   flex-direction: column;
   justify-content: center;
   gap: 5px;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   padding: var(--space-2);
   background: transparent;
   border: 1px solid var(--border-subtle);
@@ -3007,6 +3107,11 @@
   .sidebar-main {
     padding: var(--space-4);
   }
+
+  /* AgentsView — stack panels on mobile */
+  .agents-layout { flex-direction: column; height: auto; min-height: unset; }
+  .agents-left-col { width: 100%; }
+  .agents-right-col { width: 100%; height: 50vh; min-height: 300px; }
 }
 
 /* ─── Responsive — mobile ≤ 480px (iPhone 16 = 393px) ─────────── */
@@ -3064,18 +3169,6 @@
     width: auto;
     max-width: none;
     z-index: 1000;
-  }
-
-  /* Nav tabs */
-  .nav-tabs {
-    flex-wrap: wrap;
-    gap: var(--space-1);
-    margin-bottom: var(--space-3);
-  }
-  .nav-tabs .step-btn {
-    font-size: var(--text-xs);
-    padding: 0.45rem 0.55rem;
-    min-height: 40px;
   }
 
   /* Step bar (Create view steps) */
@@ -3290,7 +3383,7 @@
 .agents-layout {
   display: flex;
   gap: var(--space-4);
-  height: calc(100vh - 180px);
+  height: calc(100vh - 48px);
   min-height: 500px;
 }
 
@@ -3331,6 +3424,16 @@
   gap: var(--space-2);
   margin-bottom: var(--space-3);
   flex-wrap: wrap;
+}
+
+.agent-type-btn {
+  min-height: 44px;
+  padding: 8px 12px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-sans);
 }
 
 .dispatch-select {
@@ -4104,6 +4207,43 @@
   background: rgba(248, 113, 113, 0.12);
   border: 1px solid rgba(248, 113, 113, 0.3);
   color: var(--accent-red);
+}
+
+/* ─── Landscape — short viewports (iPhone landscape, max-height 500px) ── */
+@media (max-height: 500px) {
+  /* Sidebar rail — compact vertical spacing */
+  .sidebar-rail {
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+  }
+  .sidebar-inner {
+    gap: var(--space-2);
+  }
+  .sidebar-nav-item {
+    min-height: 36px;
+    padding: var(--space-1) var(--space-3);
+  }
+  .sidebar-action-btn {
+    min-height: 36px;
+    padding: var(--space-1) var(--space-3);
+  }
+  .sidebar-logo {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  /* Mobile top bar — reduce height */
+  .mobile-topbar {
+    padding: var(--space-1) var(--space-3);
+  }
+
+  /* AgentsView — keep terminal visible in landscape */
+  .agents-layout {
+    height: calc(100vh - 48px);
+    min-height: unset;
+  }
+  .agents-right-col {
+    min-height: 200px;
+  }
 }
 
 /* ─── Reduced motion — disable animations for users who prefer it (BIT-45) */

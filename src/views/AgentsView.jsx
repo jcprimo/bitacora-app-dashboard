@@ -92,16 +92,12 @@ export default function AgentsView({
               <button
                 key={agent.id}
                 type="button"
+                className="agent-type-btn"
                 onClick={() => setAgentType(agent.id)}
                 style={{
-                  padding: "4px 10px",
-                  fontSize: "var(--text-xs)",
-                  fontWeight: 600,
-                  borderRadius: "var(--radius-sm)",
                   border: agentType === agent.id ? `2px solid ${agent.color}` : "1px solid var(--border-subtle)",
                   background: agentType === agent.id ? `${agent.color}15` : "transparent",
                   color: agentType === agent.id ? agent.color : "var(--text-muted)",
-                  cursor: "pointer",
                 }}
               >
                 {agent.icon} {agent.id}
