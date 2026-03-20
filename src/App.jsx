@@ -189,6 +189,11 @@ function Dashboard({ auth, theme, toggleTheme }) {
 
   const runningJobCount = agentJobs.jobs.filter((j) => j.status === "running").length;
 
+  // Unread doc count — docs the user has never opened.
+  // visitedDocIds is seeded with all pre-existing IDs on first load so this
+  // only shows a badge for genuinely new documents ingested after that.
+  const unreadDocCount = md.files.filter((f) => !visitedDocIds.has(Number(f.id))).length;
+
   // ═════════════════════════════════════════════════════════════
   return (
     <div className={`app-shell app-shell--sidebar${sidebarCollapsed ? " sidebar-is-collapsed" : ""}`}>
@@ -225,7 +230,7 @@ function Dashboard({ auth, theme, toggleTheme }) {
         loading={loading}
         loadIssues={loadIssues}
         agentJobCount={runningJobCount}
-        docCount={md.files.length}
+        docCount={unreadDocCount}
         resetCreate={resetCreate}
         collapsed={sidebarCollapsed}
         onToggleCollapse={toggleSidebar}

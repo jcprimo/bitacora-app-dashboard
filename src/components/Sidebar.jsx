@@ -17,7 +17,7 @@
 //   loading        — board loading state (for refresh badge)
 //   loadIssues     — fn to refresh issues
 //   agentJobCount  — number of running agent jobs (for badge)
-//   docCount       — number of indexed docs (for badge)
+//   docCount       — number of unread/unvisited docs (for badge)
 //   resetCreate    — fn to reset create form when navigating to create
 
 import { useEffect } from "react";
