@@ -191,15 +191,26 @@ export async function dispatchJob(jobId) {
 
   // Stream stdout
   let outputBuffer = "";
+  let chunkCount = 0;
   proc.stdout.on("data", (chunk) => {
     const text = chunk.toString();
     outputBuffer += text;
+    chunkCount++;
+
+    // Debug: log first 3 raw chunks to see actual stream-json format
+    if (chunkCount <= 3) {
+      addLog(jobId, "info", `[DEBUG stdout chunk ${chunkCount}] ${text.slice(0, 500)}`);
+    }
 
     // Parse stream-json lines and broadcast meaningful ones
     const lines = text.split("\n").filter(Boolean);
     for (const line of lines) {
       try {
         const event = JSON.parse(line);
+        // Debug: log event type so we can see what Claude actually sends
+        if (chunkCount <= 5) {
+          addLog(jobId, "info", `[DEBUG event] type=${event.type} keys=${Object.keys(event).join(",")}`);
+        }
         if (event.type === "assistant" && event.message) {
           // Assistant text output
           const content = typeof event.message === "string"
