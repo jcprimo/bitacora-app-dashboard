@@ -3251,22 +3251,64 @@
     grid-template-columns: 1fr;
     gap: var(--space-3);
   }
+  /* Markdown: mobile full-screen reader mode */
   .md-layout-flex {
     flex-direction: column;
-    gap: var(--space-3);
+    gap: 0;
+    max-height: none;
+    height: calc(100vh - 120px);
   }
   .md-layout-flex .md-resize-handle { display: none; }
+
+  /* File list: full width, scrollable, takes full height when no file selected */
   .md-sidebar {
     width: auto !important;
     min-width: unset !important;
-    max-height: 180px;
+    max-height: none;
+    flex: 1;
     overflow-y: auto;
     border-radius: var(--radius-md);
   }
+  .md-sidebar--mobile-hidden {
+    display: none;
+  }
   .md-sidebar-header { padding: var(--space-2) var(--space-3); }
-  .md-file-item { padding: var(--space-2) var(--space-3); min-height: 40px; }
-  .md-reader { padding: 0.85rem; }
-  .md-content { font-size: var(--text-base); }
+  .md-file-item { padding: var(--space-3); min-height: 44px; }
+
+  /* Reader: full screen when file selected */
+  .md-reader {
+    padding: 0;
+    border-radius: var(--radius-md);
+  }
+  .md-reader--mobile-full {
+    flex: 1;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .md-reader-header {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-2);
+  }
+
+  /* Back button */
+  .md-back-btn {
+    background: none;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--accent-indigo);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    padding: 6px 12px;
+    min-height: 36px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .md-back-btn:active {
+    background: var(--accent-indigo-bg);
+  }
+
+  .md-content { font-size: var(--text-base); padding: var(--space-3); }
   .md-content p,
   .md-content li,
   .md-content blockquote { max-width: none; }

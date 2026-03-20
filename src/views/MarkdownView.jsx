@@ -192,9 +192,9 @@ export default function MarkdownView({
 
       {fileInput}
 
-      {/* Sidebar — file list */}
+      {/* Sidebar — file list (hidden on mobile when reading a file) */}
       <aside
-        className="md-sidebar"
+        className={`md-sidebar ${mobileShowReader ? "md-sidebar--mobile-hidden" : ""}`}
         style={{ width: sidebarCollapsed ? 0 : sidebarWidth, minWidth: sidebarCollapsed ? 0 : 140, flexShrink: 0 }}
       >
         {!sidebarCollapsed && (
@@ -242,21 +242,23 @@ export default function MarkdownView({
         )}
       </aside>
 
-      {/* Drag handle + collapse toggle */}
-      <div className="md-resize-handle" onMouseDown={onHandleMouseDown}>
-        <button
-          type="button"
-          className="md-collapse-btn"
-          onClick={() => setSidebarCollapsed((v) => !v)}
-          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {sidebarCollapsed ? "›" : "‹"}
-        </button>
-      </div>
+      {/* Drag handle + collapse toggle (hidden on mobile when reading) */}
+      {!mobileShowReader && (
+        <div className="md-resize-handle" onMouseDown={onHandleMouseDown}>
+          <button
+            type="button"
+            className="md-collapse-btn"
+            onClick={() => setSidebarCollapsed((v) => !v)}
+            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {sidebarCollapsed ? "›" : "‹"}
+          </button>
+        </div>
+      )}
 
-      {/* Reader — rendered Markdown */}
-      <main className="md-reader" style={{ flex: 1, minWidth: 0 }}>
+      {/* Reader — rendered Markdown (full screen on mobile) */}
+      <main className={`md-reader ${mobileShowReader ? "md-reader--mobile-full" : ""}`} style={{ flex: 1, minWidth: 0 }}>
         {isLoading ? (
           <div className="md-loading-overlay">
             <div className="md-loading-modal">
@@ -267,6 +269,16 @@ export default function MarkdownView({
         ) : activeFile ? (
           <>
             <div className="md-reader-header">
+              {isMobile && (
+                <button
+                  type="button"
+                  className="md-back-btn"
+                  onClick={() => setActiveFileId(null)}
+                  aria-label="Back to file list"
+                >
+                  ← Files
+                </button>
+              )}
               <span className="md-reader-filename">{activeFile.name}</span>
               <span className="md-reader-meta">
                 {new Date(activeFile.updatedAt).toLocaleDateString("en-US", {
