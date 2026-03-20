@@ -1666,7 +1666,7 @@
 }
 
 /* Resizable flex layout — replaces grid on desktop */
-/* flex: 1 fills the parent (.sidebar-main--fullscreen which is height:100%).
+/* flex: 1 fills the parent (.sidebar-main--fullscreen which is height:100dvh).
    min-height: 0 lets flex children shrink so overflow-y works on panels. */
 .md-layout-flex {
   display: flex;
@@ -3128,11 +3128,14 @@
 
 /* Full-screen mode — used when docs/agents view is active.
    Removes padding and constrains height so child panels can fill
-   the viewport without the parent scrolling out from under them. */
+   the viewport without the parent scrolling out from under them.
+   height: 100% is unreliable when the parent only has min-height (no
+   concrete height), so we anchor directly to the viewport instead. */
 .sidebar-main--fullscreen {
   padding: 0;
   overflow: hidden;
-  height: 100%;
+  height: 100vh;
+  height: 100dvh;
 }
 
 /* The direct child view (animate-fade) must stretch to fill the
@@ -3315,6 +3318,22 @@
   /* Mobile top bar shown */
   .mobile-topbar {
     display: flex;
+  }
+
+  /* Fullscreen views on mobile: the topbar sits above sidebar-main in the
+     column flex stack. Use flex-based sizing instead of a fixed viewport
+     height so the content region fills exactly what remains below the topbar.
+     The column parent (.app-shell--sidebar) must have a concrete height for
+     flex: 1 to work — add height: 100dvh here so children can resolve it. */
+  .app-shell--sidebar {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .sidebar-main--fullscreen {
+    height: auto;
+    flex: 1;
+    min-height: 0;
   }
 
   /* Main content full-width, no left padding offset */
