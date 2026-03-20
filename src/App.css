@@ -2005,7 +2005,9 @@
   color: var(--accent-red);
 }
 
-/* Reader panel */
+/* Reader panel — must be a block scroll container (not flex) so that
+   .md-reader-header's position:sticky works. Flex on a scroll container
+   breaks sticky for direct flex children in column direction. */
 .md-reader {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
@@ -2016,8 +2018,6 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   min-height: 0;
-  display: flex;
-  flex-direction: column;
 }
 
 .md-reader-header {
@@ -2031,7 +2031,6 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  flex-shrink: 0;
 }
 
 .md-reader-filename {
