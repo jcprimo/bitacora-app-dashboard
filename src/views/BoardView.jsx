@@ -82,6 +82,11 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
 
   return (
     <div className="animate-fade">
+      <div className="view-header">
+        <h1 className="view-title">Board</h1>
+        <p className="view-desc">Track and manage all YouTrack tickets across stages and priorities.</p>
+      </div>
+
       {/* Pill filters */}
       <div className="board-pills">
         {/* Stage filter — inline search toggle lives at the end of this row */}

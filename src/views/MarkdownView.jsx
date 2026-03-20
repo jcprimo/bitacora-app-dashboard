@@ -1,12 +1,10 @@
 // ─── views/MarkdownView.jsx — Markdown Reader ───────────────────
-// Two-panel layout: file list sidebar + rendered Markdown content.
-// Content is lazy-loaded per file. A loading overlay displays while
-// the file is being read from storage and parsed.
-// Panels are resizable via a drag handle between sidebar and reader.
+// Drawer-first layout: reader fills full width by default.
+// A "Files (N)" button in the reader header opens a slide-in overlay
+// drawer from the left with a backdrop — on all screen sizes.
 //
-// Desktop: resizable sidebar + reader, collapsible with chevron button.
-// Mobile (≤768px): reader fills full width; file list is a fixed
-// overlay drawer opened by the "Files" button in the reader header.
+// The permanent sidebar and resize handle have been removed in favor
+// of the drawer paradigm exclusively.
 
 import { useRef, useState, useCallback, useEffect } from "react";
 import { renderMarkdown } from "../utils/markdownParser";
@@ -24,60 +22,14 @@ export default function MarkdownView({
   const [renderedHtml, setRenderedHtml] = useState("");
   const [rendering, setRendering] = useState(false);
 
-  // ─── Resizable sidebar (desktop) ───────────────────────────────
-  const [sidebarWidth, setSidebarWidth] = useState(220);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const isDraggingHandle = useRef(false);
-  const dragStartX = useRef(0);
-  const dragStartWidth = useRef(0);
-  const layoutRef = useRef(null);
+  // ─── Drawer state ─────────────────────────────────────────────
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const onHandleMouseDown = useCallback((e) => {
-    e.preventDefault();
-    isDraggingHandle.current = true;
-    dragStartX.current = e.clientX;
-    dragStartWidth.current = sidebarWidth;
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
-  }, [sidebarWidth]);
-
-  useEffect(() => {
-    const onMouseMove = (e) => {
-      if (!isDraggingHandle.current) return;
-      const delta = e.clientX - dragStartX.current;
-      const newWidth = Math.max(140, Math.min(420, dragStartWidth.current + delta));
-      setSidebarWidth(newWidth);
-      if (sidebarCollapsed) setSidebarCollapsed(false);
-    };
-    const onMouseUp = () => {
-      if (!isDraggingHandle.current) return;
-      isDraggingHandle.current = false;
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-    };
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-  }, [sidebarCollapsed]);
-
-  // ─── Mobile overlay drawer ─────────────────────────────────────
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-
-  useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth <= 768);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  // Close drawer when a file is selected on mobile
-  const handleFileSelect_mobile = useCallback((id) => {
+  // Close drawer and select a file
+  const handleFileSelect = useCallback((id) => {
     setActiveFileId(id);
     markDocVisited(id);
-    setMobileDrawerOpen(false);
+    setDrawerOpen(false);
   }, [setActiveFileId, markDocVisited]);
 
   // ─── Markdown rendering ────────────────────────────────────────
@@ -146,7 +98,7 @@ export default function MarkdownView({
     />
   );
 
-  // ─── File list (shared between desktop sidebar and mobile drawer) ─
+  // ─── File list (rendered inside the drawer) ────────────────────
   const fileList = (
     <>
       <div className="md-sidebar-header">
@@ -170,7 +122,7 @@ export default function MarkdownView({
             <div
               key={f.id}
               className={`md-file-item ${f.id === activeFileId ? "md-file-active" : ""} ${!isVisited ? "md-file-unvisited" : ""}`}
-              onClick={() => isMobile ? handleFileSelect_mobile(f.id) : (setActiveFileId(f.id), markDocVisited(f.id))}
+              onClick={() => handleFileSelect(f.id)}
             >
               <div className="md-file-info">
                 <span className="md-file-name">{f.name}</span>
@@ -231,124 +183,87 @@ export default function MarkdownView({
     );
   }
 
-  // ─── Loaded state: sidebar + resize handle + reader ────────────
+  // ─── Loaded state: drawer + full-width reader ──────────────────
   return (
-    <div
-      ref={layoutRef}
-      className="animate-fade md-layout-flex"
-      {...dropZoneProps}
-    >
-      {dragging && (
-        <div className="qa-drop-overlay">
-          <div className="md-drop-overlay-content">
-            <span style={{ fontSize: "1.5rem" }}>📥</span>
-            <span>Drop .md files to add</span>
+    <div className="animate-fade" style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+      <div className="view-header">
+        <h1 className="view-title">Docs</h1>
+        <p className="view-desc">Browse and read agent-generated reports, plans, and documentation.</p>
+      </div>
+      <div
+        className="md-layout-flex"
+        {...dropZoneProps}
+      >
+        {dragging && (
+          <div className="qa-drop-overlay">
+            <div className="md-drop-overlay-content">
+              <span style={{ fontSize: "1.5rem" }}>📥</span>
+              <span>Drop .md files to add</span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {fileInput}
+        {fileInput}
 
-      {/* ── Mobile overlay backdrop ─────────────────────────────── */}
-      {isMobile && (
+        {/* ── Backdrop ────────────────────────────────────────────── */}
         <div
-          className={`md-mobile-overlay-backdrop${mobileDrawerOpen ? " md-mobile-overlay-backdrop--open" : ""}`}
-          onClick={() => setMobileDrawerOpen(false)}
+          className={`md-mobile-overlay-backdrop${drawerOpen ? " md-mobile-overlay-backdrop--open" : ""}`}
+          onClick={() => setDrawerOpen(false)}
           aria-hidden="true"
         />
-      )}
 
-      {/* ── Mobile file drawer ──────────────────────────────────── */}
-      {isMobile && (
+        {/* ── File drawer ─────────────────────────────────────────── */}
         <div
-          className={`md-mobile-file-drawer${mobileDrawerOpen ? " md-mobile-file-drawer--open" : ""}`}
+          className={`md-mobile-file-drawer${drawerOpen ? " md-mobile-file-drawer--open" : ""}`}
           role="dialog"
           aria-label="File list"
         >
           {fileList}
         </div>
-      )}
 
-      {/* ── Desktop sidebar (hidden on mobile via CSS) ──────────── */}
-      <aside
-        className="md-sidebar"
-        style={{
-          width: sidebarCollapsed ? 0 : sidebarWidth,
-          minWidth: sidebarCollapsed ? 0 : 140,
-          flexShrink: 0,
-          borderWidth: sidebarCollapsed ? 0 : undefined,
-        }}
-        aria-hidden={sidebarCollapsed}
-      >
-        {!sidebarCollapsed && fileList}
-      </aside>
-
-      {/* ── Resize handle + collapse toggle (desktop only) ─────── */}
-      <div
-        className={`md-resize-handle${sidebarCollapsed ? " md-resize-handle--collapsed" : ""}`}
-        onMouseDown={sidebarCollapsed ? undefined : onHandleMouseDown}
-      >
-        <button
-          type="button"
-          className="md-collapse-btn"
-          onClick={() => setSidebarCollapsed((v) => !v)}
-          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {sidebarCollapsed ? "›" : "‹"}
-        </button>
-      </div>
-
-      {/* ── Reader panel ────────────────────────────────────────── */}
-      <main className="md-reader" style={{ flex: 1, minWidth: 0 }}>
-        {isLoading ? (
-          <div className="md-loading-overlay">
-            <div className="md-loading-modal">
-              <div className="md-loading-spinner" />
-              <span className="md-loading-text">Rendering document...</span>
+        {/* ── Reader panel ────────────────────────────────────────── */}
+        <main className="md-reader" style={{ flex: 1, minWidth: 0 }}>
+          {isLoading ? (
+            <div className="md-loading-overlay">
+              <div className="md-loading-modal">
+                <div className="md-loading-spinner" />
+                <span className="md-loading-text">Rendering document...</span>
+              </div>
             </div>
-          </div>
-        ) : activeFile ? (
-          <>
-            <div className="md-reader-header">
-              {/* Mobile: "Files" button opens the drawer */}
-              {isMobile && (
+          ) : activeFile ? (
+            <>
+              <div className="md-reader-header">
                 <button
                   type="button"
                   className="md-mobile-files-btn"
-                  onClick={() => setMobileDrawerOpen(true)}
+                  onClick={() => setDrawerOpen(true)}
                   aria-label="Open file list"
                 >
-                  ☰ Files
+                  ☰ Files ({files.length})
                 </button>
-              )}
-              <span className="md-reader-filename">{activeFile.name}</span>
-              <span className="md-reader-meta">
-                {new Date(activeFile.updatedAt).toLocaleDateString("en-US", {
-                  month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
-                })}
-              </span>
+                <span className="md-reader-filename">{activeFile.name}</span>
+                <span className="md-reader-meta">
+                  {new Date(activeFile.updatedAt).toLocaleDateString("en-US", {
+                    month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+                  })}
+                </span>
+              </div>
+              <article
+                className="md-content"
+                dangerouslySetInnerHTML={{ __html: renderedHtml }}
+              />
+            </>
+          ) : (
+            <div className="md-reader-select-hint">
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <button type="button" className="md-mobile-files-btn" onClick={() => setDrawerOpen(true)}>
+                  ☰ Open Files
+                </button>
+              </div>
             </div>
-            <article
-              className="md-content"
-              dangerouslySetInnerHTML={{ __html: renderedHtml }}
-            />
-          </>
-        ) : (
-          <div className="md-reader-select-hint">
-            {isMobile
-              ? (
-                <div style={{ display: "flex", justifyContent: "center" }}>
-                  <button type="button" className="md-mobile-files-btn" onClick={() => setMobileDrawerOpen(true)}>
-                    ☰ Open Files
-                  </button>
-                </div>
-              )
-              : "Select a file from the sidebar"
-            }
-          </div>
-        )}
-      </main>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

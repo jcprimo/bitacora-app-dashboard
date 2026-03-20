@@ -32,7 +32,12 @@ export default function CreateView({
   const costEst = estimateCost(tokenEst);
 
   return (
-    <div className="main-grid animate-fade">
+    <div className="animate-fade">
+      <div className="view-header">
+        <h1 className="view-title">Create Ticket</h1>
+        <p className="view-desc">Draft a new ticket with AI-assisted generation or write it manually.</p>
+      </div>
+    <div className="main-grid">
       <aside className="sidebar">
         {/* Agent selector */}
         <div className="panel">
@@ -375,6 +380,7 @@ export default function CreateView({
           )}
         </div>
       </main>
+    </div>
     </div>
   );
 }

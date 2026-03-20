@@ -177,6 +177,10 @@ export default function QATrackerView({
   if (testCases.length === 0) {
     return (
       <div className="animate-fade">
+        <div className="view-header">
+          <h1 className="view-title">QA Tracker</h1>
+          <p className="view-desc">Organize test cases by feature, track pass/fail status across releases.</p>
+        </div>
         <div
           className={`content-panel qa-dropzone ${dragging ? "qa-dropzone-active" : ""}`}
           style={{ padding: "3rem 2rem", textAlign: "center" }}
@@ -230,6 +234,10 @@ export default function QATrackerView({
   // ─── Loaded state ─────────────────────────────────────────────
   return (
     <div className="animate-fade" {...dropZoneProps}>
+      <div className="view-header">
+        <h1 className="view-title">QA Tracker</h1>
+        <p className="view-desc">Organize test cases by feature, track pass/fail status across releases.</p>
+      </div>
       {dragging && (
         <div className="qa-drop-overlay">
           <div className="qa-drop-overlay-content">
