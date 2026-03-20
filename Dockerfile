@@ -32,11 +32,11 @@ RUN mkdir -p /app/data /repos
 # Express stays as root (needs /app/data write access).
 # claude -p --dangerously-skip-permissions refuses to run as root.
 RUN addgroup -S agentgroup && adduser -S agent -G agentgroup
-RUN mkdir -p /home/agent/.claude && \
-    # Point agent's claude config dir at root's so mounted agents are visible.
-    # docker-compose mounts agents at /root/.claude/agents (read-only).
-    # The agent user inherits the same definitions via this symlink.
-    ln -s /root/.claude/agents /home/agent/.claude/agents && \
+RUN mkdir -p /home/agent/.claude /root/.claude && \
+    # Agent definitions are mounted at /opt/claude-agents (readable by all).
+    # Both root and agent user get symlinks so `claude --agent <name>` works for either.
+    ln -s /opt/claude-agents /home/agent/.claude/agents && \
+    ln -s /opt/claude-agents /root/.claude/agents && \
     chown -R agent:agentgroup /home/agent /repos
 
 # Configure git to use GITHUB_TOKEN for HTTPS clone/push auth.
