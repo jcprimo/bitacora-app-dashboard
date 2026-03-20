@@ -1722,10 +1722,8 @@
   justify-content: space-between;
   padding: var(--space-3) 0.85rem;
   border-bottom: 1px solid var(--border-subtle);
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background: var(--md-sidebar-bg);
+  flex-shrink: 0;
+  background: var(--bg-solid);
 }
 
 .md-sidebar-title {
@@ -1762,10 +1760,28 @@
   padding: 0.35rem;
 }
 
-/* .md-file-list-scroll is kept as a class in JSX but no longer constrains height.
-   Scrolling is handled by .md-sidebar (the parent) instead. */
+/* .md-file-list-scroll — the scrollable area inside the drawer */
 .md-file-list-scroll {
-  overflow: visible;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.md-file-list-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.md-file-list-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.md-file-list-scroll::-webkit-scrollbar-thumb {
+  background: var(--text-dim);
+  border-radius: 4px;
+}
+
+.md-file-list-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 /* Resize handle between sidebar and reader */
@@ -1856,7 +1872,7 @@
   left: 0;
   height: 100dvh;
   width: min(80vw, 320px);
-  background: var(--md-sidebar-bg);
+  background: var(--bg-solid);
   border-right: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-xl);
   z-index: 55;
@@ -2010,10 +2026,12 @@
   justify-content: space-between;
   padding: 0.65rem var(--space-5);
   border-bottom: 1px solid var(--border-subtle);
-  background: var(--bg-elevated);
+  background: var(--bg-solid);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: 10;
+  flex-shrink: 0;
 }
 
 .md-reader-filename {
