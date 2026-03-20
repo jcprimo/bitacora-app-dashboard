@@ -56,7 +56,10 @@ export function useAgentJobs() {
         throw new Error(err.error || "Dispatch failed");
       }
       const job = await res.json();
-      setJobs((prev) => [job, ...prev]);
+      setJobs((prev) => {
+        if (prev.some((j) => j.id === job.id)) return prev;
+        return [job, ...prev];
+      });
       setActiveJobId(job.id);
       setActiveJobLogs([]);
       return job;

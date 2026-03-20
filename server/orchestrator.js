@@ -156,12 +156,18 @@ export async function dispatchJob(jobId) {
   // 2. Mark as running
   updateJobStatus(jobId, "running");
 
-  // 3. Spawn claude CLI
+  // 3. Spawn claude CLI as the non-root `agent` user.
+  //    Claude CLI refuses --dangerously-skip-permissions when running as root.
+  //    uid/gid 1000 matches the `agent` system user created in the Dockerfile.
+  //    HOME must point to /home/agent so claude can read its config/agents.
   const agentPrompt = buildPrompt(agentType, repo, prompt);
   const proc = spawn("claude", ["-p", agentPrompt, "--dangerously-skip-permissions", "--output-format", "stream-json"], {
     cwd: worktreePath,
+    uid: 1000,
+    gid: 1000,
     env: {
       ...process.env,
+      HOME: "/home/agent",
       // Ensure the agent doesn't inherit our Express port
       PORT: undefined,
     },
