@@ -195,6 +195,7 @@ export default function MarkdownView({
                   type="button"
                   className="md-add-btn"
                   onClick={() => fileInputRef.current?.click()}
+                  aria-label="Add .md files"
                   title="Add .md files"
                 >
                   +
@@ -236,6 +237,7 @@ export default function MarkdownView({
           type="button"
           className="md-collapse-btn"
           onClick={() => setSidebarCollapsed((v) => !v)}
+          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {sidebarCollapsed ? "›" : "‹"}

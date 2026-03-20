@@ -34,6 +34,7 @@ export default function SettingsModal({ showSettings, setShowSettings, settingsF
             type="button"
             className="settings-close-btn"
             onClick={() => setShowSettings(false)}
+            aria-label="Close settings"
           >
             ✕
           </button>
