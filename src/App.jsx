@@ -353,6 +353,7 @@ function Dashboard({ auth, theme, toggleTheme }) {
             cancel={agentJobs.cancel}
             retry={agentJobs.retry}
             showToast={showToast}
+            token={token}
           />
         )}
 

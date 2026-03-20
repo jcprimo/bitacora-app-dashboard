@@ -19,15 +19,29 @@ import { dispatchJob, cancelJob } from "../orchestrator.js";
 const router = Router();
 
 // Valid agent types that can be dispatched
-const CODE_AGENTS = ["baal", "ios", "qa", "security"];
+const CODE_AGENTS = [
+  "baal",
+  "beast",
+  "qa-testing",
+  "hades",
+  "matute",
+  "lucifer",
+  "security-compliance",
+  "ux-ui-designer",
+  "data-analytics",
+  "engineer-mentor",
+  "customer-success",
+  "gtm-agent",
+];
 const VALID_REPOS = [
   "bitacora-app-dashboard",
   "bitacora-app-ios",
   "primo-engineering",
+  "primo-engineering-team",
 ];
 
 // Auto-merge repos (no human review needed)
-const AUTO_MERGE_REPOS = ["bitacora-app-dashboard", "primo-engineering"];
+const AUTO_MERGE_REPOS = ["bitacora-app-dashboard", "primo-engineering", "primo-engineering-team"];
 
 // ─── POST /api/jobs — Dispatch a new agent job ──────────────────
 router.post("/", async (req, res) => {
