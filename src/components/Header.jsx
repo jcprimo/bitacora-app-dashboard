@@ -61,7 +61,13 @@ export default function Header({ token, theme, toggleTheme, openSettings, user, 
             ● Not Connected
           </span>
         )}
-        <button className="theme-toggle" onClick={toggleTheme} title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
+        <button
+          type="button"
+          className="theme-toggle"
+          onClick={toggleTheme}
+          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+        >
           {theme === "dark" ? "☀️" : "🌙"}
         </button>
         {user && (

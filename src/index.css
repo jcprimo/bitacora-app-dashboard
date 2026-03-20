@@ -12,7 +12,7 @@
   --text-primary: #f0f0f8;
   --text-secondary: #a0a0c0;
   --text-muted: #7a7aa0;
-  --text-dim: #4a4a6a;
+  --text-dim: #6e6e96; /* raised from #4a4a6a — WCAG AA 4.5:1 on dark bg */
   --accent-indigo: #7c6aff;
   --accent-green: #34d399;
   --accent-red: #f87171;
@@ -150,7 +150,7 @@
   --text-primary: #1e1a30;
   --text-secondary: #3a3558;
   --text-muted: #605a78;
-  --text-dim: #6a6480;
+  --text-dim: #4e4866; /* raised from #6a6480 — WCAG AA 4.5:1 on light bg */
   --accent-indigo: #5a45d6;
   --accent-green: #0f8f5e;
   --accent-red: #d03040;
@@ -286,6 +286,21 @@ body[data-theme="light"] {
 
 input, textarea, select, button { font-family: inherit; }
 
+/* ─── Focus visible — global accessible outline (BIT-45) ──────── */
+:focus-visible {
+  outline: 2px solid var(--accent-indigo);
+  outline-offset: 2px;
+}
+
+/* Inputs already style their focus state via border/box-shadow — suppress
+   the global outline only for them to avoid double indicators. */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+}
+
+/* ─── Keyframe definitions ────────────────────────────────────── */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
@@ -322,7 +337,10 @@ input, textarea, select, button { font-family: inherit; }
   to { transform: rotate(360deg); }
 }
 
-.animate-fade { animation: fadeIn 0.3s ease-out; }
-.animate-slide { animation: slideUp 0.4s ease-out; }
-.animate-pulse { animation: pulse 1.8s ease-in-out infinite; }
-.animate-pop { animation: successPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+/* ─── Animation utility classes — respect reduced-motion (BIT-45) */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-fade { animation: fadeIn 0.3s ease-out; }
+  .animate-slide { animation: slideUp 0.4s ease-out; }
+  .animate-pulse { animation: pulse 1.8s ease-in-out infinite; }
+  .animate-pop { animation: successPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+}
