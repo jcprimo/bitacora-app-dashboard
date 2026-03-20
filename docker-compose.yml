@@ -13,7 +13,7 @@ services:
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
       - YOUTRACK_URL=${YOUTRACK_URL:-https://bitacora.youtrack.cloud}
       - INGEST_TOKEN=${INGEST_TOKEN}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - CLAUDE_CODE_TOKEN=${CLAUDE_CODE_TOKEN}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
       # Repos are cloned fresh inside the container — no bind mounts needed
       - REPO_BASE_DIR=/repos
