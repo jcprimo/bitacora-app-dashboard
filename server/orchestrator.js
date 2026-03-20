@@ -161,7 +161,7 @@ export async function dispatchJob(jobId) {
   //    uid/gid 1000 matches the `agent` system user created in the Dockerfile.
   //    HOME must point to /home/agent so claude can read its config/agents.
   const agentPrompt = buildPrompt(agentType, repo, prompt);
-  const proc = spawn("claude", ["-p", agentPrompt, "--dangerously-skip-permissions", "--output-format", "stream-json"], {
+  const proc = spawn("claude", ["-p", agentPrompt, "--agent", agentType, "--dangerously-skip-permissions", "--output-format", "stream-json"], {
     cwd: worktreePath,
     uid: 1000,
     gid: 1000,
@@ -308,40 +308,25 @@ export function cancelJob(jobId) {
  */
 function buildPrompt(agentType, repo, userPrompt) {
   const context = [
-    `You are the ${agentType} agent working on the ${repo} repository.`,
-    `Branch: you are on an isolated worktree branch. Commit your changes when done.`,
-    `Repo: ${repo}`,
+    `Repo: ${repo} (isolated worktree branch — commit your changes when done).`,
     "",
     "## Task",
     userPrompt,
     "",
     "## Rules",
-    "- Read CLAUDE.md and any relevant docs before starting.",
-    "- Make focused, minimal changes. Do not refactor unrelated code.",
-    "- Commit with a clear message describing what you did and why.",
-    "- If tests exist, run them before committing.",
-    "- If you cannot complete the task, explain why clearly.",
+    "- Read CLAUDE.md before starting.",
+    "- Minimal, focused changes only.",
+    "- Commit with a clear message.",
+    "- Run tests if they exist.",
+    "- If you cannot complete the task, explain why.",
     "",
     "## Debrief (required)",
-    "Before you finish — whether you succeeded or not — create a file called DEBRIEF.md",
-    "in the repo root (not committed, just written to disk). Use this exact structure:",
-    "",
-    "## What Was Done",
-    "List files changed and key actions taken.",
-    "",
-    "## Lessons Learned",
-    "Non-obvious issues encountered, debugging insights, or gotchas worth recording.",
-    "",
-    "## Testing Considerations",
-    "What should be tested. What might break.",
-    "",
-    "## Critical Changes",
-    "Anything that affects other parts of the system or other team members.",
-    "",
-    "## Status",
-    "Success or failure, and why.",
-    "",
-    "Keep it concise. Do not commit DEBRIEF.md — write it to disk only.",
+    "Before finishing, write DEBRIEF.md to the repo root (do NOT commit it):",
+    "- **What Was Done** — files changed, actions taken",
+    "- **Lessons Learned** — gotchas, debugging insights",
+    "- **Testing Considerations** — what to test, what might break",
+    "- **Critical Changes** — anything affecting other parts of the system",
+    "- **Status** — success or failure, and why",
   ];
   return context.join("\n");
 }
