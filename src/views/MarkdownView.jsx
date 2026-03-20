@@ -146,7 +146,7 @@ export default function MarkdownView({
   // ─── Empty state ───────────────────────────────────────────────
   if (files.length === 0) {
     return (
-      <div className="animate-fade" style={{ flex: 1, display: "flex", flexDirection: "column", padding: "2rem" }}>
+      <div className="animate-fade md-empty-state-pad">
         {fileInput}
         <div
           className={`content-panel md-dropzone ${dragging ? "md-dropzone-active" : ""}`}
@@ -185,7 +185,7 @@ export default function MarkdownView({
 
   // ─── Loaded state: drawer + full-width reader ──────────────────
   return (
-    <div className="animate-fade" style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+    <div className="animate-fade">
       <div className="view-header">
         <h1 className="view-title">Docs</h1>
         <p className="view-desc">Browse and read agent-generated reports, plans, and documentation.</p>
