@@ -12,23 +12,63 @@ import { resolve } from "path";
 // Base directory for worktrees
 const WORKTREE_BASE = "/tmp/bitacora-agents";
 
-// Map repo names to local paths. These are the repos cloned on the VPS.
-// Override via REPO_BASE_DIR env var if repos are elsewhere.
+// Map repo names to clone URLs and local paths.
+// Repos are cloned fresh inside the container if not present.
 const REPO_BASE = process.env.REPO_BASE_DIR || resolve(process.env.HOME || "/root", "repos");
 
-const REPO_PATHS = {
-  "bitacora-app-dashboard": process.env.REPO_DASHBOARD_PATH || resolve(REPO_BASE, "bitacora-app-dashboard"),
-  "bitacora-app-ios": process.env.REPO_IOS_PATH || resolve(REPO_BASE, "bitacora-app-ios"),
-  "primo-engineering": process.env.REPO_PRIMO_PATH || resolve(REPO_BASE, "primo-engineering"),
+const REPO_MAP = {
+  "bitacora-app-dashboard": {
+    path: process.env.REPO_DASHBOARD_PATH || resolve(REPO_BASE, "bitacora-app-dashboard"),
+    url: "https://github.com/jcprimo/bitacora-app-dashboard.git",
+  },
+  "bitacora-app-ios": {
+    path: process.env.REPO_IOS_PATH || resolve(REPO_BASE, "bitacora-app-ios"),
+    url: "https://github.com/jcprimo/bitacora-app-ios.git",
+  },
+  "primo-engineering": {
+    path: process.env.REPO_PRIMO_PATH || resolve(REPO_BASE, "primo-engineering"),
+    url: "https://github.com/jcprimo/primo-engineering.git",
+  },
+  "primo-engineering-team": {
+    path: process.env.REPO_TEAM_PATH || resolve(REPO_BASE, "primo-engineering-team"),
+    url: "https://github.com/jcprimo/primo-engineering-team.git",
+  },
 };
 
 /**
  * Get the local filesystem path for a repo name.
+ * Clones the repo fresh if it doesn't exist (ephemeral container model).
  */
 export function getRepoPath(repoName) {
-  const path = REPO_PATHS[repoName];
-  if (!path) throw new Error(`Unknown repo: ${repoName}`);
-  return path;
+  const repo = REPO_MAP[repoName];
+  if (!repo) throw new Error(`Unknown repo: ${repoName}`);
+  return repo.path;
+}
+
+/**
+ * Ensure a repo is cloned and up to date.
+ * If the repo doesn't exist locally, clone it fresh.
+ * If it exists, fetch latest.
+ */
+export function ensureRepo(repoName) {
+  const repo = REPO_MAP[repoName];
+  if (!repo) throw new Error(`Unknown repo: ${repoName}`);
+
+  if (!existsSync(repo.path)) {
+    // Clone fresh — ephemeral container, always get latest
+    execSync(`git clone "${repo.url}" "${repo.path}"`, {
+      stdio: "pipe",
+      timeout: 120000, // 2 min for large repos
+      env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+    });
+  } else {
+    // Already cloned — fetch latest
+    try {
+      execSync("git fetch origin", { cwd: repo.path, stdio: "pipe", timeout: 30000 });
+    } catch { /* non-fatal */ }
+  }
+
+  return repo.path;
 }
 
 /**
@@ -37,7 +77,7 @@ export function getRepoPath(repoName) {
  */
 export function createWorktree(repoPath, agentType, jobId) {
   if (!existsSync(repoPath)) {
-    throw new Error(`Repo not found at ${repoPath}. Set REPO_*_PATH env vars.`);
+    throw new Error(`Repo not found at ${repoPath}. Did ensureRepo() run first?`);
   }
 
   const branch = `agent/${agentType}/job-${jobId}`;
@@ -45,13 +85,6 @@ export function createWorktree(repoPath, agentType, jobId) {
 
   // Determine the default branch (master or main)
   const defaultBranch = getDefaultBranch(repoPath);
-
-  // Fetch latest before branching
-  try {
-    execSync("git fetch origin", { cwd: repoPath, stdio: "pipe", timeout: 30000 });
-  } catch {
-    // Non-fatal — may not have network access in dev
-  }
 
   // Create the worktree with a new branch off the default branch
   execSync(

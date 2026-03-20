@@ -22,6 +22,7 @@ import { agentJobs, agentLogs, documents, users } from "./schema.js";
 import { eq, and, sql } from "drizzle-orm";
 import { broadcast } from "./sse.js";
 import {
+  ensureRepo,
   createWorktree,
   cleanupWorktree,
   getRepoPath,
@@ -136,10 +137,12 @@ export async function dispatchJob(jobId) {
 
   addLog(jobId, "info", `Dispatching ${agentType} agent for ${repo}`);
 
-  // 1. Create git worktree
+  // 1. Ensure repo is cloned (ephemeral container — clone fresh if needed)
+  //    Then create git worktree for isolated agent work
   let worktreePath, branch;
   try {
-    const repoPath = getRepoPath(repo);
+    addLog(jobId, "info", `Ensuring repo ${repo} is available...`);
+    const repoPath = ensureRepo(repo);
     const result = createWorktree(repoPath, agentType, jobId);
     worktreePath = result.worktreePath;
     branch = result.branch;
@@ -155,7 +158,7 @@ export async function dispatchJob(jobId) {
 
   // 3. Spawn claude CLI
   const agentPrompt = buildPrompt(agentType, repo, prompt);
-  const proc = spawn("claude", ["-p", agentPrompt, "--output-format", "stream-json"], {
+  const proc = spawn("claude", ["-p", agentPrompt, "--dangerously-skip-permissions", "--output-format", "stream-json"], {
     cwd: worktreePath,
     env: {
       ...process.env,
