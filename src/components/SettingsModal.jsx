@@ -27,13 +27,13 @@ export default function SettingsModal({ showSettings, setShowSettings, settingsF
       <div className="settings-modal animate-fade" onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
           <div>
-            <div style={{ fontSize: "1.1rem", fontWeight: 700 }}>Connection Settings</div>
-            <div style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: "0.15rem" }}>Configure your YouTrack and AI credentials</div>
+            <div style={{ fontSize: "var(--text-lg)", fontWeight: 700 }}>Connection Settings</div>
+            <div style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", marginTop: "0.15rem" }}>Configure your YouTrack and AI credentials</div>
           </div>
           <button
             type="button"
             onClick={() => setShowSettings(false)}
-            style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "1.2rem", cursor: "pointer", padding: "0.25rem" }}
+            style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "var(--text-xl)", cursor: "pointer", padding: "0.25rem" }}
           >
             ✕
           </button>

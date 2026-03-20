@@ -60,10 +60,10 @@ export default function CreateView({
         {/* Active agent info */}
         <div className="panel" style={{ borderColor: `${agentColor}20` }}>
           <div className="panel-label" style={{ color: agentColor }}>Active Agent</div>
-          <div style={{ fontSize: "0.82rem", fontWeight: 600, marginBottom: "0.25rem" }}>
+          <div style={{ fontSize: "var(--text-base)", fontWeight: 600, marginBottom: "0.25rem" }}>
             {selectedAgent.icon} {selectedAgent.label}
           </div>
-          <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", lineHeight: 1.5 }}>
+          <div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", lineHeight: 1.5 }}>
             {selectedAgent.desc}
           </div>
           <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.4rem" }}>
@@ -71,7 +71,7 @@ export default function CreateView({
               const agentShades = getColorShades(agentColor);
               return (
                 <span style={{
-                  fontSize: "0.55rem", fontWeight: 600, padding: "0.15rem 0.45rem",
+                  fontSize: "var(--text-xs)", fontWeight: 600, padding: "0.15rem 0.45rem",
                   borderRadius: 10, background: agentShades.bg, color: agentColor, border: `1px solid ${agentShades.border}`,
                 }}>{selectedAgent.defaultPriority}</span>
               );
@@ -84,15 +84,15 @@ export default function CreateView({
           <div className="panel" style={{ borderColor: hasAIKey ? "rgba(124,106,255,0.15)" : "rgba(248,113,113,0.15)" }}>
             <div className="panel-label">{hasAIKey ? "AI Token Estimate" : "🔑 AI Not Configured"}</div>
             {!hasAIKey && (
-              <div style={{ fontSize: "0.63rem", color: "var(--accent-red)", lineHeight: 1.6, marginBottom: "0.5rem" }}>
-                Add your Anthropic API key to <code style={{ fontSize: "0.6rem", background: "var(--bg-input)", padding: "1px 4px", borderRadius: 3 }}>.env</code>:
+              <div style={{ fontSize: "var(--text-xs)", color: "var(--accent-red)", lineHeight: 1.6, marginBottom: "0.5rem" }}>
+                Add your Anthropic API key to <code style={{ fontSize: "var(--text-xs)", background: "var(--bg-input)", padding: "1px 4px", borderRadius: 3 }}>.env</code>:
                 <div style={{ fontFamily: "var(--font-mono)", marginTop: "0.3rem", color: "var(--text-secondary)" }}>
                   VITE_ANTHROPIC_KEY=sk-ant-...
                 </div>
                 <div style={{ marginTop: "0.3rem", color: "var(--text-dim)" }}>Then restart the dev server.</div>
               </div>
             )}
-            <div style={{ fontSize: "0.65rem", color: "var(--text-muted)", lineHeight: 1.6 }}>
+            <div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", lineHeight: 1.6 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.2rem" }}>
                 <span>System prompt</span>
                 <span style={{ fontFamily: "var(--font-mono)", color: "var(--text-secondary)" }}>~250</span>
@@ -115,14 +115,14 @@ export default function CreateView({
               </div>
               <div style={{
                 display: "flex", justifyContent: "space-between", marginTop: "0.25rem",
-                fontSize: "0.6rem", color: "var(--accent-green)",
+                fontSize: "var(--text-xs)", color: "var(--accent-green)",
               }}>
                 <span>Est. cost</span>
                 <span style={{ fontFamily: "var(--font-mono)" }}>${costEst.toFixed(4)}</span>
               </div>
             </div>
             <div style={{
-              marginTop: "0.6rem", fontSize: "0.55rem", color: "var(--text-dim)", lineHeight: 1.5,
+              marginTop: "0.6rem", fontSize: "var(--text-xs)", color: "var(--text-dim)", lineHeight: 1.5,
               borderTop: "1px solid var(--border-subtle)", paddingTop: "0.5rem",
             }}>
               Claude Sonnet 4 · $3/MTok in · $15/MTok out
@@ -134,7 +134,7 @@ export default function CreateView({
         {createStep === "input" && (
           <div className="panel" style={{ borderColor: "rgba(251,191,36,0.15)" }}>
             <div className="panel-label" style={{ color: "var(--accent-amber)" }}>AI Prompt Tips</div>
-            <ul style={{ fontSize: "0.63rem", color: "var(--text-muted)", lineHeight: 1.7, paddingLeft: "1rem", margin: 0 }}>
+            <ul style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", lineHeight: 1.7, paddingLeft: "1rem", margin: 0 }}>
               <li><strong style={{ color: "var(--text-secondary)" }}>Be specific</strong> — "teachers on iPhone need to log incidents in under 30 seconds" beats "add logging"</li>
               <li><strong style={{ color: "var(--text-secondary)" }}>Name the user</strong> — teacher, principal, or admin. The agent tailors the ticket to that persona</li>
               <li><strong style={{ color: "var(--text-secondary)" }}>Mention compliance</strong> — if it touches student data, say so. The agent will flag FERPA/LFPDPPP risks</li>
@@ -150,12 +150,12 @@ export default function CreateView({
           <div className="panel-label" style={{ color: overBudget ? "var(--accent-red)" : "var(--accent-cyan)" }}>
             {overBudget ? "Budget Exceeded" : "AI Spend"}
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.72rem", fontWeight: 700, color: overBudget ? "var(--accent-red)" : "var(--accent-green)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--text-sm)", fontWeight: 700, color: overBudget ? "var(--accent-red)" : "var(--accent-green)" }}>
             <span>{aiUsage.totalRequests} requests</span>
             <span style={{ fontFamily: "var(--font-mono)" }}>${combinedSpend.toFixed(4)}</span>
           </div>
           {openaiTotalSpend > 0 && (
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.6rem", color: "var(--text-dim)", marginTop: "0.2rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--text-xs)", color: "var(--text-dim)", marginTop: "0.2rem" }}>
               <span>Anthropic ${totalSpendUsd.toFixed(4)}</span>
               <span>OpenAI ${openaiTotalSpend.toFixed(4)}</span>
             </div>
@@ -174,7 +174,7 @@ export default function CreateView({
             onClick={() => setView("usage")}
             style={{
               marginTop: "0.5rem", width: "100%", background: "none", border: "1px solid var(--border-subtle)",
-              borderRadius: "var(--radius-sm)", color: "var(--accent-cyan)", fontSize: "0.65rem", fontWeight: 600,
+              borderRadius: "var(--radius-sm)", color: "var(--accent-cyan)", fontSize: "var(--text-xs)", fontWeight: 600,
               padding: "0.35rem", cursor: "pointer", transition: "border-color 0.2s",
             }}
           >
@@ -221,7 +221,7 @@ export default function CreateView({
                 <div style={{
                   marginTop: "0.75rem", padding: "0.6rem 0.85rem", borderRadius: "var(--radius-md)",
                   background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.25)",
-                  fontSize: "0.68rem", color: "var(--accent-red)", lineHeight: 1.5,
+                  fontSize: "var(--text-xs)", color: "var(--accent-red)", lineHeight: 1.5,
                 }}>
                   <strong>AI Error:</strong> {aiError}
                   <div style={{ marginTop: "0.3rem", color: "var(--text-muted)" }}>
@@ -374,7 +374,7 @@ export default function CreateView({
                 <div className="success-id">{draft?.createdId}</div>
                 <div className="success-summary">{draft?.summary}</div>
               </div>
-              <div style={{ marginBottom: "1rem", fontSize: "0.65rem", color: agentColor, fontWeight: 600 }}>
+              <div style={{ marginBottom: "1rem", fontSize: "var(--text-xs)", color: agentColor, fontWeight: 600 }}>
                 {selectedAgent.icon} Created by {selectedAgent.label}
               </div>
               <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center" }}>
