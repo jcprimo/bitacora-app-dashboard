@@ -183,16 +183,16 @@ export default function QATrackerView({
           {...dropZoneProps}
         >
           <div style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>{dragging ? "📥" : "🧪"}</div>
-          <h2 style={{ fontSize: "1.2rem", fontWeight: 700, color: "var(--text-primary)", marginBottom: "0.5rem" }}>
+          <h2 style={{ fontSize: "var(--text-xl)", fontWeight: 700, color: "var(--text-primary)", marginBottom: "0.5rem" }}>
             {dragging ? "Drop CSV file here" : "QA Test Case Tracker"}
           </h2>
-          <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", marginBottom: "1.5rem", maxWidth: 420, margin: "0 auto 1.5rem" }}>
+          <p style={{ fontSize: "var(--text-base)", color: "var(--text-muted)", marginBottom: "1.5rem", maxWidth: 420, margin: "0 auto 1.5rem" }}>
             {dragging
               ? "Release to import test cases"
               : "Drag & drop a CSV file here, or click the button below to browse."}
           </p>
           {!dragging && (
-            <p style={{ fontSize: "0.65rem", color: "var(--text-dim)", maxWidth: 480, margin: "0 auto 1.5rem", lineHeight: 1.6 }}>
+            <p style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", maxWidth: 480, margin: "0 auto 1.5rem", lineHeight: 1.6 }}>
               Expected columns: <span style={{ fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>Test_ID, Test_Case, Category, Priority, Status, Steps, Expected_Result</span>
             </p>
           )}
@@ -242,7 +242,7 @@ export default function QATrackerView({
       <div className="qa-toolbar">
         <div className="qa-toolbar-top">
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-            <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "var(--text-muted)" }}>
+            <span style={{ fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--text-muted)" }}>
               📄 {fileName}
             </span>
             <span className="footer-badge" style={{
@@ -261,7 +261,7 @@ export default function QATrackerView({
             <button
               className="btn-back"
               onClick={() => fileInputRef.current?.click()}
-              style={{ fontSize: "0.72rem", padding: "0.35rem 0.75rem" }}
+              style={{ fontSize: "var(--text-sm)", padding: "0.35rem 0.75rem" }}
             >
               + Add CSV
             </button>
@@ -281,7 +281,7 @@ export default function QATrackerView({
             <button
               className={`btn-back qa-filter-toggle ${filtersExpanded ? "qa-filter-toggle-active" : ""}`}
               onClick={() => setFiltersExpanded((v) => !v)}
-              style={{ fontSize: "0.72rem", padding: "0.4rem 0.75rem", position: "relative" }}
+              style={{ fontSize: "var(--text-sm)", padding: "0.4rem 0.75rem", position: "relative" }}
             >
               ⧩ Filters
               {activeFilterCount > 0 && (
@@ -291,7 +291,7 @@ export default function QATrackerView({
 
             {/* Column picker */}
             <details className="qa-col-picker">
-              <summary className="btn-back" style={{ fontSize: "0.72rem", padding: "0.4rem 0.75rem", cursor: "pointer", listStyle: "none" }}>
+              <summary className="btn-back" style={{ fontSize: "var(--text-sm)", padding: "0.4rem 0.75rem", cursor: "pointer", listStyle: "none" }}>
                 ⚙ Columns
               </summary>
               <div className="qa-col-dropdown">
@@ -403,12 +403,12 @@ export default function QATrackerView({
                           color: categoryColor(tc[col.id]),
                           borderColor: categoryColor(tc[col.id]) + "40",
                           background: categoryColor(tc[col.id]) + "10",
-                          fontSize: "0.7rem",
+                          fontSize: "var(--text-xs)",
                         }}>
                           {tc[col.id]}
                         </span>
                       ) : col.id === "Test_ID" ? (
-                        <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 600, color: "var(--qa-accent)" }}>
+                        <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--qa-accent)" }}>
                           {tc[col.id]}
                         </span>
                       ) : (
@@ -482,18 +482,18 @@ export default function QATrackerView({
             className="btn-back"
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage <= 1}
-            style={{ fontSize: "0.72rem", padding: "0.35rem 0.65rem" }}
+            style={{ fontSize: "var(--text-sm)", padding: "0.35rem 0.65rem" }}
           >
             ← Prev
           </button>
-          <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 600 }}>
+          <span style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)", fontWeight: 600 }}>
             Page {currentPage} of {totalPages}
           </span>
           <button
             className="btn-back"
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage >= totalPages}
-            style={{ fontSize: "0.72rem", padding: "0.35rem 0.65rem" }}
+            style={{ fontSize: "var(--text-sm)", padding: "0.35rem 0.65rem" }}
           >
             Next →
           </button>

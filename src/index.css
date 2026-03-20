@@ -38,15 +38,17 @@
   --toggle-border: var(--border-medium);
   --toggle-color: var(--text-secondary);
 
-  /* ─── Type scale tokens (Fix 1) ─────────────────────────────── */
-  --text-xs: 0.6rem;
-  --text-sm: 0.72rem;
-  --text-base: 0.82rem;
-  --text-md: 0.9rem;
+  /* ─── Type scale — 5-token consolidated scale (BIT-41) ──────── */
+  /* xs  ~11px  labels, badges, meta                              */
+  /* sm  ~13px  secondary text, timestamps                        */
+  /* base ~15px body text                                         */
+  /* lg  ~20px  section headings                                  */
+  /* xl  ~24px  page headings                                     */
+  --text-xs: 0.65rem;
+  --text-sm: 0.75rem;
+  --text-base: 0.85rem;
   --text-lg: 1.1rem;
   --text-xl: 1.35rem;
-  --text-2xl: 1.6rem;
-  --text-3xl: 2.8rem;
 
   /* ─── Spacing scale tokens (Fix 1) ──────────────────────────── */
   --space-1: 0.25rem;

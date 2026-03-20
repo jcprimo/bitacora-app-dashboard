@@ -135,10 +135,10 @@ export default function MarkdownView({
           {...dropZoneProps}
         >
           <div style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>{dragging ? "📥" : "📖"}</div>
-          <h2 style={{ fontSize: "1.2rem", fontWeight: 700, color: "var(--text-primary)", marginBottom: "0.5rem" }}>
+          <h2 style={{ fontSize: "var(--text-xl)", fontWeight: 700, color: "var(--text-primary)", marginBottom: "0.5rem" }}>
             {dragging ? "Drop Markdown files here" : "Markdown Reader"}
           </h2>
-          <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", maxWidth: 420, margin: "0 auto 1.5rem" }}>
+          <p style={{ fontSize: "var(--text-base)", color: "var(--text-muted)", maxWidth: 420, margin: "0 auto 1.5rem" }}>
             {dragging
               ? "Release to import"
               : "Drag & drop .md files here, or click below to browse. Files persist across sessions."}

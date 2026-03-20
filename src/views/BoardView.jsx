@@ -61,7 +61,7 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
       <div className="board-filter-bar">
         <input
           className="config-input"
-          style={{ flex: 1, fontSize: "0.78rem", padding: "0.55rem 0.85rem", borderRadius: "var(--radius-md)" }}
+          style={{ flex: 1, fontSize: "var(--text-sm)", padding: "0.55rem 0.85rem", borderRadius: "var(--radius-md)" }}
           placeholder="Search YouTrack: priority: Critical  or  Stage: Develop  or  free text..."
           value={filterQuery}
           onChange={(e) => setFilterQuery(e.target.value)}
@@ -179,7 +179,7 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
             <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>
               {issues.length > 0 ? "🔍" : "📭"}
             </div>
-            <div style={{ fontSize: "0.82rem" }}>
+            <div style={{ fontSize: "var(--text-base)" }}>
               {issues.length > 0 ? "No tickets match the current filters" : "No issues in Bitacora"}
             </div>
             {issues.length > 0 && (
@@ -188,7 +188,7 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
                 onClick={() => { setStageFilter("All"); setPriorityFilter("All"); setHideDone(false); }}
                 style={{
                   marginTop: "0.75rem", background: "none", border: "1px solid var(--border-subtle)",
-                  borderRadius: "var(--radius-sm)", color: "var(--accent-indigo)", fontSize: "0.72rem",
+                  borderRadius: "var(--radius-sm)", color: "var(--accent-indigo)", fontSize: "var(--text-sm)",
                   fontWeight: 600, padding: "0.4rem 0.85rem", cursor: "pointer", fontFamily: "var(--font-sans)",
                 }}
               >
@@ -196,7 +196,7 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
               </button>
             )}
             {issues.length === 0 && (
-              <div style={{ fontSize: "0.7rem", marginTop: "0.25rem" }}>Create your first ticket to get started</div>
+              <div style={{ fontSize: "var(--text-xs)", marginTop: "0.25rem" }}>Create your first ticket to get started</div>
             )}
           </div>
         )}
@@ -228,7 +228,7 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
               <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", minWidth: "58px", gap: "2px" }}>
                   <span style={{
-                    fontSize: "0.68rem", fontWeight: 700, fontFamily: "var(--font-mono)",
+                    fontSize: "var(--text-xs)", fontWeight: 700, fontFamily: "var(--font-mono)",
                     color: "var(--accent-indigo)", paddingTop: "2px",
                   }}>
                     {issue.idReadable}
@@ -238,7 +238,7 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
                   )}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--text-primary)", lineHeight: 1.3 }}>
+                  <div style={{ fontSize: "var(--text-base)", fontWeight: 600, color: "var(--text-primary)", lineHeight: 1.3 }}>
                     {issue.summary}
                   </div>
                   <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.4rem", flexWrap: "wrap" }}>
@@ -247,7 +247,7 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
                       const ss = getColorShades(sc);
                       return (
                         <span style={{
-                          fontSize: "0.58rem", fontWeight: 700, padding: "0.15rem 0.45rem",
+                          fontSize: "var(--text-xs)", fontWeight: 700, padding: "0.15rem 0.45rem",
                           borderRadius: 10, background: ss.bg, color: sc, border: `1px solid ${ss.border}`,
                         }}>{stage}</span>
                       );
@@ -257,19 +257,19 @@ export default function BoardView({ issues, loading, filterQuery, setFilterQuery
                       const ps = getColorShades(pc);
                       return (
                         <span style={{
-                          fontSize: "0.58rem", fontWeight: 700, padding: "0.15rem 0.45rem",
+                          fontSize: "var(--text-xs)", fontWeight: 700, padding: "0.15rem 0.45rem",
                           borderRadius: 10, background: ps.bg, color: pc, border: `1px solid ${ps.border}`,
                         }}>{priority}</span>
                       );
                     })()}
-                    <span style={{ fontSize: "0.58rem", color: "var(--text-dim)" }}>
+                    <span style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)" }}>
                       {formatDate(issue.updated || issue.created)}
                     </span>
                   </div>
                 </div>
                 <select
                   className="review-select"
-                  style={{ fontSize: "0.62rem", padding: "0.25rem 0.4rem", minWidth: 90 }}
+                  style={{ fontSize: "var(--text-xs)", padding: "0.25rem 0.4rem", minWidth: 90 }}
                   value={stage || "Backlog"}
                   onClick={(e) => e.stopPropagation()}
                   onChange={(e) => { e.stopPropagation(); changeField(issue.idReadable, "Stage", e.target.value); }}

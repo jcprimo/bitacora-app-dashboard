@@ -29,7 +29,7 @@ function PillSelector({ label, options, value, onChange, colorFn, disabled }) {
               type="button"
               onClick={() => !disabled && onChange(opt)}
               style={{
-                fontSize: "0.65rem",
+                fontSize: "var(--text-xs)",
                 fontWeight: isActive ? 700 : 500,
                 fontFamily: "var(--font-sans)",
                 padding: "0.2rem 0.55rem",
@@ -94,11 +94,11 @@ export default function DetailView({
       <button className="btn-back" onClick={() => setView("board")} style={{ marginBottom: "1rem" }}>← Back to Board</button>
       <div className="content-panel" style={{ padding: "1.5rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.25rem" }}>
-          <span style={{ fontSize: "0.85rem", fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--accent-indigo)" }}>
+          <span style={{ fontSize: "var(--text-base)", fontWeight: 700, fontFamily: "var(--font-mono)", color: "var(--accent-indigo)" }}>
             {activeIssue.idReadable}
           </span>
           <div style={{ flex: 1 }} />
-          <span style={{ fontSize: "0.62rem", color: "var(--text-dim)" }}>
+          <span style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)" }}>
             Created {formatDate(activeIssue.created)} · Updated {formatDate(activeIssue.updated)}
           </span>
         </div>
@@ -186,7 +186,7 @@ export default function DetailView({
               onClick={() => setConfirmDelete(true)}>🗑 Delete</button>
           ) : (
             <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-              <span style={{ fontSize: "0.68rem", color: "var(--accent-red)", fontWeight: 600 }}>Confirm?</span>
+              <span style={{ fontSize: "var(--text-xs)", color: "var(--accent-red)", fontWeight: 600 }}>Confirm?</span>
               <button className="btn-back"
                 style={{ color: "var(--accent-red)", borderColor: "rgba(248,113,113,0.5)", background: "rgba(248,113,113,0.08)" }}
                 onClick={handleDelete} disabled={actionLoading === "delete"}>

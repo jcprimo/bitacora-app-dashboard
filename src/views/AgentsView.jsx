@@ -261,7 +261,7 @@ export default function AgentsView({
                     {agent?.icon} {job.agentType} #{job.id}
                   </span>
                   <span style={{
-                    fontSize: "10px",
+                    fontSize: "var(--text-xs)",
                     fontWeight: 600,
                     padding: "1px 6px",
                     borderRadius: "var(--radius-sm)",
@@ -271,10 +271,10 @@ export default function AgentsView({
                     {STATUS_LABELS[job.status] || job.status}
                   </span>
                 </div>
-                <div style={{ fontSize: "11px", color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {input?.repo || "—"} {job.ticketId ? `• ${job.ticketId}` : ""}
                 </div>
-                <div style={{ fontSize: "10px", color: "var(--text-dim)", marginTop: 2 }}>
+                <div style={{ fontSize: "var(--text-xs)", color: "var(--text-dim)", marginTop: 2 }}>
                   {formatTime(job.createdAt)}
                   {job.finishedAt && ` • ${elapsed(job.startedAt, job.finishedAt)}`}
                 </div>
@@ -336,7 +336,7 @@ export default function AgentsView({
             borderRadius: "var(--radius-lg)",
             padding: "var(--space-3)",
             fontFamily: "'SF Mono', 'Fira Code', 'Cascadia Code', monospace",
-            fontSize: "12px",
+            fontSize: "var(--text-xs)",
             lineHeight: 1.6,
             overflow: "auto",
             color: "#c9d1d9",

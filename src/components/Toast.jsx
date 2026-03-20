@@ -9,7 +9,7 @@ export default function Toast({ toast }) {
     <div className="animate-fade" style={{
       position: "fixed", top: 16, right: 16, zIndex: 999,
       padding: "0.6rem 1.1rem", borderRadius: "var(--radius-md)",
-      fontSize: "0.75rem", fontWeight: 600,
+      fontSize: "var(--text-sm)", fontWeight: 600,
       background: toast.type === "error" ? "rgba(248,113,113,0.12)" : "rgba(52,211,153,0.12)",
       border: `1px solid ${toast.type === "error" ? "rgba(248,113,113,0.3)" : "rgba(52,211,153,0.3)"}`,
       color: toast.type === "error" ? "var(--accent-red)" : "var(--accent-green)",
