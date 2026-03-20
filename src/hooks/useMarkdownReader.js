@@ -18,18 +18,35 @@ export function useMarkdownReader(showToast) {
   const [activeContent, setActiveContent] = useState("");
   const [contentLoading, setContentLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  // Incrementing this counter forces a content re-fetch for the active file
+  // even when activeFileId hasn't changed (e.g. after an SSE update event).
+  const [contentVersion, setContentVersion] = useState(0);
   const loadingIdRef = useRef(null);
 
   // ─── Fetch document index ────────────────────────────────────────
   // Extracted as a callback so it can be called imperatively (e.g. from
   // the SSE ingest event handler) as well as on mount.
-  const refreshIndex = useCallback(() => {
+  // Optional payload: { action: "created"|"updated", name } from SSE.
+  const refreshIndex = useCallback((payload) => {
     fetch(API, { credentials: "include" })
       .then((r) => (r.ok ? r.json() : []))
       .then((rows) => {
         setIndex(rows);
         // Only set the active file on first load (when none is selected yet)
-        setActiveFileId((prev) => (prev === null && rows.length > 0 ? rows[0].id : prev));
+        setActiveFileId((prev) => {
+          if (prev === null && rows.length > 0) return rows[0].id;
+          // If a new doc was created via SSE, auto-select it
+          if (payload?.action === "created" && payload?.name) {
+            const created = rows.find((f) => f.name === payload.name);
+            if (created) return created.id;
+          }
+          return prev;
+        });
+        // If the SSE event was an update, force a content re-fetch for the
+        // active file (activeFileId didn't change so the effect won't re-run).
+        if (payload?.action === "updated") {
+          setContentVersion((v) => v + 1);
+        }
       })
       .catch(() => {})
       .finally(() => setInitialLoading(false));
@@ -39,7 +56,7 @@ export function useMarkdownReader(showToast) {
     refreshIndex();
   }, [refreshIndex]);
 
-  // ─── Lazy-load content when activeFileId changes ────────────────
+  // ─── Lazy-load content when activeFileId changes or content is stale ──
   useEffect(() => {
     if (!activeFileId) {
       setActiveContent("");
@@ -61,7 +78,9 @@ export function useMarkdownReader(showToast) {
           setContentLoading(false);
         }
       });
-  }, [activeFileId]);
+  // contentVersion added so an SSE update triggers a re-fetch even when
+  // the active file ID hasn't changed.
+  }, [activeFileId, contentVersion]);
 
   // Build the activeFile object for the view (metadata + content)
   const activeFile = activeFileId
