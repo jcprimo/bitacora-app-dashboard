@@ -401,8 +401,8 @@ function Dashboard({ auth, theme, toggleTheme }) {
           />
         )}
 
-        {/* Footer */}
-        <footer className="footer">
+        {/* Footer — hidden on full-height views (docs, agents) */}
+        <footer className="footer" style={{ display: ["docs", "agents"].includes(view) ? "none" : undefined }}>
           <span className="footer-text">Bitacora App Dashboard — #OpsLife</span>
           <div className="footer-badges">
             <span className="footer-badge" style={{ color: "var(--accent-green)", borderColor: "rgba(52,211,153,0.2)", background: "rgba(52,211,153,0.04)" }}>
